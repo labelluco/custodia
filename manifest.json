@@ -1,0 +1,23 @@
+{
+  "name": "Custòdia",
+  "short_name": "Custòdia",
+  "description": "Eina de gestió forestal per a propietaris i entitats locals",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#2e7d32",
+  "lang": "ca",
+  "icons": [
+    {
+      "src": "icones/icona-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icones/icona-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custòdia — Detall de la parcel·la</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2e7d32">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="">
+  <link rel="stylesheet" href="css/estils.css">
+</head>
+<body>
+  <header class="capcalera">
+    <h1>Custòdia</h1>
+    <nav class="menu">
+      <a href="index.html" class="menu__enllac">Inici</a>
+      <a href="afegir.html" class="menu__enllac">Afegir parcel·la</a>
+    </nav>
+  </header>
+
+  <main>
+    <p><a href="index.html">&larr; Tornar al llistat</a></p>
+
+    <section id="mapa-detall" class="mapa mapa--detall" aria-label="Perímetre de la parcel·la"></section>
+
+    <section id="dades-parcela" class="fitxa-parcela-contenidor">
+      Carregant...
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <script type="module" src="js/detall.js"></script>
+  <script type="module" src="js/registrar-sw.js"></script>
+</body>
+</html>

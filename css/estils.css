@@ -1,0 +1,188 @@
+/* --- Variables i base --- */
+:root {
+  --color-primari: #2e7d32;
+  --color-primari-fosc: #1b5e20;
+  --color-text: #1c1c1c;
+  --color-fons: #fafafa;
+  --color-vora: #dddddd;
+
+  --risc-baix: #4caf50;
+  --risc-mitja: #ffb300;
+  --risc-alt: #e53935;
+
+  --espai-xs: 0.5rem;
+  --espai-s: 1rem;
+  --espai-m: 1.5rem;
+  --espai-l: 2rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--color-text);
+  background-color: var(--color-fons);
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--espai-m);
+}
+
+a {
+  color: var(--color-primari-fosc);
+}
+
+/* --- Menú --- */
+.capcalera {
+  background-color: var(--color-primari);
+  color: white;
+  padding: var(--espai-s) var(--espai-m);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--espai-s);
+}
+
+.capcalera h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.menu {
+  display: flex;
+  gap: var(--espai-m);
+}
+
+.menu__enllac {
+  color: white;
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+}
+
+.menu__enllac--actiu,
+.menu__enllac:hover {
+  border-bottom-color: white;
+}
+
+/* --- Mapa (index i detall) --- */
+.mapa {
+  width: 100%;
+  height: 350px;
+  margin: var(--espai-m) 0;
+  border: 1px solid var(--color-vora);
+  border-radius: 4px;
+}
+
+.mapa--detall {
+  height: 280px;
+}
+
+/* --- Llistat de parcel·les --- */
+.llistat__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espai-xs);
+}
+
+.item-parcela {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espai-s);
+  padding: var(--espai-s);
+  border: 1px solid var(--color-vora);
+  border-left: 6px solid #999;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.item-parcela:hover {
+  background-color: #f0f0f0;
+}
+
+.item-parcela.risc-baix   { border-left-color: var(--risc-baix); }
+.item-parcela.risc-mitja  { border-left-color: var(--risc-mitja); }
+.item-parcela.risc-alt    { border-left-color: var(--risc-alt); }
+
+/* --- Formulari --- */
+.formulari-parcela form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espai-s);
+  max-width: 420px;
+}
+
+.camp {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.camp label {
+  font-weight: 600;
+}
+
+.camp input,
+.camp select {
+  padding: 0.5rem;
+  border: 1px solid var(--color-vora);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+button {
+  padding: 0.75rem 1rem;
+  background-color: var(--color-primari);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: var(--color-primari-fosc);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.missatge-estat {
+  padding: var(--espai-xs) var(--espai-s);
+  border-radius: 4px;
+}
+
+.missatge-estat--info  { background-color: #e3f2fd; }
+.missatge-estat--exit   { background-color: #e8f5e9; }
+.missatge-estat--error  { background-color: #ffebee; }
+
+/* --- Fitxa de detall --- */
+.fitxa-parcela {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.4rem var(--espai-s);
+}
+
+.fitxa-parcela dt {
+  font-weight: 600;
+}
+
+.fitxa-parcela dd {
+  margin: 0;
+}
+
+.fitxa-parcela dd.risc-baix  { color: var(--risc-baix); font-weight: 600; }
+.fitxa-parcela dd.risc-mitja { color: var(--risc-mitja); font-weight: 600; }
+.fitxa-parcela dd.risc-alt   { color: var(--risc-alt); font-weight: 600; }

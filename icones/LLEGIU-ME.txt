@@ -1,0 +1,4 @@
+Aquestes icones son un placeholder molt basic (un cercle amb la lletra
+"C"), generat automaticament nomes perque la PWA sigui instal·lable des
+del primer commit. Val la pena substituir-les per un disseny real quan
+es defineixi la identitat visual del projecte.

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custòdia — Inici</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2e7d32">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="">
+  <link rel="stylesheet" href="css/estils.css">
+</head>
+<body>
+  <header class="capcalera">
+    <h1>Custòdia</h1>
+    <nav class="menu">
+      <a href="index.html" class="menu__enllac menu__enllac--actiu">Inici</a>
+      <a href="afegir.html" class="menu__enllac">Afegir parcel·la</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="mapa" class="mapa" aria-label="Mapa de parcel·les"></section>
+
+    <section class="llistat">
+      <h2>Les meves parcel·les</h2>
+      <p id="missatge-buit" hidden>
+        Encara no has afegit cap parcel·la.
+        <a href="afegir.html">Afegeix-ne una</a>.
+      </p>
+      <ul id="llistat-parceles" class="llistat__items"></ul>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <script type="module" src="js/inici.js"></script>
+  <script type="module" src="js/registrar-sw.js"></script>
+</body>
+</html>

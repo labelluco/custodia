@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custòdia — Afegir parcel·la</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2e7d32">
+  <link rel="stylesheet" href="css/estils.css">
+</head>
+<body>
+  <header class="capcalera">
+    <h1>Custòdia</h1>
+    <nav class="menu">
+      <a href="index.html" class="menu__enllac">Inici</a>
+      <a href="afegir.html" class="menu__enllac menu__enllac--actiu">Afegir parcel·la</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="formulari-parcela">
+      <h2>Afegir una nova parcel·la</h2>
+
+      <form id="form-parcela">
+        <div class="camp">
+          <label for="provincia">Provincia</label>
+          <input type="text" id="provincia" name="provincia" required placeholder="p. ex. Teruel">
+        </div>
+
+        <div class="camp">
+          <label for="poligon">Polígon</label>
+          <input type="text" id="poligon" name="poligon" required>
+        </div>
+
+        <div class="camp">
+          <label for="parcela">Parcel·la</label>
+          <input type="text" id="parcela" name="parcela" required>
+        </div>
+
+        <div class="camp">
+          <label for="poblacio">Població</label>
+          <input type="text" id="poblacio" name="poblacio" required>
+        </div>
+
+        <div class="camp">
+          <label for="us">Ús</label>
+          <select id="us" name="us" required>
+            <option value="agricola">Agrícola</option>
+            <option value="forestal">Forestal</option>
+            <option value="pastura">Pastura</option>
+            <option value="altre">Altre</option>
+          </select>
+        </div>
+
+        <div class="camp">
+          <label for="risc">Risc d'incendi</label>
+          <select id="risc" name="risc" required>
+            <option value="baix">Baix</option>
+            <option value="mitja">Mitjà</option>
+            <option value="alt">Alt</option>
+          </select>
+        </div>
+
+        <p id="missatge-estat" class="missatge-estat" hidden></p>
+
+        <button type="submit" id="boto-desar">Consultar cadastre i desar</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.js"></script>
+  <script type="module" src="js/afegir.js"></script>
+  <script type="module" src="js/registrar-sw.js"></script>
+</body>
+</html>

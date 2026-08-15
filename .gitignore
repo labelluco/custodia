@@ -1,0 +1,15 @@
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Sistema operatiu
+.DS_Store
+Thumbs.db
+
+# Futures dependències (si mai s'introdueix npm)
+node_modules/
+dist/
+
+# Fitxers locals / secrets
+.env
