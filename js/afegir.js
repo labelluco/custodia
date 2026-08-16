@@ -16,6 +16,7 @@ const selectUs = document.getElementById('us');
 const notaUsSuggerit = document.getElementById('nota-us-suggerit');
 
 let dadesCadastre = null;
+let dadesFormulariConsultades = null;
 
 botoConsultar.addEventListener('click', async () => {
   const dadesFormulari = new FormData(formulari);
@@ -39,6 +40,9 @@ botoConsultar.addEventListener('click', async () => {
       poligon,
       parcelaCadastral
     );
+    // Es guarden aquí, no es tornen a llegir del formulari en desar: un cop
+    // el fieldset queda disabled, FormData deixa d'incloure aquests camps.
+    dadesFormulariConsultades = { poligon, parcelaCadastral, poblacio };
 
     if (dadesCadastre.usSuggerit) {
       selectUs.value = dadesCadastre.usSuggerit;
@@ -62,7 +66,7 @@ botoConsultar.addEventListener('click', async () => {
 formulari.addEventListener('submit', async (event) => {
   event.preventDefault();
 
-  if (!dadesCadastre) {
+  if (!dadesCadastre || !dadesFormulariConsultades) {
     mostrarEstat('Primer cal consultar el cadastre.', 'error');
     return;
   }
@@ -74,9 +78,7 @@ formulari.addEventListener('submit', async (event) => {
   try {
     const parcela = new Parcela({
       ...dadesCadastre,
-      poligon: dadesFormulari.get('poligon').trim(),
-      parcelaCadastral: dadesFormulari.get('parcela').trim(),
-      poblacio: dadesFormulari.get('poblacio').trim(),
+      ...dadesFormulariConsultades,
       us: dadesFormulari.get('us'),
       risc: dadesFormulari.get('risc'),
     });
