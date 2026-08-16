@@ -92,9 +92,12 @@ export class ServeiCadastre {
       totes.find((node) => node.querySelector('car')?.textContent.trim() === '0000') ??
       totes[0];
 
+    // Diverses referencies (rústica + urbanes, típic d'un mas) ja és, per si
+    // sol, un indici de "mix" -- aquesta resposta no porta <lspr>, així que
+    // no podem afinar més, però tampoc té sentit deixar-ho sense suggeriment.
     return {
       referenciaCadastral: ServeiCadastre._referenciaDesDeNodeRc(principal.querySelector('rc')),
-      usSuggerit: null,
+      usSuggerit: totes.length > 1 ? 'mix' : null,
     };
   }
 
