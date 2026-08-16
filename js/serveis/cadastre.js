@@ -21,6 +21,15 @@ if (typeof proj4 !== 'undefined' && !proj4.defs(EPSG_CATASTRE)) {
   proj4.defs(EPSG_CATASTRE, DEFINICIO_EPSG_25830);
 }
 
+// Paraules clau per classificar la descripció de cada subparcela (<dcc> del
+// desglossament <lspr>) en un dels nostres USOS. No es basa en els codis
+// (<ccc>, poc intuïtius) sinó en el text, més estable de llegir i ajustar.
+const PARAULES_CLAU_US = {
+  agricola: ['labor', 'labradio', 'labradío', 'frutal', 'viña', 'vinya', 'hortaliza', 'huerta', 'regadio', 'regadío', 'secano'],
+  pastura: ['pasto', 'prado', 'pradera'],
+  forestal: ['pinar', 'forestal', 'monte', 'arbolado', 'eucalipto', 'encinar', 'matorral', 'coniferas'],
+};
+
 export class ServeiCadastre {
   static async consultarParcela(provincia, municipi, poligon, parcelaCadastral) {
     if (!provincia || !municipi || !poligon || !parcelaCadastral) {
@@ -29,14 +38,16 @@ export class ServeiCadastre {
       );
     }
 
-    const referenciaCadastral = await ServeiCadastre._consultarReferencia(
+    const { referenciaCadastral, usSuggerit } = await ServeiCadastre._consultarReferencia(
       provincia,
       municipi,
       poligon,
       parcelaCadastral
     );
 
-    return ServeiCadastre._consultarGeometria(referenciaCadastral);
+    const geometria = await ServeiCadastre._consultarGeometria(referenciaCadastral);
+
+    return { ...geometria, usSuggerit };
   }
 
   // Consulta_DNPPP respon de dues maneres: una única referencia dins de
@@ -44,6 +55,14 @@ export class ServeiCadastre {
   // alternatius d'una cerca ambigua, sino la mateixa propietat amb
   // diverses referencies -- típic d'un mas: part rústica car="0000" +
   // unitats urbanes car="0001", "0002"...). Sempre volem la rústica.
+  //
+  // Quan la resposta és d'una única referencia (cas A), sol portar també
+  // <lspr>, un desglossament de la parcel·la per subparceles (cada una
+  // amb el seu ús: labor, pastos, pinar...). L'aprofitem per suggerir un
+  // us -- si totes les subparceles cauen en la mateixa categoria, la
+  // suggerim; si n'hi ha de diverses, marquem "mix" perquè l'usuari
+  // decideixi. En el cas B (diverses referencies) no en tenim, i tornem
+  // usSuggerit a null: l'usuari l'haurà de triar manualment, com fins ara.
   static async _consultarReferencia(provincia, municipi, poligon, parcelaCadastral) {
     const params = new URLSearchParams({
       Provincia: provincia,
@@ -58,7 +77,10 @@ export class ServeiCadastre {
 
     const rcUnic = xml.querySelector('bico > bi > idbi > rc');
     if (rcUnic) {
-      return ServeiCadastre._referenciaDesDeNodeRc(rcUnic);
+      return {
+        referenciaCadastral: ServeiCadastre._referenciaDesDeNodeRc(rcUnic),
+        usSuggerit: ServeiCadastre._suggerirUs(xml),
+      };
     }
 
     const totes = Array.from(xml.getElementsByTagName('rcdnp'));
@@ -70,7 +92,39 @@ export class ServeiCadastre {
       totes.find((node) => node.querySelector('car')?.textContent.trim() === '0000') ??
       totes[0];
 
-    return ServeiCadastre._referenciaDesDeNodeRc(principal.querySelector('rc'));
+    return {
+      referenciaCadastral: ServeiCadastre._referenciaDesDeNodeRc(principal.querySelector('rc')),
+      usSuggerit: null,
+    };
+  }
+
+  /**
+   * Llegeix el desglossament <lspr><spr> (si n'hi ha) i en dedueix un us
+   * suggerit: la categoria si totes les subparceles hi encaixen, "mix" si
+   * n'hi ha de diverses, o null si no hi ha desglossament o cap paraula
+   * clau hi encaixa.
+   */
+  static _suggerirUs(xml) {
+    const subparceles = Array.from(xml.querySelectorAll('lspr > spr'));
+    if (subparceles.length === 0) {
+      return null;
+    }
+
+    const categories = new Set();
+    for (const subparcela of subparceles) {
+      const descripcio = subparcela.querySelector('dcc')?.textContent.trim().toLowerCase();
+      if (!descripcio) continue;
+
+      const categoria = Object.entries(PARAULES_CLAU_US).find(([, paraules]) =>
+        paraules.some((paraula) => descripcio.includes(paraula))
+      )?.[0];
+
+      categories.add(categoria ?? 'altre');
+    }
+
+    if (categories.size === 0) return null;
+    if (categories.size === 1) return [...categories][0];
+    return 'mix';
   }
 
   static _referenciaDesDeNodeRc(nodeRc) {

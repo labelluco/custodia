@@ -220,3 +220,23 @@ button:disabled {
 #form-editar {
   margin-top: var(--espai-m);
 }
+
+/* --- Formulari en dos passos (afegir.html) --- */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espai-s);
+}
+
+fieldset:disabled {
+  opacity: 0.6;
+}
+
+.nota {
+  font-size: 0.85rem;
+  color: var(--color-primari-fosc);
+  margin: 0.25rem 0 0;
+}
