@@ -22,48 +22,56 @@
       <h2>Afegir una nova parcel·la</h2>
 
       <form id="form-parcela">
-        <div class="camp">
-          <label for="provincia">Provincia</label>
-          <input type="text" id="provincia" name="provincia" required placeholder="p. ex. Teruel">
-        </div>
+        <fieldset id="dades-cadastre">
+          <div class="camp">
+            <label for="provincia">Provincia</label>
+            <input type="text" id="provincia" name="provincia" required placeholder="p. ex. Teruel">
+          </div>
 
-        <div class="camp">
-          <label for="poligon">Polígon</label>
-          <input type="text" id="poligon" name="poligon" required>
-        </div>
+          <div class="camp">
+            <label for="poligon">Polígon</label>
+            <input type="text" id="poligon" name="poligon" required>
+          </div>
 
-        <div class="camp">
-          <label for="parcela">Parcel·la</label>
-          <input type="text" id="parcela" name="parcela" required>
-        </div>
+          <div class="camp">
+            <label for="parcela">Parcel·la</label>
+            <input type="text" id="parcela" name="parcela" required>
+          </div>
 
-        <div class="camp">
-          <label for="poblacio">Població</label>
-          <input type="text" id="poblacio" name="poblacio" required>
-        </div>
+          <div class="camp">
+            <label for="poblacio">Població</label>
+            <input type="text" id="poblacio" name="poblacio" required>
+          </div>
 
-        <div class="camp">
-          <label for="us">Ús</label>
-          <select id="us" name="us" required>
-            <option value="agricola">Agrícola</option>
-            <option value="forestal">Forestal</option>
-            <option value="pastura">Pastura</option>
-            <option value="altre">Altre</option>
-          </select>
-        </div>
-
-        <div class="camp">
-          <label for="risc">Risc d'incendi</label>
-          <select id="risc" name="risc" required>
-            <option value="baix">Baix</option>
-            <option value="mitja">Mitjà</option>
-            <option value="alt">Alt</option>
-          </select>
-        </div>
+          <button type="button" id="boto-consultar">Consultar cadastre</button>
+        </fieldset>
 
         <p id="missatge-estat" class="missatge-estat" hidden></p>
 
-        <button type="submit" id="boto-desar">Consultar cadastre i desar</button>
+        <fieldset id="dades-us-risc" hidden>
+          <div class="camp">
+            <label for="us">Ús</label>
+            <select id="us" name="us" required>
+              <option value="agricola">Agrícola</option>
+              <option value="forestal">Forestal</option>
+              <option value="pastura">Pastura</option>
+              <option value="mix">Mixt (diversos usos)</option>
+              <option value="altre">Altre</option>
+            </select>
+            <p id="nota-us-suggerit" class="nota" hidden></p>
+          </div>
+
+          <div class="camp">
+            <label for="risc">Risc d'incendi</label>
+            <select id="risc" name="risc" required>
+              <option value="baix">Baix</option>
+              <option value="mitja">Mitjà</option>
+              <option value="alt">Alt</option>
+            </select>
+          </div>
+
+          <button type="submit" id="boto-desar">Desar parcel·la</button>
+        </fieldset>
       </form>
     </section>
   </main>

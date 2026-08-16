@@ -6,6 +6,7 @@ export const USOS = Object.freeze({
   AGRICOLA: 'agricola',
   FORESTAL: 'forestal',
   PASTURA: 'pastura',
+  MIX: 'mix',
   ALTRE: 'altre',
 });
 
@@ -56,6 +57,7 @@ export class Parcela {
       [USOS.AGRICOLA]: 'Agrícola',
       [USOS.FORESTAL]: 'Forestal',
       [USOS.PASTURA]: 'Pastura',
+      [USOS.MIX]: 'Mixt (diversos usos)',
       [USOS.ALTRE]: 'Altre',
     };
     return etiquetes[this.us] ?? this.us;
