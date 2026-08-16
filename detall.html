@@ -28,6 +28,37 @@
     <section id="dades-parcela" class="fitxa-parcela-contenidor">
       Carregant...
     </section>
+
+    <section id="accions-parcela" class="accions-parcela" hidden>
+      <button type="button" id="boto-editar" class="boto-secundari">Editar ús / risc</button>
+      <button type="button" id="boto-esborrar" class="boto-perillos">Esborrar parcel·la</button>
+    </section>
+
+    <form id="form-editar" class="formulari-parcela" hidden>
+      <div class="camp">
+        <label for="editar-us">Ús</label>
+        <select id="editar-us" name="us" required>
+          <option value="agricola">Agrícola</option>
+          <option value="forestal">Forestal</option>
+          <option value="pastura">Pastura</option>
+          <option value="altre">Altre</option>
+        </select>
+      </div>
+
+      <div class="camp">
+        <label for="editar-risc">Risc d'incendi</label>
+        <select id="editar-risc" name="risc" required>
+          <option value="baix">Baix</option>
+          <option value="mitja">Mitjà</option>
+          <option value="alt">Alt</option>
+        </select>
+      </div>
+
+      <div class="formulari-parcela__botons">
+        <button type="submit">Desar canvis</button>
+        <button type="button" id="boto-cancelar-editar" class="boto-secundari">Cancel·lar</button>
+      </div>
+    </form>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

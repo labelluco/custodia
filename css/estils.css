@@ -186,3 +186,37 @@ button:disabled {
 .fitxa-parcela dd.risc-baix  { color: var(--risc-baix); font-weight: 600; }
 .fitxa-parcela dd.risc-mitja { color: var(--risc-mitja); font-weight: 600; }
 .fitxa-parcela dd.risc-alt   { color: var(--risc-alt); font-weight: 600; }
+
+/* --- Accions de la fitxa de detall (editar/esborrar) --- */
+.accions-parcela {
+  display: flex;
+  gap: var(--espai-s);
+  margin-top: var(--espai-m);
+}
+
+.boto-secundari {
+  background-color: white;
+  color: var(--color-primari-fosc);
+  border: 1px solid var(--color-vora);
+}
+
+.boto-secundari:hover {
+  background-color: #f0f0f0;
+}
+
+.boto-perillos {
+  background-color: var(--risc-alt);
+}
+
+.boto-perillos:hover {
+  background-color: #c62828;
+}
+
+.formulari-parcela__botons {
+  display: flex;
+  gap: var(--espai-s);
+}
+
+#form-editar {
+  margin-top: var(--espai-m);
+}

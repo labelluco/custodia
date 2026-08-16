@@ -81,4 +81,16 @@ export class BaseDades {
         reject(new Error(`BaseDades: no s'han pogut llegir les parcel·les (${event.target.error})`));
     });
   }
+
+  esborrarParcela(id) {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(MAGATZEM_PARCELES, 'readwrite');
+      const magatzem = transaccio.objectStore(MAGATZEM_PARCELES);
+      const peticio = magatzem.delete(Number(id));
+
+      peticio.onsuccess = () => resolve();
+      peticio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'ha pogut esborrar la parcel·la (${event.target.error})`));
+    });
+  }
 }
