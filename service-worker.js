@@ -15,6 +15,7 @@ const FITXERS_PER_CACHE = [
   './js/model/parcela.js',
   './js/serveis/cadastre.js',
   './js/serveis/basedades.js',
+  './js/serveis/exportadorGpx.js',
   './js/ui/mapa.js',
   './manifest.json',
 ];
