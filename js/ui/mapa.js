@@ -14,10 +14,27 @@ export class Mapa {
   constructor(idContenidor) {
     this.leafletMap = L.map(idContenidor).setView(CENTRE_PER_DEFECTE, ZOOM_PER_DEFECTE);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const capaOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(this.leafletMap);
+    });
+
+    // Ortofoto PNOA de l'IGN, dades obertes. Es deixa com a base alternativa
+    // (no superposada) perquè és útil veure el terreny real, no només el
+    // mapa esquemàtic, sobretot per valorar l'estat real d'una parcel·la.
+    const capaOrtofoto = L.tileLayer.wms('https://www.ign.es/wms-inspire/pnoa-ma?', {
+      layers: 'OI.OrthoimageCoverage',
+      format: 'image/jpeg',
+      version: '1.3.0',
+      maxZoom: 19,
+      attribution: 'PNOA WMS. Cedit per © Instituto Geográfico Nacional de España',
+    });
+
+    capaOsm.addTo(this.leafletMap);
+
+    L.control
+      .layers({ 'Mapa': capaOsm, 'Ortofoto (PNOA)': capaOrtofoto })
+      .addTo(this.leafletMap);
 
     this.capaParceles = L.layerGroup().addTo(this.leafletMap);
     this.parceles = [];
