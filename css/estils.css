@@ -84,35 +84,46 @@ a {
   height: 280px;
 }
 
-/* --- Llistat de parcel·les --- */
-.llistat__items {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--espai-xs);
+/* --- Taula de parcel·les --- */
+.taula-parceles {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
 }
 
-.item-parcela {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--espai-s);
-  padding: var(--espai-s);
-  border: 1px solid var(--color-vora);
-  border-left: 6px solid #999;
-  border-radius: 4px;
+.taula-parceles th,
+.taula-parceles td {
+  width: 25%;
+  padding: 0.6rem var(--espai-s);
+  text-align: left;
+  border-bottom: 1px solid var(--color-vora);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taula-parceles thead th {
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-vora);
+}
+
+.taula-parceles td.us {
+  text-transform: capitalize;
+}
+
+.fila-parcela {
   cursor: pointer;
-  background-color: white;
+  /* El color de fons indica el risc -- per això no calia una columna a part. */
+  border-left: 6px solid #999;
 }
 
-.item-parcela:hover {
+.fila-parcela:hover {
   background-color: #f0f0f0;
 }
 
-.item-parcela.risc-baix   { border-left-color: var(--risc-baix); }
-.item-parcela.risc-mitja  { border-left-color: var(--risc-mitja); }
-.item-parcela.risc-alt    { border-left-color: var(--risc-alt); }
+.fila-parcela.risc-baix   { border-left-color: var(--risc-baix); background-color: #f4faf4; }
+.fila-parcela.risc-mitja  { border-left-color: var(--risc-mitja); background-color: #fffaf0; }
+.fila-parcela.risc-alt    { border-left-color: var(--risc-alt); background-color: #fdf3f3; }
 
 /* --- Formulari --- */
 .formulari-parcela form {
@@ -239,4 +250,9 @@ fieldset:disabled {
   font-size: 0.85rem;
   color: var(--color-primari-fosc);
   margin: 0.25rem 0 0;
+}
+
+/* --- Fila seleccionada (ressaltada al mapa) --- */
+.fila-parcela--seleccionada {
+  background-color: #dcedc8 !important;
 }
