@@ -2,9 +2,11 @@
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { Parcela } from './model/parcela.js';
+import { ExportadorGpx } from './serveis/exportadorGpx.js';
 
 const contenidorDades = document.getElementById('dades-parcela');
 const seccioAccions = document.getElementById('accions-parcela');
+const botoExportarGpx = document.getElementById('boto-exportar-gpx');
 const botoEditar = document.getElementById('boto-editar');
 const botoEsborrar = document.getElementById('boto-esborrar');
 const formEditar = document.getElementById('form-editar');
@@ -53,6 +55,10 @@ function pintarFitxa(parcela) {
     </dl>
   `;
 }
+
+botoExportarGpx.addEventListener('click', () => {
+  ExportadorGpx.descarregar(parcelaActual);
+});
 
 botoEditar.addEventListener('click', () => {
   formEditar.elements.us.value = parcelaActual.us;
