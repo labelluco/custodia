@@ -21,15 +21,25 @@ async function iniciar() {
   for (const parcela of parceles) {
     mapa.afegirParcela(parcela, (p) => obrirDetall(p.id));
 
-    const element = document.createElement('li');
-    element.className = `item-parcela risc-${parcela.risc}`;
-    element.innerHTML = `
-      <span class="item-parcela__poblacio">${parcela.poblacio}</span>
-      <span class="item-parcela__us">${parcela.us}</span>
-      <span class="item-parcela__risc">Risc: ${parcela.risc}</span>
+    const fila = document.createElement('tr');
+    fila.className = `fila-parcela risc-${parcela.risc}`;
+    fila.dataset.id = parcela.id;
+    fila.innerHTML = `
+      <td>${parcela.poblacio}</td>
+      <td>${parcela.poligon}</td>
+      <td>${parcela.parcelaCadastral}</td>
+      <td class="us">${parcela.us}</td>
     `;
-    element.addEventListener('click', () => obrirDetall(parcela.id));
-    contenidorLlistat.appendChild(element);
+    // Tocar el llistat ressalta la parcel·la al mapa (no obre el detall);
+    // per al detall, cal tocar la parcel·la pintada al mapa.
+    fila.addEventListener('click', () => {
+      mapa.ressaltarParcela(parcela.id);
+
+      const anteriorSeleccionada = contenidorLlistat.querySelector('.fila-parcela--seleccionada');
+      anteriorSeleccionada?.classList.remove('fila-parcela--seleccionada');
+      fila.classList.add('fila-parcela--seleccionada');
+    });
+    contenidorLlistat.appendChild(fila);
   }
 
   mapa.ajustarVistaATotes();

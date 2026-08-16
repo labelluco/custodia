@@ -38,6 +38,7 @@ export class Mapa {
 
     this.capaParceles = L.layerGroup().addTo(this.leafletMap);
     this.parceles = [];
+    this._capaRessaltada = null;
   }
 
   afegirParcela(parcela, onClick) {
@@ -60,9 +61,32 @@ export class Mapa {
     this.parceles.push({ parcela, capa: poligon });
   }
 
+  /**
+   * Ressalta una parcel·la concreta (li puja el gruix de la vora i hi fa
+   * zoom), desfent el ressalt de l'anterior si n'hi havia. Pensat perquè
+   * tocar un ítem del llistat "es noti" al mapa, tant amb ratolí com amb
+   * tàctil -- el clic funciona igual en tots dos casos.
+   */
+  ressaltarParcela(id) {
+    const entrada = this.parceles.find((p) => p.parcela.id === id);
+    if (!entrada) return;
+
+    if (this._capaRessaltada) {
+      this._capaRessaltada.setStyle({ weight: 2 });
+    }
+
+    entrada.capa.setStyle({ weight: 5 });
+    entrada.capa.bringToFront();
+    entrada.capa.openTooltip();
+    this._capaRessaltada = entrada.capa;
+
+    this.leafletMap.fitBounds(entrada.capa.getBounds(), { padding: [40, 40], maxZoom: 17 });
+  }
+
   buidar() {
     this.capaParceles.clearLayers();
     this.parceles = [];
+    this._capaRessaltada = null;
   }
 
   ajustarVistaATotes() {
