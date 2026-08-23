@@ -256,3 +256,17 @@ fieldset:disabled {
 .fila-parcela--seleccionada {
   background-color: #dcedc8 !important;
 }
+
+/* --- Selecció de mètode (altitud.html) --- */
+.camp--radio {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.camp--radio label {
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

@@ -13,3 +13,5 @@ dist/
 
 # Fitxers locals / secrets
 .env
+
+publicar.sh

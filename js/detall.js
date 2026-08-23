@@ -43,6 +43,22 @@ async function iniciar() {
 }
 
 function pintarFitxa(parcela) {
+  // Les dades d'altimetria es calculen a part (pàgina altitud.html) i es
+  // desen a la parcel·la; aquí només es mostren si ja hi són, o un
+  // enllaç per calcular-les si encara no.
+  const filaAltimetria = parcela.pendentMitja != null
+    ? `
+      <dt>Pendent mitjà</dt>
+      <dd>
+        ${parcela.pendentMitja.toFixed(1)} %
+        (<a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular de nou</a>)
+      </dd>
+    `
+    : `
+      <dt>Pendent mitjà</dt>
+      <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular-ho</a></dd>
+    `;
+
   contenidorDades.innerHTML = `
     <dl class="fitxa-parcela">
       <dt>Població</dt><dd>${parcela.poblacio}</dd>
@@ -52,6 +68,7 @@ function pintarFitxa(parcela) {
       <dt>Superfície</dt><dd>${parcela.superficie ? `${parcela.superficie} m²` : '—'}</dd>
       <dt>Ús</dt><dd>${parcela.us}</dd>
       <dt>Risc d'incendi</dt><dd class="risc-${parcela.risc}">${parcela.risc}</dd>
+      ${filaAltimetria}
     </dl>
   `;
 }

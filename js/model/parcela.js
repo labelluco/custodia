@@ -27,6 +27,14 @@ export class Parcela {
     superficie = null,
     us,
     risc,
+    // Dades d'altimetria: opcionals, es calculen a banda (pàgina
+    // d'altitud) i es desen a la parcel·la un cop calculades. Les
+    // parcel·les creades abans d'aquesta funcionalitat simplement no
+    // les tindran (queden a null) fins que algú les calculi.
+    altitudMaxima = null,
+    altitudMinima = null,
+    desnivell = null,
+    pendentMitja = null,
   }) {
     if (!poligon || !parcelaCadastral || !poblacio) {
       throw new Error('Parcela: poligon, parcelaCadastral i poblacio son obligatoris');
@@ -50,6 +58,15 @@ export class Parcela {
     this.superficie = superficie;
     this.us = us;
     this.risc = risc;
+    this.altitudMaxima = altitudMaxima;
+    this.altitudMinima = altitudMinima;
+    this.desnivell = desnivell;
+    this.pendentMitja = pendentMitja;
+  }
+
+  /** Cert si la parcel·la ja té calculades les dades d'altimetria. */
+  get teAltimetria() {
+    return this.desnivell !== null && this.pendentMitja !== null;
   }
 
   get etiquetaUs() {
@@ -83,6 +100,10 @@ export class Parcela {
       superficie: this.superficie,
       us: this.us,
       risc: this.risc,
+      altitudMaxima: this.altitudMaxima,
+      altitudMinima: this.altitudMinima,
+      desnivell: this.desnivell,
+      pendentMitja: this.pendentMitja,
     };
   }
 

@@ -89,6 +89,29 @@ export class Mapa {
     this._capaRessaltada = null;
   }
 
+  /**
+   * Afegeix un marcador per cada vèrtex del perímetre, amb la seva
+   * altitud com a tooltip en clicar-hi. Pensat per a la pàgina de
+   * càlcul d'altimetria, no per a l'ús habitual (inici/detall).
+   *
+   * @param {Array<[number, number]>} coordenades Vèrtexs [lat, lng]
+   * @param {number[]} altituds Una altitud (m) per vèrtex, mateix ordre
+   */
+  afegirVertexsAmbAltitud(coordenades, altituds) {
+    coordenades.forEach((punt, i) => {
+      const marcador = L.circleMarker(punt, {
+        radius: 6,
+        color: '#1b5e20',
+        fillColor: '#a5d6a7',
+        fillOpacity: 0.9,
+        weight: 2,
+      });
+      marcador.bindTooltip(`${altituds[i].toFixed(0)} m`);
+      marcador.on('click', () => marcador.openTooltip());
+      marcador.addTo(this.leafletMap);
+    });
+  }
+
   ajustarVistaATotes() {
     if (this.parceles.length === 0) return;
     const grup = L.featureGroup(this.parceles.map((p) => p.capa));
