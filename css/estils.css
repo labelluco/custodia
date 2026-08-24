@@ -270,3 +270,25 @@ fieldset:disabled {
   align-items: center;
   gap: 0.5rem;
 }
+
+/* --- Icona d'orientació (fletxa) als punts de la malla --- */
+.icona-orientacio {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #0d47a1;
+  text-shadow: 0 0 2px white, 0 0 2px white, 0 0 2px white;
+  transform-origin: center center;
+}
+
+.icona-orientacio--plana {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #90a4ae;
+  border: 1px solid white;
+}

@@ -35,6 +35,9 @@ export class Parcela {
     altitudMinima = null,
     desnivell = null,
     pendentMitja = null,
+    // Orientació mitjana en graus (0-360, 0=Nord), només calculable amb
+    // el mètode de malla. null si encara no s'ha calculat.
+    orientacioMitjana = null,
   }) {
     if (!poligon || !parcelaCadastral || !poblacio) {
       throw new Error('Parcela: poligon, parcelaCadastral i poblacio son obligatoris');
@@ -62,6 +65,7 @@ export class Parcela {
     this.altitudMinima = altitudMinima;
     this.desnivell = desnivell;
     this.pendentMitja = pendentMitja;
+    this.orientacioMitjana = orientacioMitjana;
   }
 
   /** Cert si la parcel·la ja té calculades les dades d'altimetria. */
@@ -104,6 +108,7 @@ export class Parcela {
       altitudMinima: this.altitudMinima,
       desnivell: this.desnivell,
       pendentMitja: this.pendentMitja,
+      orientacioMitjana: this.orientacioMitjana,
     };
   }
 

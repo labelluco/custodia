@@ -3,6 +3,7 @@ import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { Parcela } from './model/parcela.js';
 import { ExportadorGpx } from './serveis/exportadorGpx.js';
+import { ServeiOrientacio } from './serveis/orientacio.js';
 
 const contenidorDades = document.getElementById('dades-parcela');
 const seccioAccions = document.getElementById('accions-parcela');
@@ -59,6 +60,19 @@ function pintarFitxa(parcela) {
       <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular-ho</a></dd>
     `;
 
+  const filaOrientacio = parcela.orientacioMitjana != null
+    ? `
+      <dt>Orientació mitjana</dt>
+      <dd>
+        ${parcela.orientacioMitjana.toFixed(0)}° (${ServeiOrientacio.etiquetaBruixola(parcela.orientacioMitjana)})
+        (<a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular de nou</a>)
+      </dd>
+    `
+    : `
+      <dt>Orientació mitjana</dt>
+      <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular-ho (mètode de malla)</a></dd>
+    `;
+
   contenidorDades.innerHTML = `
     <dl class="fitxa-parcela">
       <dt>Població</dt><dd>${parcela.poblacio}</dd>
@@ -69,6 +83,7 @@ function pintarFitxa(parcela) {
       <dt>Ús</dt><dd>${parcela.us}</dd>
       <dt>Risc d'incendi</dt><dd class="risc-${parcela.risc}">${parcela.risc}</dd>
       ${filaAltimetria}
+      ${filaOrientacio}
     </dl>
   `;
 }

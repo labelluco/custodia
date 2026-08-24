@@ -1,11 +1,14 @@
 // Controlador d'altitud.html. Calcula i permet desar l'altitud
-// màxima/mínima, el desnivell i el pendent mitjà d'una parcel·la,
-// amb dos mètodes possibles: vèrtexs del perímetre, o una malla de
-// punts interiors. L'id arriba per URL: altitud.html?id=123
+// màxima/mínima, el desnivell i el pendent mitjà d'una parcel·la, amb
+// dos mètodes possibles: vèrtexs del perímetre, o una malla de punts
+// interiors. Amb el mètode de malla, també es calcula l'orientació
+// mitjana (reutilitza els mateixos gradients que el pendent). L'id
+// arriba per URL: altitud.html?id=123
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { Parcela } from './model/parcela.js';
 import { ServeiAltimetria } from './serveis/altimetria.js';
+import { ServeiOrientacio } from './serveis/orientacio.js';
 import { Malla } from './geometria/malla.js';
 
 // Límit de punts per consultar en una sola crida a l'API, per evitar
@@ -53,10 +56,8 @@ async function iniciar() {
 }
 
 /**
- * Si la parcel·la ja té valors d'altimetria desats (d'un càlcul
- * anterior), es mostren de seguida, sense haver de tornar a calcular-los
- * (ni tornar a gastar cap crida al servei extern). Si mai es prem
- * "Calcular", el resultat nou els substitueix igualment.
+ * Si la parcel·la ja té valors desats (d'un càlcul anterior), es
+ * mostren de seguida, sense haver de tornar a calcular-los.
  */
 function mostrarValorsDesats() {
   const jaCalculat =
@@ -77,6 +78,10 @@ function mostrarValorsDesats() {
     maxima: parcelaActual.altitudMaxima,
     desnivell: parcelaActual.desnivell,
     pendentMitja: parcelaActual.pendentMitja,
+    // Si mai es va calcular amb el mètode de vèrtexs, aquest camp serà
+    // null -- es mostra igualment (com "no calculada amb malla") en
+    // lloc d'amagar la fila.
+    orientacioMitjana: parcelaActual.orientacioMitjana ?? null,
   });
   resum.insertAdjacentHTML(
     'afterbegin',
@@ -131,6 +136,10 @@ async function calcularAmbVertexs() {
   mapa.afegirVertexsAmbAltitud(parcelaActual.coordenades, altituds);
   mapa.ajustarVistaATotes();
 
+  // orientacioMitjana no s'inclou (queda undefined): amb els vèrtexs no
+  // hi ha prou estructura 2D per calcular-la, i el valor absent (en
+  // lloc de null) indica a l'hora de desar que no s'ha de tocar el que
+  // ja hi hagués desat abans.
   valorsCalculats = ServeiAltimetria.calcularResum(parcelaActual.coordenades, altituds);
   pintarResum(valorsCalculats);
   botoDesar.hidden = false;
@@ -165,27 +174,65 @@ async function calcularAmbMalla() {
 
   const mapa = crearMapa();
   mapa.afegirParcela(parcelaActual);
-  mapa.afegirVertexsAmbAltitud(coordenades, altituds);
-  mapa.ajustarVistaATotes();
 
-  valorsCalculats = ServeiAltimetria.calcularResumMalla(
+  const orientacionsPerPunt = ServeiOrientacio.calcularOrientacionsPerPunt(
     malla.graella,
     altitudsGraella,
     distanciaMetres
   );
+  const orientacioPerPosicio = new Map(
+    orientacionsPerPunt.map(({ fila, columna, orientacio }) => [`${fila},${columna}`, orientacio])
+  );
+
+  const puntsPerAlMapa = coordenades.map((coord, i) => {
+    const [f, c] = posicions[i];
+    const orientacio = orientacioPerPosicio.get(`${f},${c}`) ?? null;
+    return {
+      coordenades: coord,
+      altitud: altituds[i],
+      orientacio,
+      etiqueta: orientacio == null ? null : ServeiOrientacio.etiquetaBruixola(orientacio),
+    };
+  });
+  mapa.afegirPuntsAmbOrientacio(puntsPerAlMapa);
+  mapa.ajustarVistaATotes();
+
+  const resumPendent = ServeiAltimetria.calcularResumMalla(
+    malla.graella,
+    altitudsGraella,
+    distanciaMetres
+  );
+  const { orientacioMitjana } = ServeiOrientacio.calcularOrientacioMalla(
+    malla.graella,
+    altitudsGraella,
+    distanciaMetres
+  );
+
+  valorsCalculats = { ...resumPendent, orientacioMitjana };
   pintarResum(valorsCalculats);
   botoDesar.hidden = false;
 }
 
-function pintarResum({ minima, maxima, desnivell, pendentMitja }) {
+function pintarResum({ minima, maxima, desnivell, pendentMitja, orientacioMitjana }) {
+  const filaOrientacio =
+    orientacioMitjana !== undefined
+      ? `<dt>Orientació mitjana</dt><dd>${formatarOrientacio(orientacioMitjana)}</dd>`
+      : '';
+
   resum.innerHTML = `
     <dl class="fitxa-parcela">
       <dt>Altitud mínima</dt><dd>${minima.toFixed(0)} m</dd>
       <dt>Altitud màxima</dt><dd>${maxima.toFixed(0)} m</dd>
       <dt>Desnivell</dt><dd>${desnivell.toFixed(0)} m</dd>
       <dt>Pendent mitjà</dt><dd>${pendentMitja.toFixed(1)} %</dd>
+      ${filaOrientacio}
     </dl>
   `;
+}
+
+function formatarOrientacio(graus) {
+  if (graus == null) return 'No calculada (terreny massa pla, o cal el mètode de malla)';
+  return `${graus.toFixed(0)}° (${ServeiOrientacio.etiquetaBruixola(graus)})`;
 }
 
 botoDesar.addEventListener('click', async () => {
@@ -199,6 +246,12 @@ botoDesar.addEventListener('click', async () => {
       altitudMinima: valorsCalculats.minima,
       desnivell: valorsCalculats.desnivell,
       pendentMitja: valorsCalculats.pendentMitja,
+      // Si aquest càlcul no ha tocat l'orientació (mètode de vèrtexs),
+      // es manté la que ja hi hagués desada, en lloc de sobreescriure-la.
+      orientacioMitjana:
+        valorsCalculats.orientacioMitjana !== undefined
+          ? valorsCalculats.orientacioMitjana
+          : (parcelaActual.orientacioMitjana ?? null),
     });
 
     await bd.afegirParcela(parcelaActualitzada);

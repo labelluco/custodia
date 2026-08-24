@@ -112,6 +112,65 @@ export class Mapa {
     });
   }
 
+  /**
+   * Com afegirVertexsAmbAltitud, però pintant una fletxa rotada segons
+   * l'orientació de cada punt en lloc d'un cercle -- pensat per al
+   * mètode de malla, on cada punt ja té una orientació local calculada.
+   * Els punts sense orientació definida (terreny massa pla) es pinten
+   * com un punt gris, sense fletxa.
+   *
+   * L'etiqueta de bruixola es rep ja calculada (per exemple, amb
+   * ServeiOrientacio.etiquetaBruixola) en lloc que Mapa hagi de conèixer
+   * cap servei -- aquesta classe només sap pintar, no calcular res.
+   *
+   * @param {Array<{coordenades: [number, number], altitud: number, orientacio: number|null, etiqueta?: string}>} punts
+   */
+  afegirPuntsAmbOrientacio(punts) {
+    punts.forEach(({ coordenades, altitud, orientacio, etiqueta }) => {
+      const html =
+        orientacio == null
+          ? '<div class="icona-orientacio icona-orientacio--plana"></div>'
+          : `<div class="icona-orientacio" style="transform: rotate(${orientacio}deg);">&#8593;</div>`;
+
+      const icona = L.divIcon({
+        className: '',
+        html,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+      });
+
+      const marcador = L.marker(coordenades, { icon: icona });
+      const textOrientacio =
+        orientacio == null
+          ? 'pla (sense orientació definida)'
+          : `${orientacio.toFixed(0)}°${etiqueta ? ` (${etiqueta})` : ''}`;
+      marcador.bindTooltip(`${altitud.toFixed(0)} m — orientació: ${textOrientacio}`);
+      marcador.on('click', () => marcador.openTooltip());
+      marcador.addTo(this.leafletMap);
+    });
+  }
+
+  /**
+   * Igual que afegirVertexsAmbAltitud, però per als punts d'una malla
+   * interior (vegeu js/geometria/malla.js) -- mateix comportament
+   * (clic per veure l'altitud), amb un estil diferent perquè es
+   * distingeixin visualment dels vèrtexs del perímetre.
+   */
+  afegirPuntsMalla(punts, altituds) {
+    punts.forEach((punt, i) => {
+      const marcador = L.circleMarker(punt, {
+        radius: 4,
+        color: '#0d47a1',
+        fillColor: '#90caf9',
+        fillOpacity: 0.9,
+        weight: 1,
+      });
+      marcador.bindTooltip(`${altituds[i].toFixed(0)} m`);
+      marcador.on('click', () => marcador.openTooltip());
+      marcador.addTo(this.leafletMap);
+    });
+  }
+
   ajustarVistaATotes() {
     if (this.parceles.length === 0) return;
     const grup = L.featureGroup(this.parceles.map((p) => p.capa));

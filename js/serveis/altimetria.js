@@ -2,6 +2,8 @@
 // de l'IGN/IDEE. Igual que ServeiCadastre, només parla amb un servei
 // extern i normalitza el resultat -- no sap res de Parcela ni de la BD.
 
+import { calcularGradients } from '../geometria/gradient.js';
+
 const URL_GET_ELEVATION = 'https://api-processes.idee.es/processes/getElevation/execution';
 
 const RADI_TERRA_M = 6371000;
@@ -163,34 +165,8 @@ export class ServeiAltimetria {
     const minima = Math.min(...totesLesAltituds);
     const maxima = Math.max(...totesLesAltituds);
 
-    const altitudA = (f, c, perDefecte) => {
-      const valor = altitudsGraella[f]?.[c];
-      return valor == null ? perDefecte : valor;
-    };
-
-    const pendents = [];
-    for (let f = 0; f < graella.length; f++) {
-      for (let c = 0; c < graella[f].length; c++) {
-        const centre = altitudsGraella[f]?.[c];
-        if (centre == null) continue;
-
-        // "f" creix cap al nord i "c" cap a l'est, per com Malla.generar
-        // construeix la graella (vegeu js/geometria/malla.js).
-        const nord = altitudA(f + 1, c, centre);
-        const sud = altitudA(f - 1, c, centre);
-        const est = altitudA(f, c + 1, centre);
-        const oest = altitudA(f, c - 1, centre);
-        const nordEst = altitudA(f + 1, c + 1, centre);
-        const nordOest = altitudA(f + 1, c - 1, centre);
-        const sudEst = altitudA(f - 1, c + 1, centre);
-        const sudOest = altitudA(f - 1, c - 1, centre);
-
-        const dzdx = (nordEst + 2 * est + sudEst - (nordOest + 2 * oest + sudOest)) / (8 * distanciaMetres);
-        const dzdy = (nordOest + 2 * nord + nordEst - (sudOest + 2 * sud + sudEst)) / (8 * distanciaMetres);
-
-        pendents.push(Math.sqrt(dzdx ** 2 + dzdy ** 2) * 100);
-      }
-    }
+    const gradients = calcularGradients(graella, altitudsGraella, distanciaMetres);
+    const pendents = gradients.map(({ dzdx, dzdy }) => Math.sqrt(dzdx ** 2 + dzdy ** 2) * 100);
 
     const pendentMitja =
       pendents.length > 0 ? pendents.reduce((s, p) => s + p, 0) / pendents.length : 0;
