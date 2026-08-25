@@ -28,7 +28,7 @@ async function iniciar() {
       <td>${parcela.poblacio}</td>
       <td>${parcela.poligon}</td>
       <td>${parcela.parcelaCadastral}</td>
-      <td class="us">${parcela.us}</td>
+      <td class="us">${parcela.us ?? '—'}</td>
     `;
     // Tocar el llistat ressalta la parcel·la al mapa (no obre el detall);
     // per al detall, cal tocar la parcel·la pintada al mapa.

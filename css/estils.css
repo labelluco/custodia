@@ -292,3 +292,16 @@ fieldset:disabled {
   background-color: #90a4ae;
   border: 1px solid white;
 }
+
+/* --- Camp de només lectura (afegir.html: us segons el Cadastre) --- */
+.etiqueta-camp {
+  font-weight: 600;
+}
+
+.valor-nomes-lectura {
+  margin: 0.25rem 0 0;
+  padding: 0.5rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  color: #444;
+}

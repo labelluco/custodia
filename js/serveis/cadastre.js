@@ -4,6 +4,12 @@
 // EPSG:25830 (UTM ETRS89 30N), es converteixen a lat/lng amb proj4
 // perquè Leaflet les pugui pintar.
 //
+// L'ús de la parcel·la es mostra tal com el retorna el Cadastre
+// (<debi><luso>, per exemple "Agrario"), sense cap classificació ni
+// interpretació pròpia -- decisió deliberada per mantenir-ho senzill i
+// fidel a la font original, en lloc d'intentar encaixar-ho en unes
+// categories pròpies.
+//
 // Nota CORS: aquests serveis estan pensats per a consum des de servidor.
 // Si fetch() falla per un bloqueig CORS (no un 4xx/5xx, sinó un error
 // abans de rebre resposta), caldrà un petit proxy propi. Ho deixo apuntat
@@ -11,6 +17,8 @@
 
 const URL_CONSULTA_REFERENCIA =
   'https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/Consulta_DNPPP';
+const URL_CONSULTA_PER_RC =
+  'https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/Consulta_DNPRC';
 const URL_WFS = 'https://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx';
 
 const EPSG_CATASTRE = 'EPSG:25830';
@@ -21,15 +29,6 @@ if (typeof proj4 !== 'undefined' && !proj4.defs(EPSG_CATASTRE)) {
   proj4.defs(EPSG_CATASTRE, DEFINICIO_EPSG_25830);
 }
 
-// Paraules clau per classificar la descripció de cada subparcela (<dcc> del
-// desglossament <lspr>) en un dels nostres USOS. No es basa en els codis
-// (<ccc>, poc intuïtius) sinó en el text, més estable de llegir i ajustar.
-const PARAULES_CLAU_US = {
-  agricola: ['labor', 'labradio', 'labradío', 'frutal', 'viña', 'vinya', 'hortaliza', 'huerta', 'regadio', 'regadío', 'secano'],
-  pastura: ['pasto', 'prado', 'pradera'],
-  forestal: ['pinar', 'forestal', 'monte', 'arbolado', 'eucalipto', 'encinar', 'matorral', 'coniferas'],
-};
-
 export class ServeiCadastre {
   static async consultarParcela(provincia, municipi, poligon, parcelaCadastral) {
     if (!provincia || !municipi || !poligon || !parcelaCadastral) {
@@ -38,7 +37,7 @@ export class ServeiCadastre {
       );
     }
 
-    const { referenciaCadastral, usSuggerit } = await ServeiCadastre._consultarReferencia(
+    const { referenciaCadastral, us, subparceles } = await ServeiCadastre._consultarReferencia(
       provincia,
       municipi,
       poligon,
@@ -47,7 +46,7 @@ export class ServeiCadastre {
 
     const geometria = await ServeiCadastre._consultarGeometria(referenciaCadastral);
 
-    return { ...geometria, usSuggerit };
+    return { ...geometria, us, subparceles };
   }
 
   // Consulta_DNPPP respon de dues maneres: una única referencia dins de
@@ -56,13 +55,9 @@ export class ServeiCadastre {
   // diverses referencies -- típic d'un mas: part rústica car="0000" +
   // unitats urbanes car="0001", "0002"...). Sempre volem la rústica.
   //
-  // Quan la resposta és d'una única referencia (cas A), sol portar també
-  // <lspr>, un desglossament de la parcel·la per subparceles (cada una
-  // amb el seu ús: labor, pastos, pinar...). L'aprofitem per suggerir un
-  // us -- si totes les subparceles cauen en la mateixa categoria, la
-  // suggerim; si n'hi ha de diverses, marquem "mix" perquè l'usuari
-  // decideixi. En el cas B (diverses referencies) no en tenim, i tornem
-  // usSuggerit a null: l'usuari l'haurà de triar manualment, com fins ara.
+  // Només la resposta d'única referencia (cas A) porta <debi><luso>, el
+  // camp que fem servir directament com a "us" -- el cas B no en té, i
+  // l'us queda null (es mostrarà com "No disponible" a la interfície).
   static async _consultarReferencia(provincia, municipi, poligon, parcelaCadastral) {
     const params = new URLSearchParams({
       Provincia: provincia,
@@ -79,7 +74,8 @@ export class ServeiCadastre {
     if (rcUnic) {
       return {
         referenciaCadastral: ServeiCadastre._referenciaDesDeNodeRc(rcUnic),
-        usSuggerit: ServeiCadastre._suggerirUs(xml),
+        us: xml.querySelector('bico > bi > debi > luso')?.textContent.trim() ?? null,
+        subparceles: ServeiCadastre._extreureSubparceles(xml),
       };
     }
 
@@ -92,42 +88,51 @@ export class ServeiCadastre {
       totes.find((node) => node.querySelector('car')?.textContent.trim() === '0000') ??
       totes[0];
 
-    // Diverses referencies (rústica + urbanes, típic d'un mas) ja és, per si
-    // sol, un indici de "mix" -- aquesta resposta no porta <lspr>, així que
-    // no podem afinar més, però tampoc té sentit deixar-ho sense suggeriment.
-    return {
-      referenciaCadastral: ServeiCadastre._referenciaDesDeNodeRc(principal.querySelector('rc')),
-      usSuggerit: totes.length > 1 ? 'mix' : null,
-    };
+    const nodeRc = principal.querySelector('rc');
+    const referenciaCadastral = ServeiCadastre._referenciaDesDeNodeRc(nodeRc);
+    const car = nodeRc?.querySelector('car')?.textContent.trim();
+
+    // La resposta "de llista" (aquesta, cas B) no porta <lspr>. Però amb
+    // el "car" ja sabem exactament quina unitat concreta volem (la
+    // rústica, car="0000") -- consultant-la amb la seva referència
+    // completa (14+4=18 caràcters) via Consulta_DNPRC hauria de
+    // desambiguar-la del tot i donar la resposta "d'única coincidència",
+    // que sí porta el desglossament. No bloquejant: si falla, es queda
+    // buit, com fins ara.
+    let subparceles = [];
+    if (car) {
+      try {
+        subparceles = await ServeiCadastre._consultarSubparcelesPerReferencia(
+          provincia,
+          municipi,
+          `${referenciaCadastral}${car}`
+        );
+      } catch (error) {
+        console.warn('ServeiCadastre: no s\'ha pogut obtenir el desglossament del mas:', error);
+      }
+    }
+
+    return { referenciaCadastral, us: null, subparceles };
   }
 
   /**
-   * Llegeix el desglossament <lspr><spr> (si n'hi ha) i en dedueix un us
-   * suggerit: la categoria si totes les subparceles hi encaixen, "mix" si
-   * n'hi ha de diverses, o null si no hi ha desglossament o cap paraula
-   * clau hi encaixa.
+   * Consulta Consulta_DNPRC amb una referència cadastral completa
+   * (18/20 caràcters, no la de 14 d'una finca sencera) per obtenir el
+   * desglossament <lspr> d'una unitat concreta -- útil quan la consulta
+   * per polígon/parcel·la ha tornat la resposta "de llista" (cas d'un
+   * mas amb part rústica + unitats urbanes) sense aquest detall.
    */
-  static _suggerirUs(xml) {
-    const subparceles = Array.from(xml.querySelectorAll('lspr > spr'));
-    if (subparceles.length === 0) {
-      return null;
-    }
+  static async _consultarSubparcelesPerReferencia(provincia, municipi, referenciaLlarga) {
+    const params = new URLSearchParams({
+      Provincia: provincia,
+      Municipio: municipi,
+      RC: referenciaLlarga,
+    });
+    const url = `${URL_CONSULTA_PER_RC}?${params.toString()}`;
 
-    const categories = new Set();
-    for (const subparcela of subparceles) {
-      const descripcio = subparcela.querySelector('dcc')?.textContent.trim().toLowerCase();
-      if (!descripcio) continue;
-
-      const categoria = Object.entries(PARAULES_CLAU_US).find(([, paraules]) =>
-        paraules.some((paraula) => descripcio.includes(paraula))
-      )?.[0];
-
-      categories.add(categoria ?? 'altre');
-    }
-
-    if (categories.size === 0) return null;
-    if (categories.size === 1) return [...categories][0];
-    return 'mix';
+    const text = await ServeiCadastre._peticio(url, 'consultar les subparceles per referència');
+    const xml = ServeiCadastre._parsejarXml(text);
+    return ServeiCadastre._extreureSubparceles(xml);
   }
 
   static _referenciaDesDeNodeRc(nodeRc) {
@@ -137,6 +142,28 @@ export class ServeiCadastre {
       throw new Error('ServeiCadastre: resposta sense referència cadastral vàlida');
     }
     return `${pc1}${pc2}`;
+  }
+
+  /**
+   * Llegeix el desglossament <lspr><spr> (si n'hi ha) i en retorna una
+   * llista d'objectes, un per subparcela, amb tots els camps que porta
+   * el Cadastre -- no només els que fem servir ara (dcc, ssp), també
+   * cspr (lletra identificadora), ccc (codi curt de cultiu) i ip
+   * (índex de productivitat, significat exacte no confirmat), per no
+   * haver de tornar a consultar el Cadastre si algun dia calen.
+   *
+   * @returns {Array<{cspr: string|null, ccc: string|null, dcc: string|null, ip: string|null, ssp: string|null}>}
+   */
+  static _extreureSubparceles(xml) {
+    const subparceles = Array.from(xml.querySelectorAll('lspr > spr'));
+
+    return subparceles.map((subparcela) => ({
+      cspr: subparcela.querySelector('cspr')?.textContent.trim() ?? null,
+      ccc: subparcela.querySelector('ccc')?.textContent.trim() ?? null,
+      dcc: subparcela.querySelector('dcc')?.textContent.trim() ?? null,
+      ip: subparcela.querySelector('ip')?.textContent.trim() ?? null,
+      ssp: subparcela.querySelector('ssp')?.textContent.trim() ?? null,
+    }));
   }
 
   static async _consultarGeometria(referenciaCadastral) {

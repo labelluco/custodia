@@ -20,6 +20,7 @@ const FITXERS_PER_CACHE = [
   './js/serveis/exportadorGpx.js',
   './js/serveis/altimetria.js',
   './js/serveis/orientacio.js',
+  './js/serveis/vegetacio.js',
   './js/geometria/malla.js',
   './js/geometria/gradient.js',
   './js/ui/mapa.js',

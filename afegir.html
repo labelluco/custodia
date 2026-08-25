@@ -50,15 +50,13 @@
 
         <fieldset id="dades-us-risc" hidden>
           <div class="camp">
-            <label for="us">Ús</label>
-            <select id="us" name="us" required>
-              <option value="agricola">Agrícola</option>
-              <option value="forestal">Forestal</option>
-              <option value="pastura">Pastura</option>
-              <option value="mix">Mixt (diversos usos)</option>
-              <option value="altre">Altre</option>
-            </select>
-            <p id="nota-us-suggerit" class="nota" hidden></p>
+            <span class="etiqueta-camp">Ús (segons el Cadastre)</span>
+            <p id="valor-us-cadastre" class="valor-nomes-lectura"></p>
+          </div>
+
+          <div class="camp" id="camp-desglossament" hidden>
+            <span class="etiqueta-camp">Desglossament de subparceles</span>
+            <p id="valor-desglossament" class="valor-nomes-lectura"></p>
           </div>
 
           <div class="camp">

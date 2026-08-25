@@ -6,6 +6,8 @@ import { ExportadorGpx } from './serveis/exportadorGpx.js';
 import { ServeiOrientacio } from './serveis/orientacio.js';
 
 const contenidorDades = document.getElementById('dades-parcela');
+const seccioSubparceles = document.getElementById('seccio-subparceles');
+const llistatSubparceles = document.getElementById('llistat-subparceles');
 const seccioAccions = document.getElementById('accions-parcela');
 const botoExportarGpx = document.getElementById('boto-exportar-gpx');
 const botoEditar = document.getElementById('boto-editar');
@@ -35,12 +37,32 @@ async function iniciar() {
 
   document.title = `Custòdia — ${parcelaActual.poblacio}`;
   pintarFitxa(parcelaActual);
+  pintarSubparceles();
 
   const mapa = new Mapa('mapa-detall');
   mapa.afegirParcela(parcelaActual);
   mapa.ajustarVistaATotes();
 
   seccioAccions.hidden = false;
+}
+
+async function pintarSubparceles() {
+  const subparceles = await bd.llegirSubparcelesDe(parcelaActual.id);
+  if (subparceles.length === 0) return;
+
+  llistatSubparceles.innerHTML = subparceles
+    .map(
+      (s) => `
+        <tr>
+          <td>${s.dcc ?? '—'}</td>
+          <td>${s.ssp ? `${s.ssp} m²` : '—'}</td>
+          <td>${s.ip ?? '—'}</td>
+          <td>${s.ccc ?? '—'}</td>
+        </tr>
+      `
+    )
+    .join('');
+  seccioSubparceles.hidden = false;
 }
 
 function pintarFitxa(parcela) {
@@ -73,6 +95,10 @@ function pintarFitxa(parcela) {
       <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular-ho (mètode de malla)</a></dd>
     `;
 
+  const filaVegetacio = parcela.tipusVegetacio != null
+    ? `<dt>Tipus de vegetació (MFE)</dt><dd>${parcela.tipusVegetacio}</dd>`
+    : '';
+
   contenidorDades.innerHTML = `
     <dl class="fitxa-parcela">
       <dt>Població</dt><dd>${parcela.poblacio}</dd>
@@ -80,7 +106,8 @@ function pintarFitxa(parcela) {
       <dt>Parcel·la</dt><dd>${parcela.parcelaCadastral}</dd>
       <dt>Referència cadastral</dt><dd>${parcela.referenciaCadastral ?? '—'}</dd>
       <dt>Superfície</dt><dd>${parcela.superficie ? `${parcela.superficie} m²` : '—'}</dd>
-      <dt>Ús</dt><dd>${parcela.us}</dd>
+      <dt>Ús (segons el Cadastre)</dt><dd>${parcela.us ?? 'No disponible'}</dd>
+      ${filaVegetacio}
       <dt>Risc d'incendi</dt><dd class="risc-${parcela.risc}">${parcela.risc}</dd>
       ${filaAltimetria}
       ${filaOrientacio}
@@ -93,7 +120,6 @@ botoExportarGpx.addEventListener('click', () => {
 });
 
 botoEditar.addEventListener('click', () => {
-  formEditar.elements.us.value = parcelaActual.us;
   formEditar.elements.risc.value = parcelaActual.risc;
   formEditar.hidden = false;
   seccioAccions.hidden = true;
@@ -109,7 +135,6 @@ formEditar.addEventListener('submit', async (event) => {
 
   const parcelaActualitzada = new Parcela({
     ...parcelaActual,
-    us: formEditar.elements.us.value,
     risc: formEditar.elements.risc.value,
   });
 
@@ -127,6 +152,7 @@ botoEsborrar.addEventListener('click', async () => {
   );
   if (!confirmat) return;
 
+  await bd.esborrarSubparcelesDe(parcelaActual.id);
   await bd.esborrarParcela(parcelaActual.id);
   window.location.href = 'index.html';
 });

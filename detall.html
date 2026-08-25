@@ -29,24 +29,28 @@
       Carregant...
     </section>
 
+    <section id="seccio-subparceles" hidden>
+      <h2>Subparceles (Cadastre)</h2>
+      <table class="taula-parceles">
+        <thead>
+          <tr>
+            <th>Descripció</th>
+            <th>Superfície</th>
+            <th>Índex prod.</th>
+            <th>Codi</th>
+          </tr>
+        </thead>
+        <tbody id="llistat-subparceles"></tbody>
+      </table>
+    </section>
+
     <section id="accions-parcela" class="accions-parcela" hidden>
       <button type="button" id="boto-exportar-gpx" class="boto-secundari">Exportar track (GPX)</button>
-      <button type="button" id="boto-editar" class="boto-secundari">Editar ús / risc</button>
+      <button type="button" id="boto-editar" class="boto-secundari">Editar risc</button>
       <button type="button" id="boto-esborrar" class="boto-perillos">Esborrar parcel·la</button>
     </section>
 
     <form id="form-editar" class="formulari-parcela" hidden>
-      <div class="camp">
-        <label for="editar-us">Ús</label>
-        <select id="editar-us" name="us" required>
-          <option value="agricola">Agrícola</option>
-          <option value="forestal">Forestal</option>
-          <option value="pastura">Pastura</option>
-          <option value="mix">Mixt (diversos usos)</option>
-          <option value="altre">Altre</option>
-        </select>
-      </div>
-
       <div class="camp">
         <label for="editar-risc">Risc d'incendi</label>
         <select id="editar-risc" name="risc" required>
