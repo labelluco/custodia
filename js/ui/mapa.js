@@ -1,11 +1,7 @@
 // Embolcall sobre Leaflet. Necessita que L estigui carregat globalment
 // via <script> abans d'importar aquest mòdul.
 
-const COLORS_RISC = {
-  baix: '#4caf50',
-  mitja: '#ffb300',
-  alt: '#e53935',
-};
+const COLOR_NEUTRE = '#000000';
 
 const CENTRE_PER_DEFECTE = [40.15, -0.65]; // zona interior de Castelló/Terol
 const ZOOM_PER_DEFECTE = 11;
@@ -41,9 +37,15 @@ export class Mapa {
     this._capaRessaltada = null;
   }
 
-  afegirParcela(parcela, onClick) {
-    const color = COLORS_RISC[parcela.risc] ?? '#999999';
-
+  /**
+   * @param {Object} parcela
+   * @param {(parcela: Object) => void} [onClick]
+   * @param {string} [color] Color del contorn/farciment. Per defecte,
+   *   neutre (negre): Mapa ja no calcula cap color a partir d'un risc
+   *   -- qui la crida (inici.js, detall.js) el calcula amb ServeiRisc
+   *   i el passa ja fet, perquè Mapa només sap pintar, no avaluar risc.
+   */
+  afegirParcela(parcela, onClick, color = COLOR_NEUTRE) {
     const poligon = L.polygon(parcela.coordenades, {
       color,
       weight: 2,
@@ -51,7 +53,7 @@ export class Mapa {
       fillOpacity: 0.35,
     });
 
-    poligon.bindTooltip(`${parcela.poblacio} — ${parcela.us} (risc ${parcela.risc})`);
+    poligon.bindTooltip(`${parcela.poblacio}${parcela.us ? ` — ${parcela.us}` : ''}`);
 
     if (onClick) {
       poligon.on('click', () => onClick(parcela));

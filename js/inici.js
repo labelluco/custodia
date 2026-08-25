@@ -1,6 +1,7 @@
 // Controlador de index.html: mapa + llistat.
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
+import { ServeiRisc } from './serveis/risc.js';
 
 async function iniciar() {
   const bd = await BaseDades.obrir();
@@ -19,10 +20,13 @@ async function iniciar() {
   contenidorLlistat.innerHTML = '';
 
   for (const parcela of parceles) {
-    mapa.afegirParcela(parcela, (p) => obrirDetall(p.id));
+    const color = await colorDeLaParcela(bd, parcela);
+
+    mapa.afegirParcela(parcela, (p) => obrirDetall(p.id), color);
 
     const fila = document.createElement('tr');
-    fila.className = `fila-parcela risc-${parcela.risc}`;
+    fila.className = 'fila-parcela';
+    fila.style.borderLeftColor = color;
     fila.dataset.id = parcela.id;
     fila.innerHTML = `
       <td>${parcela.poblacio}</td>
@@ -43,6 +47,24 @@ async function iniciar() {
   }
 
   mapa.ajustarVistaATotes();
+}
+
+/**
+ * Neutre si encara no es pot calcular (falta el pendent mitjà), o el
+ * color segons el percentatge de risc si ja es pot.
+ */
+async function colorDeLaParcela(bd, parcela) {
+  if (parcela.pendentMitja == null) {
+    return ServeiRisc.COLOR_NEUTRE;
+  }
+
+  const subparceles = await bd.llegirSubparcelesDe(parcela.id);
+  const { riscPercentatge } = ServeiRisc.calcularRiscTotal({
+    pendentMitja: parcela.pendentMitja,
+    orientacioMitjana: parcela.orientacioMitjana,
+    subparceles,
+  });
+  return ServeiRisc.colorSegonsRisc(riscPercentatge);
 }
 
 function obrirDetall(id) {

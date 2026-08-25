@@ -6,9 +6,7 @@
   --color-fons: #fafafa;
   --color-vora: #dddddd;
 
-  --risc-baix: #4caf50;
-  --risc-mitja: #ffb300;
-  --risc-alt: #e53935;
+  --color-perill: #e53935;
 
   --espai-xs: 0.5rem;
   --espai-s: 1rem;
@@ -113,17 +111,15 @@ a {
 
 .fila-parcela {
   cursor: pointer;
-  /* El color de fons indica el risc -- per això no calia una columna a part. */
+  /* El color s'assigna des de JS (border-left-color inline), segons el
+     percentatge de risc calculat -- una escala contínua, no categories
+     fixes, per això no hi ha regles de color aquí. */
   border-left: 6px solid #999;
 }
 
 .fila-parcela:hover {
   background-color: #f0f0f0;
 }
-
-.fila-parcela.risc-baix   { border-left-color: var(--risc-baix); background-color: #f4faf4; }
-.fila-parcela.risc-mitja  { border-left-color: var(--risc-mitja); background-color: #fffaf0; }
-.fila-parcela.risc-alt    { border-left-color: var(--risc-alt); background-color: #fdf3f3; }
 
 /* --- Formulari --- */
 .formulari-parcela form {
@@ -194,11 +190,7 @@ button:disabled {
   margin: 0;
 }
 
-.fitxa-parcela dd.risc-baix  { color: var(--risc-baix); font-weight: 600; }
-.fitxa-parcela dd.risc-mitja { color: var(--risc-mitja); font-weight: 600; }
-.fitxa-parcela dd.risc-alt   { color: var(--risc-alt); font-weight: 600; }
-
-/* --- Accions de la fitxa de detall (editar/esborrar) --- */
+/* --- Accions de la fitxa de detall --- */
 .accions-parcela {
   display: flex;
   gap: var(--espai-s);
@@ -216,7 +208,7 @@ button:disabled {
 }
 
 .boto-perillos {
-  background-color: var(--risc-alt);
+  background-color: var(--color-perill);
 }
 
 .boto-perillos:hover {

@@ -6,12 +6,11 @@
 // desa tal com el retorna el Cadastre (per exemple "Agrario"), o null
 // si el Cadastre no en va donar cap. No hi ha, doncs, cap validació de
 // valors permesos per a aquest camp -- és text lliure, no editable.
-
-export const RISCOS = Object.freeze({
-  BAIX: 'baix',
-  MITJA: 'mitja',
-  ALT: 'alt',
-});
+//
+// Ja no hi ha cap camp "risc" manual: el risc d'incendi es calcula
+// sempre automàticament (vegeu ServeiRisc), a partir de la vegetació,
+// el pendent i l'orientació -- no té sentit que convisqui amb un valor
+// triat a mà que ningú actualitzaria.
 
 export class Parcela {
   constructor({
@@ -23,7 +22,6 @@ export class Parcela {
     referenciaCadastral = null,
     superficie = null,
     us = null,
-    risc,
     // Dades d'altimetria: opcionals, es calculen a banda (pàgina
     // d'altitud) i es desen a la parcel·la un cop calculades. Les
     // parcel·les creades abans d'aquesta funcionalitat simplement no
@@ -35,20 +33,12 @@ export class Parcela {
     // Orientació mitjana en graus (0-360, 0=Nord), només calculable amb
     // el mètode de malla. null si encara no s'ha calculat.
     orientacioMitjana = null,
-    // Tipus de vegetació segons el Mapa Forestal d'Espanya, consultat
-    // només en el moment de crear la parcel·la (vegeu ServeiVegetacio).
-    // Les parcel·les creades abans d'aquesta funcionalitat no el
-    // tindran mai (queda null per sempre, no es recalcula després).
-    tipusVegetacio = null,
   }) {
     if (!poligon || !parcelaCadastral || !poblacio) {
       throw new Error('Parcela: poligon, parcelaCadastral i poblacio son obligatoris');
     }
     if (!Array.isArray(coordenades) || coordenades.length === 0) {
       throw new Error('Parcela: calen les coordenades del perimetre');
-    }
-    if (!Object.values(RISCOS).includes(risc)) {
-      throw new Error(`Parcela: risc "${risc}" no valid`);
     }
 
     this.id = id;
@@ -59,27 +49,16 @@ export class Parcela {
     this.referenciaCadastral = referenciaCadastral;
     this.superficie = superficie;
     this.us = us;
-    this.risc = risc;
     this.altitudMaxima = altitudMaxima;
     this.altitudMinima = altitudMinima;
     this.desnivell = desnivell;
     this.pendentMitja = pendentMitja;
     this.orientacioMitjana = orientacioMitjana;
-    this.tipusVegetacio = tipusVegetacio;
   }
 
   /** Cert si la parcel·la ja té calculades les dades d'altimetria. */
   get teAltimetria() {
     return this.desnivell !== null && this.pendentMitja !== null;
-  }
-
-  get etiquetaRisc() {
-    const etiquetes = {
-      [RISCOS.BAIX]: 'Baix',
-      [RISCOS.MITJA]: 'Mitjà',
-      [RISCOS.ALT]: 'Alt',
-    };
-    return etiquetes[this.risc] ?? this.risc;
   }
 
   toObject() {
@@ -92,13 +71,11 @@ export class Parcela {
       referenciaCadastral: this.referenciaCadastral,
       superficie: this.superficie,
       us: this.us,
-      risc: this.risc,
       altitudMaxima: this.altitudMaxima,
       altitudMinima: this.altitudMinima,
       desnivell: this.desnivell,
       pendentMitja: this.pendentMitja,
       orientacioMitjana: this.orientacioMitjana,
-      tipusVegetacio: this.tipusVegetacio,
     };
   }
 

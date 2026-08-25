@@ -44,27 +44,15 @@
       </table>
     </section>
 
-    <section id="accions-parcela" class="accions-parcela" hidden>
-      <button type="button" id="boto-exportar-gpx" class="boto-secundari">Exportar track (GPX)</button>
-      <button type="button" id="boto-editar" class="boto-secundari">Editar risc</button>
-      <button type="button" id="boto-esborrar" class="boto-perillos">Esborrar parcel·la</button>
+    <section id="seccio-risc-calculat" class="fitxa-parcela-contenidor" hidden>
+      <h2>Risc d'incendi calculat</h2>
+      <div id="contingut-risc-calculat"></div>
     </section>
 
-    <form id="form-editar" class="formulari-parcela" hidden>
-      <div class="camp">
-        <label for="editar-risc">Risc d'incendi</label>
-        <select id="editar-risc" name="risc" required>
-          <option value="baix">Baix</option>
-          <option value="mitja">Mitjà</option>
-          <option value="alt">Alt</option>
-        </select>
-      </div>
-
-      <div class="formulari-parcela__botons">
-        <button type="submit">Desar canvis</button>
-        <button type="button" id="boto-cancelar-editar" class="boto-secundari">Cancel·lar</button>
-      </div>
-    </form>
+    <section id="accions-parcela" class="accions-parcela" hidden>
+      <button type="button" id="boto-exportar-gpx" class="boto-secundari">Exportar track (GPX)</button>
+      <button type="button" id="boto-esborrar" class="boto-perillos">Esborrar parcel·la</button>
+    </section>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
