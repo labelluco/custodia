@@ -25,7 +25,9 @@
         <fieldset id="dades-cadastre">
           <div class="camp">
             <label for="provincia">Provincia</label>
-            <input type="text" id="provincia" name="provincia" required placeholder="p. ex. Teruel">
+            <select id="provincia" name="provincia" required>
+              <option value="">Carregant...</option>
+            </select>
           </div>
 
           <div class="camp">
@@ -40,7 +42,9 @@
 
           <div class="camp">
             <label for="poblacio">Població</label>
-            <input type="text" id="poblacio" name="poblacio" required>
+            <select id="poblacio" name="poblacio" required disabled>
+              <option value="">Tria primer una província</option>
+            </select>
           </div>
 
           <button type="button" id="boto-consultar">Consultar cadastre</button>

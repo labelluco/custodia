@@ -22,6 +22,7 @@ const FITXERS_PER_CACHE = [
   './js/serveis/orientacio.js',
   './js/serveis/risc.js',
   './js/serveis/vegetacio.js',
+  './js/serveis/ubicacions.js',
   './js/geometria/malla.js',
   './js/geometria/gradient.js',
   './js/ui/mapa.js',

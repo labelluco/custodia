@@ -64,8 +64,8 @@ export class ServeiRisc {
    * passant per grocs/taronges als valors intermedis -- una escala
    * contínua, no categories fixes (baix/mitjà/alt) com abans.
    */
-  static colorSegonsRisc(percentatge) {
-    const p = Math.min(Math.max(percentatge, 0), 100);
+  static colorSegonsRisc(index) {
+    const p = Math.min(Math.max(index, 0), 100);
     const to = 120 - (120 * p) / 100; // 120° (verd) -> 0° (roig)
     return `hsl(${to}, 70%, 45%)`;
   }
@@ -127,7 +127,7 @@ export class ServeiRisc {
    * hi ha, en lloc de comptar-los com a zero.
    *
    * @param {{pendentMitja: number, orientacioMitjana: number|null, subparceles: Array}} dades
-   * @returns {{riscPercentatge: number, riscVegetacio: number|null, riscPendent: number, riscOrientacio: number|null}}
+   * @returns {{indexPerillositat: number, riscVegetacio: number|null, riscPendent: number, riscOrientacio: number|null}}
    */
   static calcularRiscTotal({ pendentMitja, orientacioMitjana, subparceles }) {
     if (pendentMitja == null) {
@@ -154,7 +154,7 @@ export class ServeiRisc {
     );
 
     return {
-      riscPercentatge: riscTotal * 100,
+      indexPerillositat: riscTotal * 100,
       riscVegetacio,
       riscPendent,
       riscOrientacio,

@@ -33,6 +33,11 @@ export class Parcela {
     // Orientació mitjana en graus (0-360, 0=Nord), només calculable amb
     // el mètode de malla. null si encara no s'ha calculat.
     orientacioMitjana = null,
+    // Data (ISO) de quan es va crear la parcel·la, és a dir, de quan es
+    // van consultar les dades del Cadastre. Les parcel·les creades
+    // abans d'aquest camp no la tindran mai (queda null per sempre) --
+    // útil per saber si les dades poden haver quedat desactualitzades.
+    dataCreacio = null,
   }) {
     if (!poligon || !parcelaCadastral || !poblacio) {
       throw new Error('Parcela: poligon, parcelaCadastral i poblacio son obligatoris');
@@ -54,6 +59,7 @@ export class Parcela {
     this.desnivell = desnivell;
     this.pendentMitja = pendentMitja;
     this.orientacioMitjana = orientacioMitjana;
+    this.dataCreacio = dataCreacio;
   }
 
   /** Cert si la parcel·la ja té calculades les dades d'altimetria. */
@@ -76,6 +82,7 @@ export class Parcela {
       desnivell: this.desnivell,
       pendentMitja: this.pendentMitja,
       orientacioMitjana: this.orientacioMitjana,
+      dataCreacio: this.dataCreacio,
     };
   }
 

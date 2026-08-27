@@ -25,8 +25,14 @@
 
     <section id="mapa-detall" class="mapa mapa--detall" aria-label="Perímetre de la parcel·la"></section>
 
+    <section id="seccio-risc-calculat" class="fitxa-parcela-contenidor" hidden>
+      <h2>Risc d'incendi calculat (experimental)</h2>
+      <div id="contingut-risc-calculat"></div>
+    </section>
+
     <section id="dades-parcela" class="fitxa-parcela-contenidor">
-      Carregant...
+      <h2>Dades de la parcel·la</h2>
+      <div id="contingut-dades-parcela">Carregant...</div>
     </section>
 
     <section id="seccio-subparceles" hidden>
@@ -36,17 +42,13 @@
           <tr>
             <th>Descripció</th>
             <th>Superfície</th>
+            <th>Risc base</th>
             <th>Índex prod.</th>
             <th>Codi</th>
           </tr>
         </thead>
         <tbody id="llistat-subparceles"></tbody>
       </table>
-    </section>
-
-    <section id="seccio-risc-calculat" class="fitxa-parcela-contenidor" hidden>
-      <h2>Risc d'incendi calculat</h2>
-      <div id="contingut-risc-calculat"></div>
     </section>
 
     <section id="accions-parcela" class="accions-parcela" hidden>

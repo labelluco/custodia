@@ -10,6 +10,7 @@
 // des d'enlloc.
 import { BaseDades } from './serveis/basedades.js';
 import { ServeiCadastre } from './serveis/cadastre.js';
+import { ServeiUbicacions } from './serveis/ubicacions.js';
 import { Parcela } from './model/parcela.js';
 
 const formulari = document.getElementById('form-parcela');
@@ -21,9 +22,54 @@ const missatgeEstat = document.getElementById('missatge-estat');
 const valorUsCadastre = document.getElementById('valor-us-cadastre');
 const campDesglossament = document.getElementById('camp-desglossament');
 const valorDesglossament = document.getElementById('valor-desglossament');
+const selectProvincia = document.getElementById('provincia');
+const selectPoblacio = document.getElementById('poblacio');
 
 let dadesCadastre = null;
 let dadesFormulariConsultades = null;
+
+/**
+ * Carrega el desplegable de províncies en obrir la pàgina, per evitar
+ * que l'usuari l'hagi d'escriure a mà (i s'equivoqui). Si falla, es
+ * torna a deixar com a camp de text lliure -- millor que bloquejar
+ * tot el formulari per un servei extern caigut.
+ */
+async function carregarProvincies() {
+  try {
+    const provincies = await ServeiUbicacions.consultarProvincies();
+    selectProvincia.innerHTML =
+      '<option value="">Tria una província</option>' +
+      provincies.map((p) => `<option value="${p.nom}">${p.nom}</option>`).join('');
+  } catch (error) {
+    console.warn('No s\'han pogut carregar les províncies, es deixa com a camp de text:', error);
+    selectProvincia.outerHTML =
+      '<input type="text" id="provincia" name="provincia" required placeholder="p. ex. Teruel">';
+  }
+}
+
+selectProvincia.addEventListener('change', async () => {
+  const provincia = selectProvincia.value;
+  selectPoblacio.disabled = true;
+  selectPoblacio.innerHTML = '<option value="">Carregant...</option>';
+
+  if (!provincia) {
+    selectPoblacio.innerHTML = '<option value="">Tria primer una província</option>';
+    return;
+  }
+
+  try {
+    const municipis = await ServeiUbicacions.consultarMunicipis(provincia);
+    selectPoblacio.innerHTML =
+      '<option value="">Tria un municipi</option>' +
+      municipis.map((m) => `<option value="${m.nom}">${m.nom}</option>`).join('');
+    selectPoblacio.disabled = false;
+  } catch (error) {
+    console.warn('No s\'han pogut carregar els municipis, es deixa com a camp de text:', error);
+    selectPoblacio.outerHTML = '<input type="text" id="poblacio" name="poblacio" required>';
+  }
+});
+
+carregarProvincies();
 
 botoConsultar.addEventListener('click', async () => {
   const dadesFormulari = new FormData(formulari);
@@ -87,6 +133,7 @@ formulari.addEventListener('submit', async (event) => {
     const parcela = new Parcela({
       ...dadesCadastre,
       ...dadesFormulariConsultades,
+      dataCreacio: new Date().toISOString(),
     });
 
     const bd = await BaseDades.obrir();

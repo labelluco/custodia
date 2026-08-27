@@ -59,12 +59,12 @@ async function colorDeLaParcela(bd, parcela) {
   }
 
   const subparceles = await bd.llegirSubparcelesDe(parcela.id);
-  const { riscPercentatge } = ServeiRisc.calcularRiscTotal({
+  const { indexPerillositat } = ServeiRisc.calcularRiscTotal({
     pendentMitja: parcela.pendentMitja,
     orientacioMitjana: parcela.orientacioMitjana,
     subparceles,
   });
-  return ServeiRisc.colorSegonsRisc(riscPercentatge);
+  return ServeiRisc.colorSegonsRisc(indexPerillositat);
 }
 
 function obrirDetall(id) {

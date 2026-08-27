@@ -5,7 +5,7 @@ import { ExportadorGpx } from './serveis/exportadorGpx.js';
 import { ServeiOrientacio } from './serveis/orientacio.js';
 import { ServeiRisc } from './serveis/risc.js';
 
-const contenidorDades = document.getElementById('dades-parcela');
+const contenidorDades = document.getElementById('contingut-dades-parcela');
 const seccioSubparceles = document.getElementById('seccio-subparceles');
 const llistatSubparceles = document.getElementById('llistat-subparceles');
 const seccioRiscCalculat = document.getElementById('seccio-risc-calculat');
@@ -59,6 +59,7 @@ function pintarSubparceles(subparceles) {
         <tr>
           <td>${s.dcc ?? '—'}</td>
           <td>${s.ssp ? `${s.ssp} m²` : '—'}</td>
+          <td>${(ServeiRisc.classificarSubparcela(s.dcc) * 100).toFixed(0)} / 100</td>
           <td>${s.ip ?? '—'}</td>
           <td>${s.ccc ?? '—'}</td>
         </tr>
@@ -90,7 +91,7 @@ function pintarRisc(subparceles) {
     return ServeiRisc.COLOR_NEUTRE;
   }
 
-  const { riscPercentatge, riscVegetacio, riscPendent, riscOrientacio } =
+  const { indexPerillositat, riscVegetacio, riscPendent, riscOrientacio } =
     ServeiRisc.calcularRiscTotal({
       pendentMitja: parcelaActual.pendentMitja,
       orientacioMitjana: parcelaActual.orientacioMitjana,
@@ -99,15 +100,20 @@ function pintarRisc(subparceles) {
 
   contingutRiscCalculat.innerHTML = `
     <dl class="fitxa-parcela">
-      <dt>Risc total</dt><dd><strong>${riscPercentatge.toFixed(0)} %</strong></dd>
-      <dt>Component vegetació</dt><dd>${riscVegetacio != null ? `${(riscVegetacio * 100).toFixed(0)} %` : 'No disponible (sense subparceles)'}</dd>
-      <dt>Component pendent</dt><dd>${(riscPendent * 100).toFixed(0)} %</dd>
-      <dt>Component orientació</dt><dd>${riscOrientacio != null ? `${(riscOrientacio * 100).toFixed(0)} %` : 'No disponible (cal el mètode de malla)'}</dd>
+      <dt>Índex de perillositat</dt><dd><strong>${indexPerillositat.toFixed(0)} / 100</strong></dd>
+      <dt>Component vegetació</dt><dd>${riscVegetacio != null ? `${(riscVegetacio * 100).toFixed(0)} / 100` : 'No disponible (sense subparceles)'}</dd>
+      <dt>Component pendent</dt><dd>${(riscPendent * 100).toFixed(0)} / 100</dd>
+      <dt>Component orientació</dt><dd>${riscOrientacio != null ? `${(riscOrientacio * 100).toFixed(0)} / 100` : 'No disponible (cal el mètode de malla)'}</dd>
     </dl>
-    <p class="nota">Model propi, no un estàndard oficial — pensat per ajustar-lo amb l'ús real.</p>
+    <p class="nota">
+      Model propi, no un estàndard oficial — pensat per ajustar-lo amb l'ús real.
+      És un índex per <strong>comparar parcel·les entre elles</strong> segons el
+      mateix criteri, no una probabilitat ni una freqüència d'incendis: un 62
+      no vol dir "62% de possibilitats de cremar-se", ni "es crema 6 anys de cada 10".
+    </p>
   `;
 
-  return ServeiRisc.colorSegonsRisc(riscPercentatge);
+  return ServeiRisc.colorSegonsRisc(indexPerillositat);
 }
 
 function pintarFitxa(parcela) {
@@ -140,6 +146,10 @@ function pintarFitxa(parcela) {
       <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular-ho (mètode de malla)</a></dd>
     `;
 
+  const filaData = parcela.dataCreacio != null
+    ? `<dt>Dades consultades el</dt><dd>${new Date(parcela.dataCreacio).toLocaleDateString('ca-ES')}</dd>`
+    : '';
+
   contenidorDades.innerHTML = `
     <dl class="fitxa-parcela">
       <dt>Població</dt><dd>${parcela.poblacio}</dd>
@@ -150,6 +160,7 @@ function pintarFitxa(parcela) {
       <dt>Ús (segons el Cadastre)</dt><dd>${parcela.us ?? 'No disponible'}</dd>
       ${filaAltimetria}
       ${filaOrientacio}
+      ${filaData}
     </dl>
   `;
 }
