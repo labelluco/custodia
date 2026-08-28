@@ -1,5 +1,6 @@
 // Embolcall sobre Leaflet. Necessita que L estigui carregat globalment
 // via <script> abans d'importar aquest mòdul.
+import { t } from '../i18n.js';
 
 const COLOR_NEUTRE = '#000000';
 
@@ -144,9 +145,9 @@ export class Mapa {
       const marcador = L.marker(coordenades, { icon: icona });
       const textOrientacio =
         orientacio == null
-          ? 'pla (sense orientació definida)'
+          ? t('pla (sense orientació definida)')
           : `${orientacio.toFixed(0)}°${etiqueta ? ` (${etiqueta})` : ''}`;
-      marcador.bindTooltip(`${altitud.toFixed(0)} m — orientació: ${textOrientacio}`);
+      marcador.bindTooltip(`${altitud.toFixed(0)} m — ${t('orientació:')} ${textOrientacio}`);
       marcador.on('click', () => marcador.openTooltip());
       marcador.addTo(this.leafletMap);
     });

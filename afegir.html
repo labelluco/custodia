@@ -12,58 +12,59 @@
   <header class="capcalera">
     <h1>Custòdia</h1>
     <nav class="menu">
-      <a href="index.html" class="menu__enllac">Inici</a>
-      <a href="afegir.html" class="menu__enllac menu__enllac--actiu">Afegir parcel·la</a>
+      <a href="index.html" class="menu__enllac" data-i18n="Inici">Inici</a>
+      <a href="afegir.html" class="menu__enllac menu__enllac--actiu" data-i18n="Afegir parcel·la">Afegir parcel·la</a>
     </nav>
+    <span id="selector-idioma" class="selector-idioma"></span>
   </header>
 
   <main>
     <section class="formulari-parcela">
-      <h2>Afegir una nova parcel·la</h2>
+      <h2 data-i18n="Afegir una nova parcel·la">Afegir una nova parcel·la</h2>
 
       <form id="form-parcela">
         <fieldset id="dades-cadastre">
           <div class="camp">
-            <label for="provincia">Provincia</label>
+            <label for="provincia" data-i18n="Provincia">Provincia</label>
             <select id="provincia" name="provincia" required>
-              <option value="">Carregant...</option>
+              <option value="" data-i18n="Carregant...">Carregant...</option>
             </select>
           </div>
 
           <div class="camp">
-            <label for="poligon">Polígon</label>
+            <label for="poligon" data-i18n="Polígon">Polígon</label>
             <input type="text" id="poligon" name="poligon" required>
           </div>
 
           <div class="camp">
-            <label for="parcela">Parcel·la</label>
+            <label for="parcela" data-i18n="Parcel·la">Parcel·la</label>
             <input type="text" id="parcela" name="parcela" required>
           </div>
 
           <div class="camp">
-            <label for="poblacio">Població</label>
+            <label for="poblacio" data-i18n="Població">Població</label>
             <select id="poblacio" name="poblacio" required disabled>
-              <option value="">Tria primer una província</option>
+              <option value="" data-i18n="Tria primer una província">Tria primer una província</option>
             </select>
           </div>
 
-          <button type="button" id="boto-consultar">Consultar cadastre</button>
+          <button type="button" id="boto-consultar" data-i18n="Consultar cadastre">Consultar cadastre</button>
         </fieldset>
 
         <p id="missatge-estat" class="missatge-estat" hidden></p>
 
         <fieldset id="dades-us-risc" hidden>
           <div class="camp">
-            <span class="etiqueta-camp">Ús (segons el Cadastre)</span>
+            <span class="etiqueta-camp" data-i18n="Ús (segons el Cadastre)">Ús (segons el Cadastre)</span>
             <p id="valor-us-cadastre" class="valor-nomes-lectura"></p>
           </div>
 
           <div class="camp" id="camp-desglossament" hidden>
-            <span class="etiqueta-camp">Desglossament de subparceles</span>
+            <span class="etiqueta-camp" data-i18n="Desglossament de subparceles">Desglossament de subparceles</span>
             <p id="valor-desglossament" class="valor-nomes-lectura"></p>
           </div>
 
-          <button type="submit" id="boto-desar">Desar parcel·la</button>
+          <button type="submit" id="boto-desar" data-i18n="Desar parcel·la">Desar parcel·la</button>
         </fieldset>
       </form>
     </section>

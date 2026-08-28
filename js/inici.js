@@ -2,6 +2,10 @@
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { ServeiRisc } from './serveis/risc.js';
+import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
+
+aplicarTraduccions();
+inicialitzarSelectorIdioma('selector-idioma');
 
 async function iniciar() {
   const bd = await BaseDades.obrir();
@@ -73,5 +77,5 @@ function obrirDetall(id) {
 
 iniciar().catch((error) => {
   console.error(error);
-  alert('No s\'han pogut carregar les parcel·les. Revisa la consola per a més detalls.');
+  alert(t('No s\'han pogut carregar les parcel·les. Revisa la consola per a més detalls.'));
 });

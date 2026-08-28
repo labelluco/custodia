@@ -15,36 +15,37 @@
   <header class="capcalera">
     <h1>Custòdia</h1>
     <nav class="menu">
-      <a href="index.html" class="menu__enllac">Inici</a>
-      <a href="afegir.html" class="menu__enllac">Afegir parcel·la</a>
+      <a href="index.html" class="menu__enllac" data-i18n="Inici">Inici</a>
+      <a href="afegir.html" class="menu__enllac" data-i18n="Afegir parcel·la">Afegir parcel·la</a>
     </nav>
+    <span id="selector-idioma" class="selector-idioma"></span>
   </header>
 
   <main>
-    <p><a href="index.html">&larr; Tornar al llistat</a></p>
+    <p><a href="index.html" data-i18n="← Tornar al llistat">&larr; Tornar al llistat</a></p>
 
     <section id="mapa-detall" class="mapa mapa--detall" aria-label="Perímetre de la parcel·la"></section>
 
     <section id="seccio-risc-calculat" class="fitxa-parcela-contenidor" hidden>
-      <h2>Risc d'incendi calculat (experimental)</h2>
+      <h2 data-i18n="Risc d'incendi calculat (experimental)">Risc d'incendi calculat (experimental)</h2>
       <div id="contingut-risc-calculat"></div>
     </section>
 
     <section id="dades-parcela" class="fitxa-parcela-contenidor">
-      <h2>Dades de la parcel·la</h2>
-      <div id="contingut-dades-parcela">Carregant...</div>
+      <h2 data-i18n="Dades de la parcel·la">Dades de la parcel·la</h2>
+      <div id="contingut-dades-parcela" data-i18n="Carregant...">Carregant...</div>
     </section>
 
     <section id="seccio-subparceles" hidden>
-      <h2>Subparceles (Cadastre)</h2>
+      <h2 data-i18n="Subparceles (Cadastre)">Subparceles (Cadastre)</h2>
       <table class="taula-parceles">
         <thead>
           <tr>
-            <th>Descripció</th>
-            <th>Superfície</th>
-            <th>Risc base</th>
-            <th>Índex prod.</th>
-            <th>Codi</th>
+            <th data-i18n="Descripció">Descripció</th>
+            <th data-i18n="Superfície">Superfície</th>
+            <th data-i18n="Risc base">Risc base</th>
+            <th data-i18n="Índex prod.">Índex prod.</th>
+            <th data-i18n="Codi">Codi</th>
           </tr>
         </thead>
         <tbody id="llistat-subparceles"></tbody>
@@ -52,8 +53,8 @@
     </section>
 
     <section id="accions-parcela" class="accions-parcela" hidden>
-      <button type="button" id="boto-exportar-gpx" class="boto-secundari">Exportar track (GPX)</button>
-      <button type="button" id="boto-esborrar" class="boto-perillos">Esborrar parcel·la</button>
+      <button type="button" id="boto-exportar-gpx" class="boto-secundari" data-i18n="Exportar track (GPX)">Exportar track (GPX)</button>
+      <button type="button" id="boto-esborrar" class="boto-perillos" data-i18n="Esborrar parcel·la">Esborrar parcel·la</button>
     </section>
   </main>
 

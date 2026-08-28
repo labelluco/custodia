@@ -12,6 +12,10 @@ import { BaseDades } from './serveis/basedades.js';
 import { ServeiCadastre } from './serveis/cadastre.js';
 import { ServeiUbicacions } from './serveis/ubicacions.js';
 import { Parcela } from './model/parcela.js';
+import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
+
+aplicarTraduccions();
+inicialitzarSelectorIdioma('selector-idioma');
 
 const formulari = document.getElementById('form-parcela');
 const fieldsetCadastre = document.getElementById('dades-cadastre');
@@ -38,29 +42,29 @@ async function carregarProvincies() {
   try {
     const provincies = await ServeiUbicacions.consultarProvincies();
     selectProvincia.innerHTML =
-      '<option value="">Tria una província</option>' +
+      `<option value="">${t('Tria una província')}</option>` +
       provincies.map((p) => `<option value="${p.nom}">${p.nom}</option>`).join('');
   } catch (error) {
     console.warn('No s\'han pogut carregar les províncies, es deixa com a camp de text:', error);
     selectProvincia.outerHTML =
-      '<input type="text" id="provincia" name="provincia" required placeholder="p. ex. Teruel">';
+      `<input type="text" id="provincia" name="provincia" required placeholder="${t('p. ex. Teruel')}">`;
   }
 }
 
 selectProvincia.addEventListener('change', async () => {
   const provincia = selectProvincia.value;
   selectPoblacio.disabled = true;
-  selectPoblacio.innerHTML = '<option value="">Carregant...</option>';
+  selectPoblacio.innerHTML = `<option value="">${t('Carregant...')}</option>`;
 
   if (!provincia) {
-    selectPoblacio.innerHTML = '<option value="">Tria primer una província</option>';
+    selectPoblacio.innerHTML = `<option value="">${t('Tria primer una província')}</option>`;
     return;
   }
 
   try {
     const municipis = await ServeiUbicacions.consultarMunicipis(provincia);
     selectPoblacio.innerHTML =
-      '<option value="">Tria un municipi</option>' +
+      `<option value="">${t('Tria un municipi')}</option>` +
       municipis.map((m) => `<option value="${m.nom}">${m.nom}</option>`).join('');
     selectPoblacio.disabled = false;
   } catch (error) {
@@ -79,12 +83,12 @@ botoConsultar.addEventListener('click', async () => {
   const parcelaCadastral = dadesFormulari.get('parcela').trim();
 
   if (!provincia || !poblacio || !poligon || !parcelaCadastral) {
-    mostrarEstat('Cal omplir provincia, polígon, parcel·la i població.', 'error');
+    mostrarEstat(t('Cal omplir provincia, polígon, parcel·la i població.'), 'error');
     return;
   }
 
   botoConsultar.disabled = true;
-  mostrarEstat('Consultant el Cadastre...', 'info');
+  mostrarEstat(t('Consultant el Cadastre...'), 'info');
 
   try {
     dadesCadastre = await ServeiCadastre.consultarParcela(
@@ -97,7 +101,7 @@ botoConsultar.addEventListener('click', async () => {
     // el fieldset queda disabled, FormData deixa d'incloure aquests camps.
     dadesFormulariConsultades = { poligon, parcelaCadastral, poblacio };
 
-    valorUsCadastre.textContent = dadesCadastre.us ?? 'No disponible';
+    valorUsCadastre.textContent = dadesCadastre.us ?? t('No disponible');
 
     if (dadesCadastre.subparceles.length > 0) {
       valorDesglossament.textContent = dadesCadastre.subparceles
@@ -110,10 +114,10 @@ botoConsultar.addEventListener('click', async () => {
 
     fieldsetCadastre.disabled = true;
     fieldsetUsRisc.hidden = false;
-    mostrarEstat('Cadastre consultat correctament.', 'exit');
+    mostrarEstat(t('Cadastre consultat correctament.'), 'exit');
   } catch (error) {
     console.error(error);
-    mostrarEstat(`No s'ha pogut consultar el cadastre: ${error.message}`, 'error');
+    mostrarEstat(`${t('No s\'ha pogut consultar el cadastre:')} ${error.message}`, 'error');
   } finally {
     botoConsultar.disabled = false;
   }
@@ -123,7 +127,7 @@ formulari.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   if (!dadesCadastre || !dadesFormulariConsultades) {
-    mostrarEstat('Primer cal consultar el cadastre.', 'error');
+    mostrarEstat(t('Primer cal consultar el cadastre.'), 'error');
     return;
   }
 
@@ -143,11 +147,11 @@ formulari.addEventListener('submit', async (event) => {
       await bd.afegirSubparceles(id, dadesCadastre.subparceles);
     }
 
-    mostrarEstat('Parcel·la desada correctament.', 'exit');
+    mostrarEstat(t('Parcel·la desada correctament.'), 'exit');
     window.location.href = 'index.html';
   } catch (error) {
     console.error(error);
-    mostrarEstat(`No s'ha pogut desar la parcel·la: ${error.message}`, 'error');
+    mostrarEstat(`${t('No s\'ha pogut desar la parcel·la:')} ${error.message}`, 'error');
   } finally {
     botoDesar.disabled = false;
   }

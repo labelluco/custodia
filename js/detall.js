@@ -4,6 +4,10 @@ import { Mapa } from './ui/mapa.js';
 import { ExportadorGpx } from './serveis/exportadorGpx.js';
 import { ServeiOrientacio } from './serveis/orientacio.js';
 import { ServeiRisc } from './serveis/risc.js';
+import { t, idiomaActual, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
+
+aplicarTraduccions();
+inicialitzarSelectorIdioma('selector-idioma');
 
 const contenidorDades = document.getElementById('contingut-dades-parcela');
 const seccioSubparceles = document.getElementById('seccio-subparceles');
@@ -22,7 +26,7 @@ async function iniciar() {
   const id = parametres.get('id');
 
   if (!id) {
-    contenidorDades.textContent = 'No s\'ha indicat cap parcel·la.';
+    contenidorDades.textContent = t('No s\'ha indicat cap parcel·la.');
     return;
   }
 
@@ -30,7 +34,7 @@ async function iniciar() {
   parcelaActual = await bd.llegirParcela(id);
 
   if (!parcelaActual) {
-    contenidorDades.textContent = 'No s\'ha trobat aquesta parcel·la.';
+    contenidorDades.textContent = t('No s\'ha trobat aquesta parcel·la.');
     return;
   }
 
@@ -84,8 +88,8 @@ function pintarRisc(subparceles) {
   if (parcelaActual.pendentMitja == null) {
     contingutRiscCalculat.innerHTML = `
       <p>
-        Cal calcular primer el pendent mitjà
-        (<a href="altitud.html?id=${encodeURIComponent(parcelaActual.id)}">calcular-ho</a>).
+        ${t('Cal calcular primer el pendent mitjà')}
+        (<a href="altitud.html?id=${encodeURIComponent(parcelaActual.id)}">${t('calcular-ho')}</a>).
       </p>
     `;
     return ServeiRisc.COLOR_NEUTRE;
@@ -100,16 +104,14 @@ function pintarRisc(subparceles) {
 
   contingutRiscCalculat.innerHTML = `
     <dl class="fitxa-parcela">
-      <dt>Índex de perillositat</dt><dd><strong>${indexPerillositat.toFixed(0)} / 100</strong></dd>
-      <dt>Component vegetació</dt><dd>${riscVegetacio != null ? `${(riscVegetacio * 100).toFixed(0)} / 100` : 'No disponible (sense subparceles)'}</dd>
-      <dt>Component pendent</dt><dd>${(riscPendent * 100).toFixed(0)} / 100</dd>
-      <dt>Component orientació</dt><dd>${riscOrientacio != null ? `${(riscOrientacio * 100).toFixed(0)} / 100` : 'No disponible (cal el mètode de malla)'}</dd>
+      <dt>${t('Índex de perillositat')}</dt><dd><strong>${indexPerillositat.toFixed(0)} / 100</strong></dd>
+      <dt>${t('Component vegetació')}</dt><dd>${riscVegetacio != null ? `${(riscVegetacio * 100).toFixed(0)} / 100` : t('No disponible (sense subparceles)')}</dd>
+      <dt>${t('Component pendent')}</dt><dd>${(riscPendent * 100).toFixed(0)} / 100</dd>
+      <dt>${t('Component orientació')}</dt><dd>${riscOrientacio != null ? `${(riscOrientacio * 100).toFixed(0)} / 100` : t('No disponible (cal el mètode de malla)')}</dd>
     </dl>
     <p class="nota">
-      Model propi, no un estàndard oficial — pensat per ajustar-lo amb l'ús real.
-      És un índex per <strong>comparar parcel·les entre elles</strong> segons el
-      mateix criteri, no una probabilitat ni una freqüència d'incendis: un 62
-      no vol dir "62% de possibilitats de cremar-se", ni "es crema 6 anys de cada 10".
+      ${t('Model propi, no un estàndard oficial — pensat per ajustar-lo amb l\'ús real.')}
+      ${t('És un índex per')} <strong>${t('comparar parcel·les entre elles')}</strong> ${t('segons el mateix criteri, no una probabilitat ni una freqüència d\'incendis: un 62 no vol dir "62% de possibilitats de cremar-se", ni "es crema 6 anys de cada 10".')}
     </p>
   `;
 
@@ -122,42 +124,43 @@ function pintarFitxa(parcela) {
   // enllaç per calcular-les si encara no.
   const filaAltimetria = parcela.pendentMitja != null
     ? `
-      <dt>Pendent mitjà</dt>
+      <dt>${t('Pendent mitjà')}</dt>
       <dd>
         ${parcela.pendentMitja.toFixed(1)} %
-        (<a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular de nou</a>)
+        (<a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular de nou')}</a>)
       </dd>
     `
     : `
-      <dt>Pendent mitjà</dt>
-      <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular-ho</a></dd>
+      <dt>${t('Pendent mitjà')}</dt>
+      <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular-ho')}</a></dd>
     `;
 
   const filaOrientacio = parcela.orientacioMitjana != null
     ? `
-      <dt>Orientació mitjana</dt>
+      <dt>${t('Orientació mitjana')}</dt>
       <dd>
-        ${parcela.orientacioMitjana.toFixed(0)}° (${ServeiOrientacio.etiquetaBruixola(parcela.orientacioMitjana)})
-        (<a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular de nou</a>)
+        ${parcela.orientacioMitjana.toFixed(0)}° (${t(ServeiOrientacio.etiquetaBruixola(parcela.orientacioMitjana))})
+        (<a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular de nou')}</a>)
       </dd>
     `
     : `
-      <dt>Orientació mitjana</dt>
-      <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">Calcular-ho (mètode de malla)</a></dd>
+      <dt>${t('Orientació mitjana')}</dt>
+      <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular-ho (mètode de malla)')}</a></dd>
     `;
 
+  const localeData = idiomaActual() === 'ca' ? 'ca-ES' : 'es-ES';
   const filaData = parcela.dataCreacio != null
-    ? `<dt>Dades consultades el</dt><dd>${new Date(parcela.dataCreacio).toLocaleDateString('ca-ES')}</dd>`
+    ? `<dt>${t('Dades consultades el')}</dt><dd>${new Date(parcela.dataCreacio).toLocaleDateString(localeData)}</dd>`
     : '';
 
   contenidorDades.innerHTML = `
     <dl class="fitxa-parcela">
-      <dt>Població</dt><dd>${parcela.poblacio}</dd>
-      <dt>Polígon</dt><dd>${parcela.poligon}</dd>
-      <dt>Parcel·la</dt><dd>${parcela.parcelaCadastral}</dd>
-      <dt>Referència cadastral</dt><dd>${parcela.referenciaCadastral ?? '—'}</dd>
-      <dt>Superfície</dt><dd>${parcela.superficie ? `${parcela.superficie} m²` : '—'}</dd>
-      <dt>Ús (segons el Cadastre)</dt><dd>${parcela.us ?? 'No disponible'}</dd>
+      <dt>${t('Població')}</dt><dd>${parcela.poblacio}</dd>
+      <dt>${t('Polígon')}</dt><dd>${parcela.poligon}</dd>
+      <dt>${t('Parcel·la')}</dt><dd>${parcela.parcelaCadastral}</dd>
+      <dt>${t('Referència cadastral')}</dt><dd>${parcela.referenciaCadastral ?? '—'}</dd>
+      <dt>${t('Superfície')}</dt><dd>${parcela.superficie ? `${parcela.superficie} m²` : '—'}</dd>
+      <dt>${t('Ús (segons el Cadastre)')}</dt><dd>${parcela.us ?? t('No disponible')}</dd>
       ${filaAltimetria}
       ${filaOrientacio}
       ${filaData}
@@ -171,7 +174,7 @@ botoExportarGpx.addEventListener('click', () => {
 
 botoEsborrar.addEventListener('click', async () => {
   const confirmat = confirm(
-    `Segur que vols esborrar la parcel·la de ${parcelaActual.poblacio}? Aquesta acció no es pot desfer.`
+    `${t('Segur que vols esborrar la parcel·la de')} ${parcelaActual.poblacio}? ${t('Aquesta acció no es pot desfer.')}`
   );
   if (!confirmat) return;
 
@@ -182,5 +185,5 @@ botoEsborrar.addEventListener('click', async () => {
 
 iniciar().catch((error) => {
   console.error(error);
-  alert('No s\'ha pogut carregar el detall de la parcel·la.');
+  alert(t('No s\'ha pogut carregar el detall de la parcel·la.'));
 });

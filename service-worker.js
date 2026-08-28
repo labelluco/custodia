@@ -23,6 +23,8 @@ const FITXERS_PER_CACHE = [
   './js/serveis/risc.js',
   './js/serveis/vegetacio.js',
   './js/serveis/ubicacions.js',
+  './js/i18n.js',
+  './js/i18n/es.js',
   './js/geometria/malla.js',
   './js/geometria/gradient.js',
   './js/ui/mapa.js',

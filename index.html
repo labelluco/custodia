@@ -15,27 +15,28 @@
   <header class="capcalera">
     <h1>Custòdia</h1>
     <nav class="menu">
-      <a href="index.html" class="menu__enllac menu__enllac--actiu">Inici</a>
-      <a href="afegir.html" class="menu__enllac">Afegir parcel·la</a>
+      <a href="index.html" class="menu__enllac menu__enllac--actiu" data-i18n="Inici">Inici</a>
+      <a href="afegir.html" class="menu__enllac" data-i18n="Afegir parcel·la">Afegir parcel·la</a>
     </nav>
+    <span id="selector-idioma" class="selector-idioma"></span>
   </header>
 
   <main>
     <section id="mapa" class="mapa" aria-label="Mapa de parcel·les"></section>
 
     <section class="llistat">
-      <h2>Les meves parcel·les</h2>
+      <h2 data-i18n="Les meves parcel·les">Les meves parcel·les</h2>
       <p id="missatge-buit" hidden>
-        Encara no has afegit cap parcel·la.
-        <a href="afegir.html">Afegeix-ne una</a>.
+        <span data-i18n="Encara no has afegit cap parcel·la.">Encara no has afegit cap parcel·la.</span>
+        <a href="afegir.html" data-i18n="Afegeix-ne una">Afegeix-ne una</a>.
       </p>
       <table class="taula-parceles">
         <thead>
           <tr>
-            <th>Població</th>
-            <th>Polígon</th>
-            <th>Parcel·la</th>
-            <th>Ús</th>
+            <th data-i18n="Població">Població</th>
+            <th data-i18n="Polígon">Polígon</th>
+            <th data-i18n="Parcel·la">Parcel·la</th>
+            <th data-i18n="Ús">Ús</th>
           </tr>
         </thead>
         <tbody id="llistat-parceles"></tbody>

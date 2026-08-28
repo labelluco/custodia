@@ -297,3 +297,24 @@ fieldset:disabled {
   border-radius: 4px;
   color: #444;
 }
+
+/* --- Selector d'idioma (capçalera) --- */
+.selector-idioma {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.selector-idioma__opcio {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: white;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.selector-idioma__opcio--actiu {
+  background-color: white;
+  color: var(--color-primari);
+  font-weight: 600;
+}

@@ -10,6 +10,10 @@ import { Parcela } from './model/parcela.js';
 import { ServeiAltimetria } from './serveis/altimetria.js';
 import { ServeiOrientacio } from './serveis/orientacio.js';
 import { Malla } from './geometria/malla.js';
+import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
+
+aplicarTraduccions();
+inicialitzarSelectorIdioma('selector-idioma');
 
 // Límit de punts per consultar en una sola crida a l'API, per evitar
 // generar peticions desproporcionades si algú tria una distància molt
@@ -35,7 +39,7 @@ async function iniciar() {
 
   if (!id) {
     resum.hidden = false;
-    resum.textContent = 'No s\'ha indicat cap parcel·la.';
+    resum.textContent = t('No s\'ha indicat cap parcel·la.');
     return;
   }
 
@@ -44,13 +48,13 @@ async function iniciar() {
 
   if (!parcelaActual) {
     resum.hidden = false;
-    resum.textContent = 'No s\'ha trobat aquesta parcel·la.';
+    resum.textContent = t('No s\'ha trobat aquesta parcel·la.');
     return;
   }
 
   document.title = `Custòdia — Altitud (${parcelaActual.poblacio})`;
   document.getElementById('enllac-tornar').innerHTML =
-    `<a href="detall.html?id=${encodeURIComponent(id)}">&larr; Tornar al detall</a>`;
+    `<a href="detall.html?id=${encodeURIComponent(id)}">&larr; ${t('Tornar al detall')}</a>`;
 
   mostrarValorsDesats();
 }
@@ -69,7 +73,7 @@ function mostrarValorsDesats() {
   resum.hidden = false;
 
   if (!jaCalculat) {
-    resum.textContent = 'Encara no s\'ha calculat l\'altimetria d\'aquesta parcel·la.';
+    resum.textContent = t('Encara no s\'ha calculat l\'altimetria d\'aquesta parcel·la.');
     return;
   }
 
@@ -85,7 +89,7 @@ function mostrarValorsDesats() {
   });
   resum.insertAdjacentHTML(
     'afterbegin',
-    '<p class="nota">Valors ja desats d\'un càlcul anterior. Selecciona un mètode i prem "Calcular" per refer-los.</p>'
+    `<p class="nota">${t('Valors ja desats d\'un càlcul anterior. Selecciona un mètode i prem "Calcular" per refer-los.')}</p>`
   );
 }
 
@@ -107,22 +111,22 @@ botoCalcular.addEventListener('click', async () => {
   botoCalcular.disabled = true;
   seccioMapa.hidden = false;
   resum.hidden = false;
-  resum.textContent = 'Calculant...';
+  resum.textContent = t('Calculant...');
   botoDesar.hidden = true;
   instruccioMapa.hidden = true;
 
   try {
     if (metode === 'vertexs') {
       await calcularAmbVertexs();
-      instruccioMapa.textContent = 'Toca un vèrtex del perímetre per veure la seva altitud.';
+      instruccioMapa.textContent = t('Toca un vèrtex del perímetre per veure la seva altitud.');
     } else {
       await calcularAmbMalla();
-      instruccioMapa.textContent = 'Toca un punt de la malla per veure la seva altitud.';
+      instruccioMapa.textContent = t('Toca un punt de la malla per veure la seva altitud.');
     }
     instruccioMapa.hidden = false;
   } catch (error) {
     console.error(error);
-    resum.textContent = `No s'ha pogut calcular l'altimetria: ${error.message}`;
+    resum.textContent = `${t('No s\'ha pogut calcular l\'altimetria:')} ${error.message}`;
   } finally {
     botoCalcular.disabled = false;
   }
@@ -148,18 +152,20 @@ async function calcularAmbVertexs() {
 async function calcularAmbMalla() {
   const distanciaMetres = Number(campDistanciaMalla.value);
   if (!(distanciaMetres > 0)) {
-    throw new Error('La distància entre punts ha de ser un número positiu');
+    throw new Error(t('La distància entre punts ha de ser un número positiu'));
   }
 
   const malla = Malla.generar(parcelaActual.coordenades, distanciaMetres);
   const { coordenades, posicions } = Malla.puntsPerConsultar(malla);
 
   if (coordenades.length === 0) {
-    throw new Error('Cap punt de la malla cau dins del perímetre; prova amb una distància més petita');
+    throw new Error(t('Cap punt de la malla cau dins del perímetre; prova amb una distància més petita'));
   }
   if (coordenades.length > MAXIM_PUNTS_MALLA) {
     throw new Error(
-      `La malla generaria ${coordenades.length} punts (màxim ${MAXIM_PUNTS_MALLA}); tria una distància més gran`
+      `${t('La malla generaria {n} punts (màxim {max}); tria una distància més gran')
+        .replace('{n}', coordenades.length)
+        .replace('{max}', MAXIM_PUNTS_MALLA)}`
     );
   }
 
@@ -191,7 +197,7 @@ async function calcularAmbMalla() {
       coordenades: coord,
       altitud: altituds[i],
       orientacio,
-      etiqueta: orientacio == null ? null : ServeiOrientacio.etiquetaBruixola(orientacio),
+      etiqueta: orientacio == null ? null : t(ServeiOrientacio.etiquetaBruixola(orientacio)),
     };
   });
   mapa.afegirPuntsAmbOrientacio(puntsPerAlMapa);
@@ -216,23 +222,23 @@ async function calcularAmbMalla() {
 function pintarResum({ minima, maxima, desnivell, pendentMitja, orientacioMitjana }) {
   const filaOrientacio =
     orientacioMitjana !== undefined
-      ? `<dt>Orientació mitjana</dt><dd>${formatarOrientacio(orientacioMitjana)}</dd>`
+      ? `<dt>${t('Orientació mitjana')}</dt><dd>${formatarOrientacio(orientacioMitjana)}</dd>`
       : '';
 
   resum.innerHTML = `
     <dl class="fitxa-parcela">
-      <dt>Altitud mínima</dt><dd>${minima.toFixed(0)} m</dd>
-      <dt>Altitud màxima</dt><dd>${maxima.toFixed(0)} m</dd>
-      <dt>Desnivell</dt><dd>${desnivell.toFixed(0)} m</dd>
-      <dt>Pendent mitjà</dt><dd>${pendentMitja.toFixed(1)} %</dd>
+      <dt>${t('Altitud mínima')}</dt><dd>${minima.toFixed(0)} m</dd>
+      <dt>${t('Altitud màxima')}</dt><dd>${maxima.toFixed(0)} m</dd>
+      <dt>${t('Desnivell')}</dt><dd>${desnivell.toFixed(0)} m</dd>
+      <dt>${t('Pendent mitjà')}</dt><dd>${pendentMitja.toFixed(1)} %</dd>
       ${filaOrientacio}
     </dl>
   `;
 }
 
 function formatarOrientacio(graus) {
-  if (graus == null) return 'No calculada (terreny massa pla, o cal el mètode de malla)';
-  return `${graus.toFixed(0)}° (${ServeiOrientacio.etiquetaBruixola(graus)})`;
+  if (graus == null) return t('No calculada (terreny massa pla, o cal el mètode de malla)');
+  return `${graus.toFixed(0)}° (${t(ServeiOrientacio.etiquetaBruixola(graus))})`;
 }
 
 botoDesar.addEventListener('click', async () => {
@@ -256,12 +262,12 @@ botoDesar.addEventListener('click', async () => {
 
     await bd.afegirParcela(parcelaActualitzada);
 
-    missatgeEstat.textContent = 'Dades desades a la parcel·la.';
+    missatgeEstat.textContent = t('Dades desades a la parcel·la.');
     missatgeEstat.className = 'missatge-estat missatge-estat--exit';
     missatgeEstat.hidden = false;
   } catch (error) {
     console.error(error);
-    missatgeEstat.textContent = `No s'ha pogut desar: ${error.message}`;
+    missatgeEstat.textContent = `${t('No s\'ha pogut desar:')} ${error.message}`;
     missatgeEstat.className = 'missatge-estat missatge-estat--error';
     missatgeEstat.hidden = false;
   } finally {
@@ -272,5 +278,5 @@ botoDesar.addEventListener('click', async () => {
 iniciar().catch((error) => {
   console.error(error);
   resum.hidden = false;
-  resum.textContent = 'No s\'ha pogut carregar la parcel·la.';
+  resum.textContent = t('No s\'ha pogut carregar la parcel·la.');
 });
