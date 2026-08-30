@@ -3,9 +3,11 @@ import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { ServeiRisc } from './serveis/risc.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
+import { inicialitzarMenu } from './ui/menu.js';
 
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
+inicialitzarMenu();
 
 async function iniciar() {
   const bd = await BaseDades.obrir();
@@ -24,22 +26,36 @@ async function iniciar() {
   contenidorLlistat.innerHTML = '';
 
   for (const parcela of parceles) {
-    const color = await colorDeLaParcela(bd, parcela);
+    const { color, index } = await riscDeLaParcela(bd, parcela);
 
     mapa.afegirParcela(parcela, (p) => obrirDetall(p.id), color);
 
     const fila = document.createElement('tr');
     fila.className = 'fila-parcela';
-    fila.style.borderLeftColor = color;
     fila.dataset.id = parcela.id;
     fila.innerHTML = `
       <td>${parcela.poblacio}</td>
       <td>${parcela.poligon}</td>
       <td>${parcela.parcelaCadastral}</td>
       <td class="us">${parcela.us ?? '—'}</td>
+      <td>${parcela.superficie ? `${parcela.superficie} m²` : '—'}</td>
+      <td>
+        ${
+          index != null
+            ? `
+              <span class="taula-parceles__risc">
+                <span class="taula-parceles__punt-risc" style="background-color: ${color};"></span>
+                ${index.toFixed(0)} / 100
+              </span>
+            `
+            : '—'
+        }
+      </td>
+      <td><a href="detall.html?id=${encodeURIComponent(parcela.id)}" class="boto-taula">${t('Detall')}</a></td>
     `;
-    // Tocar el llistat ressalta la parcel·la al mapa (no obre el detall);
-    // per al detall, cal tocar la parcel·la pintada al mapa.
+    // Tocar la fila la ressalta al mapa (per relacionar visualment
+    // llistat i mapa); el botó "Detall" -- amb el seu propi clic, que
+    // no interfereix amb el de la fila -- porta a la fitxa completa.
     fila.addEventListener('click', () => {
       mapa.ressaltarParcela(parcela.id);
 
@@ -47,6 +63,7 @@ async function iniciar() {
       anteriorSeleccionada?.classList.remove('fila-parcela--seleccionada');
       fila.classList.add('fila-parcela--seleccionada');
     });
+    fila.querySelector('.boto-taula').addEventListener('click', (event) => event.stopPropagation());
     contenidorLlistat.appendChild(fila);
   }
 
@@ -54,12 +71,12 @@ async function iniciar() {
 }
 
 /**
- * Neutre si encara no es pot calcular (falta el pendent mitjà), o el
- * color segons el percentatge de risc si ja es pot.
+ * Neutre (sense índex) si encara no es pot calcular (falta el pendent
+ * mitjà), o el color i l'índex reals si ja es pot.
  */
-async function colorDeLaParcela(bd, parcela) {
+async function riscDeLaParcela(bd, parcela) {
   if (parcela.pendentMitja == null) {
-    return ServeiRisc.COLOR_NEUTRE;
+    return { color: ServeiRisc.COLOR_NEUTRE, index: null };
   }
 
   const subparceles = await bd.llegirSubparcelesDe(parcela.id);
@@ -68,7 +85,7 @@ async function colorDeLaParcela(bd, parcela) {
     orientacioMitjana: parcela.orientacioMitjana,
     subparceles,
   });
-  return ServeiRisc.colorSegonsRisc(indexPerillositat);
+  return { color: ServeiRisc.colorSegonsRisc(indexPerillositat), index: indexPerillositat };
 }
 
 function obrirDetall(id) {

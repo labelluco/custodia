@@ -1,7 +1,7 @@
 // Service worker bàsic: cache dels fitxers estàtics per a ús offline.
 // Actualitzar la llista si s'afegeixen pantalles noves.
 
-const NOM_CACHE = 'custodia-v1';
+const NOM_CACHE = 'custodia-v8';
 
 const FITXERS_PER_CACHE = [
   './',
@@ -10,6 +10,7 @@ const FITXERS_PER_CACHE = [
   './detall.html',
   './altitud.html',
   './css/estils.css',
+  './js/registrar-sw.js',
   './js/inici.js',
   './js/afegir.js',
   './js/detall.js',
@@ -28,7 +29,12 @@ const FITXERS_PER_CACHE = [
   './js/geometria/malla.js',
   './js/geometria/gradient.js',
   './js/ui/mapa.js',
+  './js/ui/ajuda.js',
+  './js/ui/menu.js',
   './manifest.json',
+  './icones/icona.svg',
+  './icones/icona-192.png',
+  './icones/icona-512.png',
 ];
 
 self.addEventListener('install', (event) => {

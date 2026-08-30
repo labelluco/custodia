@@ -4,10 +4,14 @@ import { Mapa } from './ui/mapa.js';
 import { ExportadorGpx } from './serveis/exportadorGpx.js';
 import { ServeiOrientacio } from './serveis/orientacio.js';
 import { ServeiRisc } from './serveis/risc.js';
+import { inicialitzarAjudes, iconaAjuda } from './ui/ajuda.js';
 import { t, idiomaActual, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
+import { inicialitzarMenu } from './ui/menu.js';
 
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
+inicialitzarMenu();
+inicialitzarAjudes();
 
 const contenidorDades = document.getElementById('contingut-dades-parcela');
 const seccioSubparceles = document.getElementById('seccio-subparceles');
@@ -58,19 +62,77 @@ function pintarSubparceles(subparceles) {
   if (subparceles.length === 0) return;
 
   llistatSubparceles.innerHTML = subparceles
-    .map(
-      (s) => `
+    .map((s) => {
+      const risc = ServeiRisc.classificarSubparcela(s.dcc) * 100;
+      const color = ServeiRisc.colorSegonsRisc(risc);
+      return `
         <tr>
           <td>${s.dcc ?? '—'}</td>
           <td>${s.ssp ? `${s.ssp} m²` : '—'}</td>
-          <td>${(ServeiRisc.classificarSubparcela(s.dcc) * 100).toFixed(0)} / 100</td>
+          <td>
+            <span class="taula-parceles__risc">
+              <span class="taula-parceles__punt-risc" style="background-color: ${color};"></span>
+              ${risc.toFixed(0)} / 100
+            </span>
+          </td>
           <td>${s.ip ?? '—'}</td>
           <td>${s.ccc ?? '—'}</td>
         </tr>
-      `
-    )
+      `;
+    })
     .join('');
   seccioSubparceles.hidden = false;
+}
+
+/**
+ * Anell de progrés en SVG (cercle amb stroke-dasharray/dashoffset),
+ * acolorit amb el mateix gradient verd-roig que ja fem servir per a les
+ * parcel·les al mapa -- el "senyal" visual de l'índex de perillositat.
+ */
+function crearAnellSvg(index, color) {
+  const radi = 52;
+  const circumferencia = 2 * Math.PI * radi;
+  const p = Math.min(Math.max(index, 0), 100);
+  const offset = circumferencia * (1 - p / 100);
+
+  return `
+    <svg viewBox="0 0 120 120" role="img" aria-label="${t('Índex de perillositat')}: ${index.toFixed(0)}">
+      <circle cx="60" cy="60" r="${radi}" fill="none" stroke="#e2ddd2" stroke-width="12"></circle>
+      <circle cx="60" cy="60" r="${radi}" fill="none" stroke="${color}" stroke-width="12"
+        stroke-linecap="round" stroke-dasharray="${circumferencia}" stroke-dashoffset="${offset}"
+        transform="rotate(-90 60 60)"></circle>
+    </svg>
+  `;
+}
+
+/** Una fila d'un component del risc (etiqueta + barra acolorida segons el seu propi valor, o "no disponible"). */
+function filaComponent(etiqueta, valor01, textNoDisponible) {
+  if (valor01 == null) {
+    return `
+      <div class="risc-component">
+        <div class="risc-component__capcalera">
+          <span>${etiqueta}</span>
+          <span>${textNoDisponible}</span>
+        </div>
+        <div class="risc-component__barra"></div>
+      </div>
+    `;
+  }
+
+  const percentatge = valor01 * 100;
+  const color = ServeiRisc.colorSegonsRisc(percentatge);
+
+  return `
+    <div class="risc-component">
+      <div class="risc-component__capcalera">
+        <span>${etiqueta}</span>
+        <span>${percentatge.toFixed(0)} / 100</span>
+      </div>
+      <div class="risc-component__barra">
+        <div class="risc-component__valor" style="width: ${percentatge}%; background-color: ${color};"></div>
+      </div>
+    </div>
+  `;
 }
 
 /**
@@ -85,7 +147,14 @@ function pintarSubparceles(subparceles) {
 function pintarRisc(subparceles) {
   seccioRiscCalculat.hidden = false;
 
+  const textAjudaRisc = t(
+    'Índex propi (0-100) que combina vegetació, pendent i orientació per comparar parcel·les entre elles. No representa una probabilitat ni una freqüència real d\'incendis.'
+  );
+  const titolAmbAjuda = `${t('Risc d\'incendi calculat')}${iconaAjuda(textAjudaRisc)}`;
+  seccioRiscCalculat.querySelector('h2').innerHTML = titolAmbAjuda;
+
   if (parcelaActual.pendentMitja == null) {
+    seccioRiscCalculat.style.borderTopColor = '';
     contingutRiscCalculat.innerHTML = `
       <p>
         ${t('Cal calcular primer el pendent mitjà')}
@@ -102,70 +171,133 @@ function pintarRisc(subparceles) {
       subparceles,
     });
 
+  const colorTotal = ServeiRisc.colorSegonsRisc(indexPerillositat);
+  seccioRiscCalculat.style.borderTopColor = colorTotal;
+
   contingutRiscCalculat.innerHTML = `
-    <dl class="fitxa-parcela">
-      <dt>${t('Índex de perillositat')}</dt><dd><strong>${indexPerillositat.toFixed(0)} / 100</strong></dd>
-      <dt>${t('Component vegetació')}</dt><dd>${riscVegetacio != null ? `${(riscVegetacio * 100).toFixed(0)} / 100` : t('No disponible (sense subparceles)')}</dd>
-      <dt>${t('Component pendent')}</dt><dd>${(riscPendent * 100).toFixed(0)} / 100</dd>
-      <dt>${t('Component orientació')}</dt><dd>${riscOrientacio != null ? `${(riscOrientacio * 100).toFixed(0)} / 100` : t('No disponible (cal el mètode de malla)')}</dd>
-    </dl>
-    <p class="nota">
-      ${t('Model propi, no un estàndard oficial — pensat per ajustar-lo amb l\'ús real.')}
-      ${t('És un índex per')} <strong>${t('comparar parcel·les entre elles')}</strong> ${t('segons el mateix criteri, no una probabilitat ni una freqüència d\'incendis: un 62 no vol dir "62% de possibilitats de cremar-se", ni "es crema 6 anys de cada 10".')}
-    </p>
+    <div class="risc-panell">
+      <div class="risc-gauge">
+        ${crearAnellSvg(indexPerillositat, colorTotal)}
+        <div class="risc-gauge__valor">
+          <span class="risc-gauge__numero">${indexPerillositat.toFixed(0)}</span>
+          <span class="risc-gauge__escala">/ 100</span>
+        </div>
+      </div>
+      <div class="risc-components">
+        ${filaComponent(t('Component vegetació'), riscVegetacio, t('No disponible (sense subparceles)'))}
+        ${filaComponent(t('Component pendent'), riscPendent, '')}
+        ${filaComponent(t('Component orientació'), riscOrientacio, t('No disponible (cal el mètode de malla)'))}
+      </div>
+    </div>
   `;
 
-  return ServeiRisc.colorSegonsRisc(indexPerillositat);
+  return colorTotal;
 }
 
 function pintarFitxa(parcela) {
   // Les dades d'altimetria es calculen a part (pàgina altitud.html) i es
   // desen a la parcel·la; aquí només es mostren si ja hi són, o un
   // enllaç per calcular-les si encara no.
+  const ajudaPendent = iconaAjuda(
+    t('Inclinació mitjana del terreny, calculada a partir del model digital d\'elevacions de l\'IDEE (vèrtexs del perímetre o una malla de punts interiors).')
+  );
   const filaAltimetria = parcela.pendentMitja != null
     ? `
-      <dt>${t('Pendent mitjà')}</dt>
+      <dt>${t('Pendent mitjà')}${ajudaPendent}</dt>
       <dd>
         ${parcela.pendentMitja.toFixed(1)} %
         (<a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular de nou')}</a>)
       </dd>
     `
     : `
-      <dt>${t('Pendent mitjà')}</dt>
+      <dt>${t('Pendent mitjà')}${ajudaPendent}</dt>
       <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular-ho')}</a></dd>
     `;
 
+  const ajudaOrientacio = iconaAjuda(
+    t('Direcció cap on "mira" el pendent del terreny. Només es calcula amb el mètode de malla, no amb els vèrtexs del perímetre.')
+  );
   const filaOrientacio = parcela.orientacioMitjana != null
     ? `
-      <dt>${t('Orientació mitjana')}</dt>
+      <dt>${t('Orientació mitjana')}${ajudaOrientacio}</dt>
       <dd>
         ${parcela.orientacioMitjana.toFixed(0)}° (${t(ServeiOrientacio.etiquetaBruixola(parcela.orientacioMitjana))})
         (<a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular de nou')}</a>)
       </dd>
     `
     : `
-      <dt>${t('Orientació mitjana')}</dt>
+      <dt>${t('Orientació mitjana')}${ajudaOrientacio}</dt>
       <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular-ho (mètode de malla)')}</a></dd>
     `;
 
   const localeData = idiomaActual() === 'ca' ? 'ca-ES' : 'es-ES';
-  const filaData = parcela.dataCreacio != null
-    ? `<dt>${t('Dades consultades el')}</dt><dd>${new Date(parcela.dataCreacio).toLocaleDateString(localeData)}</dd>`
+  const ajudaData = iconaAjuda(
+    t('Dades desades a la base de dades local en el moment de crear la parcel·la. Per tornar a consultar-les, cal esborrar la parcel·la i afegir-la de nou.')
+  );
+  const notaData = parcela.dataCreacio != null
+    ? `<p class="nota">${t('Dades consultades el')}${ajudaData}: ${new Date(parcela.dataCreacio).toLocaleDateString(localeData)}</p>`
     : '';
 
   contenidorDades.innerHTML = `
+    <h3>${t('Identificació')}</h3>
     <dl class="fitxa-parcela">
       <dt>${t('Població')}</dt><dd>${parcela.poblacio}</dd>
       <dt>${t('Polígon')}</dt><dd>${parcela.poligon}</dd>
       <dt>${t('Parcel·la')}</dt><dd>${parcela.parcelaCadastral}</dd>
-      <dt>${t('Referència cadastral')}</dt><dd>${parcela.referenciaCadastral ?? '—'}</dd>
+      <dt>${t('Referència cadastral')}</dt><dd>${referenciaAmbEnllac(parcela)}</dd>
       <dt>${t('Superfície')}</dt><dd>${parcela.superficie ? `${parcela.superficie} m²` : '—'}</dd>
       <dt>${t('Ús (segons el Cadastre)')}</dt><dd>${parcela.us ?? t('No disponible')}</dd>
+    </dl>
+
+    <h3>${t('Terreny')}</h3>
+    <dl class="fitxa-parcela">
       ${filaAltimetria}
       ${filaOrientacio}
-      ${filaData}
     </dl>
+
+    ${notaData}
   `;
+}
+
+/**
+ * Enllaç directe a la cartografia del Cadastre, amb polígon i parcel·la
+ * ja inclosos -- construït a partir d'un exemple real (l'usuari va
+ * navegar al cadastre i em va passar la URL resultant), no d'una
+ * documentació oficial de l'API. Només es mostra si la parcel·la té
+ * els codis numèrics de província/municipi (calen per a la URL): les
+ * creades abans d'aquest camp no els tindran, i es mostra només el
+ * text de la referència, sense enllaç.
+ */
+function referenciaAmbEnllac(parcela) {
+  if (parcela.referenciaCadastral == null) return '—';
+  if (!parcela.codiProvincia || !parcela.codiMunicipi) return parcela.referenciaCadastral;
+
+  const parametres = new URLSearchParams({
+    pol: parcela.poligon,
+    par: parcela.parcelaCadastral,
+    MuniAgr: '',
+    ZCon: '',
+    DescProv: (parcela.provincia ?? '').toUpperCase(),
+    prov: parcela.codiProvincia,
+    muni: parcela.codiMunicipi,
+    DescMuni: parcela.poblacio.toUpperCase(),
+    TipUR: 'R',
+    pest: 'rustica',
+    from: 'OVCBusqueda',
+    ZV: 'NO',
+    ZR: 'NO',
+    anyoZV: '',
+    tematicos: '',
+    anyotem: '',
+    historica: '',
+    coordinadas: '',
+    antecedentes: '',
+    cartografia: 'True',
+    ListaBienes: 'TRUE',
+  });
+  const url = `https://www1.sedecatastro.gob.es/Cartografia/mapa.aspx?${parametres.toString()}`;
+
+  return `${parcela.referenciaCadastral} (<a href="${url}" target="_blank" rel="noopener">${t('veure al Cadastre')}</a>)`;
 }
 
 botoExportarGpx.addEventListener('click', () => {

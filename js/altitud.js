@@ -10,23 +10,53 @@ import { Parcela } from './model/parcela.js';
 import { ServeiAltimetria } from './serveis/altimetria.js';
 import { ServeiOrientacio } from './serveis/orientacio.js';
 import { Malla } from './geometria/malla.js';
+import { inicialitzarAjudes, iconaAjuda } from './ui/ajuda.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
+import { inicialitzarMenu } from './ui/menu.js';
 
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
+inicialitzarMenu();
+inicialitzarAjudes();
 
 // Límit de punts per consultar en una sola crida a l'API, per evitar
 // generar peticions desproporcionades si algú tria una distància molt
 // petita en una parcel·la gran.
 const MAXIM_PUNTS_MALLA = 400;
 
-const seccioMapa = document.getElementById('mapa-altitud');
 const instruccioMapa = document.getElementById('instruccio-mapa');
 const resum = document.getElementById('resum-altimetria');
+const contingutResum = document.getElementById('contingut-resum-altimetria');
 const botoCalcular = document.getElementById('boto-calcular');
 const botoDesar = document.getElementById('boto-desar-altimetria');
 const missatgeEstat = document.getElementById('missatge-estat');
 const campDistanciaMalla = document.getElementById('distancia-malla');
+
+// Colors clars per al fons del resum -- verd per a missatges d'ajuda o
+// d'estat (encara calculant, res calculat encara), roig per a errors.
+// Els resultats calculats no porten color, es queden amb el blanc
+// normal de la targeta (no és "un missatge", és la dada en si).
+//
+// Es reforça amb una vora lateral de color, més fàcil de notar que
+// només un lleuger canvi de fons sobre una targeta que ja té vora i
+// ombra pròpies.
+const COLOR_FONS_INFO = '#e8f5e9';
+const COLOR_VORA_INFO = '#66bb6a';
+const COLOR_FONS_ERROR = '#ffebee';
+const COLOR_VORA_ERROR = '#e57373';
+
+function aplicarEstatMissatge(element, tipus) {
+  element.style.backgroundColor = tipus === 'info' ? COLOR_FONS_INFO : tipus === 'error' ? COLOR_FONS_ERROR : '';
+  element.style.borderLeft = tipus === 'info'
+    ? `5px solid ${COLOR_VORA_INFO}`
+    : tipus === 'error'
+      ? `5px solid ${COLOR_VORA_ERROR}`
+      : '';
+}
+
+function establirEstatResum(tipus) {
+  aplicarEstatMissatge(resum, tipus);
+}
 
 let bd;
 let parcelaActual;
@@ -39,7 +69,8 @@ async function iniciar() {
 
   if (!id) {
     resum.hidden = false;
-    resum.textContent = t('No s\'ha indicat cap parcel·la.');
+    establirEstatResum('error');
+    contingutResum.textContent = t('No s\'ha indicat cap parcel·la.');
     return;
   }
 
@@ -48,13 +79,20 @@ async function iniciar() {
 
   if (!parcelaActual) {
     resum.hidden = false;
-    resum.textContent = t('No s\'ha trobat aquesta parcel·la.');
+    establirEstatResum('error');
+    contingutResum.textContent = t('No s\'ha trobat aquesta parcel·la.');
     return;
   }
 
   document.title = `Custòdia — Altitud (${parcelaActual.poblacio})`;
   document.getElementById('enllac-tornar').innerHTML =
-    `<a href="detall.html?id=${encodeURIComponent(id)}">&larr; ${t('Tornar al detall')}</a>`;
+    `<a href="detall.html?id=${encodeURIComponent(id)}" class="enllac-tornar">&larr; ${t('Tornar al detall')}</a>`;
+
+  // El mapa amb el perímetre es mostra de seguida, com a la resta de
+  // pàgines, sense esperar cap càlcul.
+  const mapa = crearMapa();
+  mapa.afegirParcela(parcelaActual);
+  mapa.ajustarVistaATotes();
 
   mostrarValorsDesats();
 }
@@ -73,7 +111,8 @@ function mostrarValorsDesats() {
   resum.hidden = false;
 
   if (!jaCalculat) {
-    resum.textContent = t('Encara no s\'ha calculat l\'altimetria d\'aquesta parcel·la.');
+    establirEstatResum('info');
+    contingutResum.textContent = t('Encara no s\'ha calculat l\'altimetria d\'aquesta parcel·la.');
     return;
   }
 
@@ -87,7 +126,7 @@ function mostrarValorsDesats() {
     // lloc d'amagar la fila.
     orientacioMitjana: parcelaActual.orientacioMitjana ?? null,
   });
-  resum.insertAdjacentHTML(
+  contingutResum.insertAdjacentHTML(
     'afterbegin',
     `<p class="nota">${t('Valors ja desats d\'un càlcul anterior. Selecciona un mètode i prem "Calcular" per refer-los.')}</p>`
   );
@@ -109,9 +148,9 @@ botoCalcular.addEventListener('click', async () => {
   const metode = document.querySelector('input[name="metode"]:checked').value;
 
   botoCalcular.disabled = true;
-  seccioMapa.hidden = false;
   resum.hidden = false;
-  resum.textContent = t('Calculant...');
+  establirEstatResum('info');
+  contingutResum.textContent = t('Calculant...');
   botoDesar.hidden = true;
   instruccioMapa.hidden = true;
 
@@ -121,12 +160,14 @@ botoCalcular.addEventListener('click', async () => {
       instruccioMapa.textContent = t('Toca un vèrtex del perímetre per veure la seva altitud.');
     } else {
       await calcularAmbMalla();
-      instruccioMapa.textContent = t('Toca un punt de la malla per veure la seva altitud.');
+      instruccioMapa.textContent = t('Toca un punt de la malla per veure la seva altitud i orientació.');
     }
+    aplicarEstatMissatge(instruccioMapa, 'info');
     instruccioMapa.hidden = false;
   } catch (error) {
     console.error(error);
-    resum.textContent = `${t('No s\'ha pogut calcular l\'altimetria:')} ${error.message}`;
+    establirEstatResum('error');
+    contingutResum.textContent = `${t('No s\'ha pogut calcular l\'altimetria:')} ${error.message}`;
   } finally {
     botoCalcular.disabled = false;
   }
@@ -220,17 +261,25 @@ async function calcularAmbMalla() {
 }
 
 function pintarResum({ minima, maxima, desnivell, pendentMitja, orientacioMitjana }) {
+  const ajudaPendent = iconaAjuda(
+    t('Inclinació mitjana del terreny, calculada a partir del model digital d\'elevacions de l\'IDEE (vèrtexs del perímetre o una malla de punts interiors).')
+  );
+  const ajudaOrientacio = iconaAjuda(
+    t('Direcció cap on "mira" el pendent del terreny. Només es calcula amb el mètode de malla, no amb els vèrtexs del perímetre.')
+  );
+
   const filaOrientacio =
     orientacioMitjana !== undefined
-      ? `<dt>${t('Orientació mitjana')}</dt><dd>${formatarOrientacio(orientacioMitjana)}</dd>`
+      ? `<dt>${t('Orientació mitjana')}${ajudaOrientacio}</dt><dd>${formatarOrientacio(orientacioMitjana)}</dd>`
       : '';
 
-  resum.innerHTML = `
+  establirEstatResum(null);
+  contingutResum.innerHTML = `
     <dl class="fitxa-parcela">
       <dt>${t('Altitud mínima')}</dt><dd>${minima.toFixed(0)} m</dd>
       <dt>${t('Altitud màxima')}</dt><dd>${maxima.toFixed(0)} m</dd>
       <dt>${t('Desnivell')}</dt><dd>${desnivell.toFixed(0)} m</dd>
-      <dt>${t('Pendent mitjà')}</dt><dd>${pendentMitja.toFixed(1)} %</dd>
+      <dt>${t('Pendent mitjà')}${ajudaPendent}</dt><dd>${pendentMitja.toFixed(1)} %</dd>
       ${filaOrientacio}
     </dl>
   `;
@@ -278,5 +327,6 @@ botoDesar.addEventListener('click', async () => {
 iniciar().catch((error) => {
   console.error(error);
   resum.hidden = false;
-  resum.textContent = t('No s\'ha pogut carregar la parcel·la.');
+  establirEstatResum('error');
+  contingutResum.textContent = t('No s\'ha pogut carregar la parcel·la.');
 });

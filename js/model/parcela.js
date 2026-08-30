@@ -22,6 +22,13 @@ export class Parcela {
     referenciaCadastral = null,
     superficie = null,
     us = null,
+    // Província i codis numèrics de província/municipi: opcionals (les
+    // parcel·les creades abans d'aquest camp no els tindran), es fan
+    // servir només per construir l'enllaç directe a la cartografia del
+    // Cadastre a la pàgina de detall.
+    provincia = null,
+    codiProvincia = null,
+    codiMunicipi = null,
     // Dades d'altimetria: opcionals, es calculen a banda (pàgina
     // d'altitud) i es desen a la parcel·la un cop calculades. Les
     // parcel·les creades abans d'aquesta funcionalitat simplement no
@@ -54,6 +61,9 @@ export class Parcela {
     this.referenciaCadastral = referenciaCadastral;
     this.superficie = superficie;
     this.us = us;
+    this.provincia = provincia;
+    this.codiProvincia = codiProvincia;
+    this.codiMunicipi = codiMunicipi;
     this.altitudMaxima = altitudMaxima;
     this.altitudMinima = altitudMinima;
     this.desnivell = desnivell;
@@ -77,6 +87,9 @@ export class Parcela {
       referenciaCadastral: this.referenciaCadastral,
       superficie: this.superficie,
       us: this.us,
+      provincia: this.provincia,
+      codiProvincia: this.codiProvincia,
+      codiMunicipi: this.codiMunicipi,
       altitudMaxima: this.altitudMaxima,
       altitudMinima: this.altitudMinima,
       desnivell: this.desnivell,

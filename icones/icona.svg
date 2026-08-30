@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fons: verd de pi/alzina, cantonades arrodonides -->
+  <rect width="512" height="512" rx="96" fill="#396a49"/>
+
+  <!-- Pi estilitzat: silueta sòlida i geomètrica, sense contorns fins,
+       perquè es llegeixi bé fins i tot molt petit (favicon) -->
+  <g fill="#f3f1ea">
+    <path d="M 256 88 L 340 220 L 296 220 L 368 320 L 312 320 L 388 420 L 124 420 L 200 320 L 144 320 L 216 220 L 172 220 Z"/>
+  </g>
+  <rect x="234" y="420" width="44" height="52" rx="6" fill="#f3f1ea"/>
+</svg>

@@ -17,6 +17,7 @@ export const ES = {
   'Polígon': 'Polígono',
   'Parcel·la': 'Parcela',
   'Ús': 'Uso',
+  'Risc': 'Riesgo',
   'No s\'han pogut carregar les parcel·les. Revisa la consola per a més detalls.':
     'No se han podido cargar las parcelas. Revisa la consola para más detalles.',
 
@@ -48,7 +49,7 @@ export const ES = {
   // Pàgina de detall (detall.html / detall.js)
   'No s\'ha indicat cap parcel·la.': 'No se ha indicado ninguna parcela.',
   'No s\'ha trobat aquesta parcel·la.': 'No se ha encontrado esta parcela.',
-  'Risc d\'incendi calculat (experimental)': 'Riesgo de incendio calculado (experimental)',
+  'Risc d\'incendi calculat': 'Riesgo de incendio calculado',
   'Dades de la parcel·la': 'Datos de la parcela',
   'Subparceles (Cadastre)': 'Subparcelas (Catastro)',
   'Descripció': 'Descripción',
@@ -85,6 +86,7 @@ export const ES = {
 
   // Pàgina d'altitud (altitud.html / altitud.js)
   'Altitud i pendent': 'Altitud y pendiente',
+  'Calculant...': 'Calculando...',
   'Mètode de càlcul': 'Método de cálculo',
   'Vèrtexs del perímetre': 'Vértices del perímetro',
   'Malla de punts': 'Malla de puntos',
@@ -99,8 +101,8 @@ export const ES = {
     'Valores ya guardados de un cálculo anterior. Selecciona un método y pulsa "Calcular" para rehacerlos.',
   'Toca un vèrtex del perímetre per veure la seva altitud.':
     'Toca un vértice del perímetro para ver su altitud.',
-  'Toca un punt de la malla per veure la seva altitud.':
-    'Toca un punto de la malla para ver su altitud.',
+  'Toca un punt de la malla per veure la seva altitud i orientació.':
+    'Toca un punto de la malla para ver su altitud y orientación.',
   'No s\'ha pogut calcular l\'altimetria:': 'No se ha podido calcular la altimetría:',
   'La distància entre punts ha de ser un número positiu': 'La distancia entre puntos debe ser un número positivo',
   'Cap punt de la malla cau dins del perímetre; prova amb una distància més petita':
@@ -129,4 +131,26 @@ export const ES = {
   'Sud-oest': 'Suroeste',
   'Oest': 'Oeste',
   'Nord-oest': 'Noroeste',
+
+  // Textos de les icones d'ajuda (afegides en aquesta ronda)
+  'Índex propi (0-100) que combina vegetació, pendent i orientació per comparar parcel·les entre elles. No representa una probabilitat ni una freqüència real d\'incendis.':
+    'Índice propio (0-100) que combina vegetación, pendiente y orientación para comparar parcelas entre sí. No representa una probabilidad ni una frecuencia real de incendios.',
+  'Inclinació mitjana del terreny, calculada a partir del model digital d\'elevacions de l\'IDEE (vèrtexs del perímetre o una malla de punts interiors).':
+    'Inclinación media del terreno, calculada a partir del modelo digital de elevaciones del IDEE (vértices del perímetro o una malla de puntos interiores).',
+  'Direcció cap on "mira" el pendent del terreny. Només es calcula amb el mètode de malla, no amb els vèrtexs del perímetre.':
+    'Dirección hacia donde "mira" la pendiente del terreno. Solo se calcula con el método de malla, no con los vértices del perímetro.',
+  'Dades desades a la base de dades local en el moment de crear la parcel·la. Per tornar a consultar-les, cal esborrar la parcel·la i afegir-la de nou.':
+    'Datos guardados en la base de datos local en el momento de crear la parcela. Para volver a consultarlos, hay que borrar la parcela y añadirla de nuevo.',
+
+  // Ronda de retocs d'usabilitat
+  'Identificació': 'Identificación',
+  'Terreny': 'Terreno',
+  'veure al Cadastre': 'ver en el Catastro',
+  'Detall': 'Detalle',
+  'Toca una parcel·la en el llistat per veure\'n el perímetre al mapa. Per veure el detall, fes clic en el perímetre o en el botó «Detall».':
+    'Toca una parcela en el listado para ver su perímetro en el mapa. Para ver el detalle, haz clic en el perímetro o en el botón «Detalle».',
+  'Resultats': 'Resultados',
+  'Programari lliure': 'Software libre',
+  'Codi font': 'Código fuente',
+  'Contacte': 'Contacto',
 };

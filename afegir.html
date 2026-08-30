@@ -5,29 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Custòdia — Afegir parcel·la</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2e7d32">
+  <link rel="icon" type="image/svg+xml" href="icones/icona.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icones/icona-192.png">
+  <link rel="apple-touch-icon" href="icones/icona-192.png">
+  <meta name="theme-color" content="#396a49">
   <link rel="stylesheet" href="css/estils.css">
 </head>
 <body>
   <header class="capcalera">
     <h1>Custòdia</h1>
-    <nav class="menu">
+    <nav class="menu" id="menu-principal">
       <a href="index.html" class="menu__enllac" data-i18n="Inici">Inici</a>
       <a href="afegir.html" class="menu__enllac menu__enllac--actiu" data-i18n="Afegir parcel·la">Afegir parcel·la</a>
     </nav>
-    <span id="selector-idioma" class="selector-idioma"></span>
+    <div class="capcalera__dreta">
+      <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+      <span id="selector-idioma" class="selector-idioma"></span>
+    </div>
   </header>
 
   <main>
-    <section class="formulari-parcela">
+    <section class="formulari-parcela fitxa-parcela-contenidor">
       <h2 data-i18n="Afegir una nova parcel·la">Afegir una nova parcel·la</h2>
 
       <form id="form-parcela">
-        <fieldset id="dades-cadastre">
+        <fieldset id="dades-cadastre" class="formulari-graella">
           <div class="camp">
             <label for="provincia" data-i18n="Provincia">Provincia</label>
             <select id="provincia" name="provincia" required>
               <option value="" data-i18n="Carregant...">Carregant...</option>
+            </select>
+          </div>
+
+          <div class="camp">
+            <label for="poblacio" data-i18n="Població">Població</label>
+            <select id="poblacio" name="poblacio" required disabled>
+              <option value="" data-i18n="Tria primer una província">Tria primer una província</option>
             </select>
           </div>
 
@@ -39,13 +54,6 @@
           <div class="camp">
             <label for="parcela" data-i18n="Parcel·la">Parcel·la</label>
             <input type="text" id="parcela" name="parcela" required>
-          </div>
-
-          <div class="camp">
-            <label for="poblacio" data-i18n="Població">Població</label>
-            <select id="poblacio" name="poblacio" required disabled>
-              <option value="" data-i18n="Tria primer una província">Tria primer una província</option>
-            </select>
           </div>
 
           <button type="button" id="boto-consultar" data-i18n="Consultar cadastre">Consultar cadastre</button>
@@ -61,14 +69,34 @@
 
           <div class="camp" id="camp-desglossament" hidden>
             <span class="etiqueta-camp" data-i18n="Desglossament de subparceles">Desglossament de subparceles</span>
-            <p id="valor-desglossament" class="valor-nomes-lectura"></p>
+            <div class="taula-parceles-contenidor">
+              <table class="taula-parceles">
+                <thead>
+                  <tr>
+                    <th data-i18n="Descripció">Descripció</th>
+                    <th data-i18n="Superfície">Superfície</th>
+                    <th data-i18n="Índex prod.">Índex prod.</th>
+                    <th data-i18n="Codi">Codi</th>
+                  </tr>
+                </thead>
+                <tbody id="llistat-desglossament"></tbody>
+              </table>
+            </div>
           </div>
 
-          <button type="submit" id="boto-desar" data-i18n="Desar parcel·la">Desar parcel·la</button>
+          <button type="submit" id="boto-desar" class="boto-estret" data-i18n="Desar parcel·la">Desar parcel·la</button>
         </fieldset>
       </form>
     </section>
   </main>
+
+  <footer class="peu">
+    <p>
+      Custòdia — <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) ·
+      <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> ·
+      <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a>
+    </p>
+  </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.js"></script>
   <script type="module" src="js/afegir.js"></script>

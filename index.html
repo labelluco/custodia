@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Custòdia — Inici</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2e7d32">
+  <link rel="icon" type="image/svg+xml" href="icones/icona.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icones/icona-192.png">
+  <link rel="apple-touch-icon" href="icones/icona-192.png">
+  <meta name="theme-color" content="#396a49">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="">
@@ -14,35 +17,54 @@
 <body>
   <header class="capcalera">
     <h1>Custòdia</h1>
-    <nav class="menu">
+    <nav class="menu" id="menu-principal">
       <a href="index.html" class="menu__enllac menu__enllac--actiu" data-i18n="Inici">Inici</a>
       <a href="afegir.html" class="menu__enllac" data-i18n="Afegir parcel·la">Afegir parcel·la</a>
     </nav>
-    <span id="selector-idioma" class="selector-idioma"></span>
+    <div class="capcalera__dreta">
+      <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+      <span id="selector-idioma" class="selector-idioma"></span>
+    </div>
   </header>
 
   <main>
     <section id="mapa" class="mapa" aria-label="Mapa de parcel·les"></section>
 
-    <section class="llistat">
+    <section class="llistat fitxa-parcela-contenidor">
       <h2 data-i18n="Les meves parcel·les">Les meves parcel·les</h2>
+      <p class="nota nota--llistat" data-i18n="Toca una parcel·la en el llistat per veure'n el perímetre al mapa. Per veure el detall, fes clic en el perímetre o en el botó «Detall».">Toca una parcel·la en el llistat per veure'n el perímetre al mapa. Per veure el detall, fes clic en el perímetre o en el botó «Detall».</p>
       <p id="missatge-buit" hidden>
         <span data-i18n="Encara no has afegit cap parcel·la.">Encara no has afegit cap parcel·la.</span>
         <a href="afegir.html" data-i18n="Afegeix-ne una">Afegeix-ne una</a>.
       </p>
-      <table class="taula-parceles">
-        <thead>
-          <tr>
-            <th data-i18n="Població">Població</th>
-            <th data-i18n="Polígon">Polígon</th>
-            <th data-i18n="Parcel·la">Parcel·la</th>
-            <th data-i18n="Ús">Ús</th>
-          </tr>
-        </thead>
-        <tbody id="llistat-parceles"></tbody>
-      </table>
+      <div class="taula-parceles-contenidor">
+        <table class="taula-parceles">
+          <thead>
+            <tr>
+              <th data-i18n="Població">Població</th>
+              <th data-i18n="Polígon">Polígon</th>
+              <th data-i18n="Parcel·la">Parcel·la</th>
+              <th data-i18n="Ús">Ús</th>
+              <th data-i18n="Superfície">Superfície</th>
+              <th data-i18n="Risc">Risc</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="llistat-parceles"></tbody>
+        </table>
+      </div>
     </section>
   </main>
+
+  <footer class="peu">
+    <p>
+      Custòdia — <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) ·
+      <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> ·
+      <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a>
+    </p>
+  </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="

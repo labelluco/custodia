@@ -13,9 +13,11 @@ import { ServeiCadastre } from './serveis/cadastre.js';
 import { ServeiUbicacions } from './serveis/ubicacions.js';
 import { Parcela } from './model/parcela.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
+import { inicialitzarMenu } from './ui/menu.js';
 
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
+inicialitzarMenu();
 
 const formulari = document.getElementById('form-parcela');
 const fieldsetCadastre = document.getElementById('dades-cadastre');
@@ -25,7 +27,7 @@ const botoDesar = document.getElementById('boto-desar');
 const missatgeEstat = document.getElementById('missatge-estat');
 const valorUsCadastre = document.getElementById('valor-us-cadastre');
 const campDesglossament = document.getElementById('camp-desglossament');
-const valorDesglossament = document.getElementById('valor-desglossament');
+const llistatDesglossament = document.getElementById('llistat-desglossament');
 const selectProvincia = document.getElementById('provincia');
 const selectPoblacio = document.getElementById('poblacio');
 
@@ -37,13 +39,18 @@ let dadesFormulariConsultades = null;
  * que l'usuari l'hagi d'escriure a mà (i s'equivoqui). Si falla, es
  * torna a deixar com a camp de text lliure -- millor que bloquejar
  * tot el formulari per un servei extern caigut.
+ *
+ * Es guarda el codi numèric de cada província/municipi com a
+ * data-codi de cada opció -- no cal per a la consulta del Cadastre
+ * (que va per nom), però sí per construir l'enllaç directe a la
+ * cartografia del Cadastre en acabar (vegeu detall.js).
  */
 async function carregarProvincies() {
   try {
     const provincies = await ServeiUbicacions.consultarProvincies();
     selectProvincia.innerHTML =
       `<option value="">${t('Tria una província')}</option>` +
-      provincies.map((p) => `<option value="${p.nom}">${p.nom}</option>`).join('');
+      provincies.map((p) => `<option value="${p.nom}" data-codi="${p.codi}">${p.nom}</option>`).join('');
   } catch (error) {
     console.warn('No s\'han pogut carregar les províncies, es deixa com a camp de text:', error);
     selectProvincia.outerHTML =
@@ -65,7 +72,7 @@ selectProvincia.addEventListener('change', async () => {
     const municipis = await ServeiUbicacions.consultarMunicipis(provincia);
     selectPoblacio.innerHTML =
       `<option value="">${t('Tria un municipi')}</option>` +
-      municipis.map((m) => `<option value="${m.nom}">${m.nom}</option>`).join('');
+      municipis.map((m) => `<option value="${m.nom}" data-codi="${m.codi}">${m.nom}</option>`).join('');
     selectPoblacio.disabled = false;
   } catch (error) {
     console.warn('No s\'han pogut carregar els municipis, es deixa com a camp de text:', error);
@@ -74,6 +81,17 @@ selectProvincia.addEventListener('change', async () => {
 });
 
 carregarProvincies();
+
+/**
+ * Codi (data-codi) de l'opció triada d'un <select>, si encara ho és
+ * (si el servei va fallar i s'ha convertit en un camp de text, no hi
+ * ha cap codi disponible -- es torna null, no es trenca res).
+ */
+function codiSeleccionat(idElement) {
+  const element = document.getElementById(idElement);
+  if (!element || element.tagName !== 'SELECT') return null;
+  return element.options[element.selectedIndex]?.dataset.codi ?? null;
+}
 
 botoConsultar.addEventListener('click', async () => {
   const dadesFormulari = new FormData(formulari);
@@ -99,14 +117,33 @@ botoConsultar.addEventListener('click', async () => {
     );
     // Es guarden aquí, no es tornen a llegir del formulari en desar: un cop
     // el fieldset queda disabled, FormData deixa d'incloure aquests camps.
-    dadesFormulariConsultades = { poligon, parcelaCadastral, poblacio };
+    dadesFormulariConsultades = {
+      poligon,
+      parcelaCadastral,
+      poblacio,
+      provincia,
+      codiProvincia: codiSeleccionat('provincia'),
+      codiMunicipi: codiSeleccionat('poblacio'),
+    };
 
     valorUsCadastre.textContent = dadesCadastre.us ?? t('No disponible');
 
     if (dadesCadastre.subparceles.length > 0) {
-      valorDesglossament.textContent = dadesCadastre.subparceles
-        .map((s) => (s.ssp ? `${s.dcc} (${s.ssp} m²)` : s.dcc))
-        .join(', ');
+      // Sense columna de risc: encara no s'ha desat la parcel·la, i el
+      // risc es calcula a partir de dades ja guardades (vegeu
+      // ServeiRisc) -- no té sentit calcular-lo aquí.
+      llistatDesglossament.innerHTML = dadesCadastre.subparceles
+        .map(
+          (s) => `
+            <tr>
+              <td>${s.dcc ?? '—'}</td>
+              <td>${s.ssp ? `${s.ssp} m²` : '—'}</td>
+              <td>${s.ip ?? '—'}</td>
+              <td>${s.ccc ?? '—'}</td>
+            </tr>
+          `
+        )
+        .join('');
       campDesglossament.hidden = false;
     } else {
       campDesglossament.hidden = true;

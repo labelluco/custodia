@@ -1,17 +1,29 @@
-/* --- Variables i base --- */
+/* --- Variables i base ---
+   Paleta arrelada al propi tema del projecte (territori interior de
+   Castelló/Terol): verd fosc de pi/alzina com a color principal, pedra
+   calcària (Maestrat/Alt Palància) com a fons, i un ocre de "terra
+   cremada" com a accent puntual -- no una paleta genèrica. */
 :root {
-  --color-primari: #2e7d32;
-  --color-primari-fosc: #1b5e20;
-  --color-text: #1c1c1c;
-  --color-fons: #fafafa;
-  --color-vora: #dddddd;
+  --color-primari: #396a49;
+  --color-primari-fosc: #24402f;
+  --color-text: #23261f;
+  --color-fons: #f3f1ea;
+  --color-superficie: #ffffff;
+  --color-vora: #e2ddd2;
+  --color-accent: #a1552e;
 
-  --color-perill: #e53935;
+  --color-perill: #c0392b;
+
+  --color-text-mut: #6b6b63;
+  --color-hover: #efece2;
 
   --espai-xs: 0.5rem;
   --espai-s: 1rem;
   --espai-m: 1.5rem;
   --espai-l: 2rem;
+
+  --radi: 10px;
+  --ombra: 0 1px 3px rgba(35, 38, 31, 0.1), 0 1px 2px rgba(35, 38, 31, 0.06);
 }
 
 * {
@@ -26,13 +38,13 @@ body {
 }
 
 main {
-  max-width: 900px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: var(--espai-m);
 }
 
 a {
-  color: var(--color-primari-fosc);
+  color: var(--color-accent);
 }
 
 /* --- Menú --- */
@@ -45,6 +57,7 @@ a {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--espai-s);
+  position: relative;
 }
 
 .capcalera h1 {
@@ -69,56 +82,174 @@ a {
   border-bottom-color: white;
 }
 
+.capcalera__dreta {
+  display: flex;
+  align-items: center;
+  gap: var(--espai-s);
+}
+
+/* Enllaç de "Tornar..." (índex/detall/altitud): una mica de presència
+   pròpia en lloc d'un enllaç de text pla, sense arribar a semblar un
+   botó. */
+.enllac-tornar {
+  color: var(--color-primari-fosc);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.enllac-tornar:hover {
+  text-decoration: underline;
+}
+
+/* Botó d'hamburguesa: amagat per defecte, només es mostra en pantalla
+   estreta (vegeu la media query de sota). */
+.boto-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 0.4rem;
+  cursor: pointer;
+}
+
+.boto-menu span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: white;
+  border-radius: 1px;
+}
+
+@media (max-width: 640px) {
+  .boto-menu {
+    display: flex;
+  }
+
+  /* El menú es col·lapsa: amagat per defecte, es desplega com un
+     panell sota la capçalera en obrir-lo (.menu--obert). */
+  .menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--color-primari);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--espai-s) var(--espai-m);
+    gap: var(--espai-xs);
+    z-index: 30;
+  }
+
+  .menu--obert {
+    display: flex;
+  }
+}
+
 /* --- Mapa (index i detall) --- */
 .mapa {
   width: 100%;
-  height: 350px;
+  height: 440px;
   margin: var(--espai-m) 0;
   border: 1px solid var(--color-vora);
-  border-radius: 4px;
+  border-radius: var(--radi);
+  /* Aïlla el mapa en el seu propi context d'apilament: Leaflet fa
+     servir z-index interns molt alts (200-700) per als seus panells i
+     controls, i sense això "s'escapen" i acaben per damunt d'altres
+     elements de la pàgina (com el menú desplegable). */
+  position: relative;
+  z-index: 0;
 }
 
 .mapa--detall {
-  height: 280px;
+  height: 380px;
 }
 
 /* --- Taula de parcel·les --- */
+.taula-parceles-contenidor {
+  overflow-x: auto;
+}
+
 .taula-parceles {
   width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .taula-parceles th,
 .taula-parceles td {
-  width: 25%;
-  padding: 0.6rem var(--espai-s);
+  padding: 0.7rem var(--espai-s);
   text-align: left;
   border-bottom: 1px solid var(--color-vora);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .taula-parceles thead th {
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-mut);
   border-bottom: 2px solid var(--color-vora);
+  white-space: nowrap;
+}
+
+.taula-parceles tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.taula-parceles tbody tr:hover {
+  background-color: #f7f5ef;
 }
 
 .taula-parceles td.us {
   text-transform: capitalize;
 }
 
+.taula-parceles__risc {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.taula-parceles__punt-risc {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .fila-parcela {
   cursor: pointer;
-  /* El color s'assigna des de JS (border-left-color inline), segons el
-     percentatge de risc calculat -- una escala contínua, no categories
-     fixes, per això no hi ha regles de color aquí. */
-  border-left: 6px solid #999;
 }
 
 .fila-parcela:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-hover);
+}
+
+/* Fila ressaltada (en clicar-la, per relacionar-la amb el mapa). */
+.fila-parcela--seleccionada {
+  background-color: #dfe6d3 !important;
+}
+
+/* Botó compacte per a una acció dins d'una cel·la de taula (per
+   exemple, "Detall" al llistat de parcel·les). */
+.boto-taula {
+  display: inline-block;
+  padding: 0.3rem 0.65rem;
+  background-color: var(--color-primari);
+  color: white;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.boto-taula:hover {
+  background-color: var(--color-primari-fosc);
 }
 
 /* --- Formulari --- */
@@ -126,13 +257,13 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--espai-s);
-  max-width: 420px;
 }
 
 .camp {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0;
 }
 
 .camp label {
@@ -141,10 +272,21 @@ a {
 
 .camp input,
 .camp select {
-  padding: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0.6rem 0.7rem;
   border: 1px solid var(--color-vora);
-  border-radius: 4px;
+  border-radius: var(--radi);
   font-size: 1rem;
+  background-color: white;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.camp input:focus,
+.camp select:focus {
+  outline: none;
+  border-color: var(--color-primari);
+  box-shadow: 0 0 0 3px rgba(57, 106, 73, 0.15);
 }
 
 button {
@@ -152,7 +294,7 @@ button {
   background-color: var(--color-primari);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radi);
   font-size: 1rem;
   cursor: pointer;
 }
@@ -168,14 +310,66 @@ button:disabled {
 
 .missatge-estat {
   padding: var(--espai-xs) var(--espai-s);
-  border-radius: 4px;
+  border-radius: var(--radi);
 }
 
 .missatge-estat--info  { background-color: #e3f2fd; }
 .missatge-estat--exit   { background-color: #e8f5e9; }
 .missatge-estat--error  { background-color: #ffebee; }
 
-/* --- Fitxa de detall --- */
+/* --- Targetes de la fitxa de detall (i altres pàgines que en reutilitzen l'estil) --- */
+.fitxa-parcela-contenidor {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-vora);
+  border-radius: var(--radi);
+  box-shadow: var(--ombra);
+  padding: var(--espai-m);
+  margin-bottom: var(--espai-m);
+}
+
+.fitxa-parcela-contenidor h2 {
+  margin-top: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primari-fosc);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Subtítols per agrupar informació dins d'una mateixa targeta (per
+   exemple, "Identificació" i "Terreny" a les dades de la parcel·la),
+   perquè un bloc llarg de dades no es llegeixi tot d'una tirada. */
+.fitxa-parcela-contenidor h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #8a8578;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: var(--espai-m) 0 0.4rem;
+}
+
+.fitxa-parcela-contenidor h3:first-child {
+  margin-top: 0;
+}
+
+.fitxa-parcela-contenidor--risc {
+  border-top: 4px solid var(--color-vora);
+}
+
+/* --- Panell de la fitxa de detall: sempre apilat, mai en columnes
+   (una taula amb prou columnes com la de subparceles no cap bé si
+   comparteix amplada amb una altra targeta al costat). --- */
+.panell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espai-m);
+  margin: var(--espai-m) 0;
+}
+
+.panell > .fitxa-parcela-contenidor {
+  margin-bottom: 0;
+}
+
 .fitxa-parcela {
   display: grid;
   grid-template-columns: max-content 1fr;
@@ -188,6 +382,98 @@ button:disabled {
 
 .fitxa-parcela dd {
   margin: 0;
+  /* Per defecte, un element de graella no es redueix per sota de
+     l'amplada del seu contingut (min-width: auto) -- si un valor és
+     llarg i sense espais (una referència cadastral, per exemple), això
+     fa sortir tota la graella (i la targeta) fora de pantalla en mòbil. */
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* --- Índex de perillositat: anell + barres per component --- */
+.risc-panell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espai-l);
+  align-items: center;
+}
+
+.risc-gauge {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  flex-shrink: 0;
+}
+
+.risc-gauge svg {
+  width: 100%;
+  height: 100%;
+}
+
+.risc-gauge__valor {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.risc-gauge__numero {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.risc-gauge__escala {
+  font-size: 0.75rem;
+  color: var(--color-text-mut);
+}
+
+.risc-components {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espai-s);
+}
+
+.risc-component {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  min-width: 0;
+}
+
+.risc-component__capcalera {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espai-s);
+}
+
+.risc-component__capcalera span:first-child {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.risc-component__capcalera span:last-child {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-mut);
+}
+
+.risc-component__barra {
+  height: 8px;
+  background-color: #ece9df;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.risc-component__valor {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
 }
 
 /* --- Accions de la fitxa de detall --- */
@@ -204,7 +490,7 @@ button:disabled {
 }
 
 .boto-secundari:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-hover);
 }
 
 .boto-perillos {
@@ -212,7 +498,7 @@ button:disabled {
 }
 
 .boto-perillos:hover {
-  background-color: #c62828;
+  background-color: #96261a;
 }
 
 .formulari-parcela__botons {
@@ -232,27 +518,80 @@ fieldset {
   display: flex;
   flex-direction: column;
   gap: var(--espai-s);
+  min-width: 0;
 }
 
 fieldset:disabled {
   opacity: 0.6;
 }
 
+legend {
+  font-weight: 700;
+  margin-bottom: var(--espai-xs);
+}
+
+/* Un botó que no s'estira per omplir tota l'amplada del seu contenidor
+   flex/graella -- útil quan el botó és l'únic element de la fila. */
+.boto-estret {
+  align-self: flex-start;
+}
+
+/* Els dos botons del formulari d'afegir parcel·la comparteixen una
+   amplada mínima, perquè "Consultar cadastre" i "Desar parcel·la" (amb
+   textos de llargada diferent) es vegin coherents entre si -- només
+   afecta aquests dos, no la resta de botons "estrets" de l'app. */
+#boto-consultar,
+#boto-desar {
+  min-width: 200px;
+}
+
+/* Distribueix els camps en columnes quan hi ha prou amplada, en lloc
+   d'estirar-los tots sols a tota la pàgina (afegir.html) -- els camps
+   amb prou espai formen files, en comptes d'una única columna llarga. */
+.formulari-graella {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espai-s) var(--espai-m);
+  align-items: start;
+}
+
+.formulari-graella > button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+@media (max-width: 560px) {
+  .formulari-graella {
+    grid-template-columns: 1fr;
+  }
+}
+
 .nota {
   font-size: 0.85rem;
-  color: var(--color-primari-fosc);
+  color: var(--color-accent);
   margin: 0.25rem 0 0;
 }
 
-/* --- Fila seleccionada (ressaltada al mapa) --- */
-.fila-parcela--seleccionada {
-  background-color: #dcedc8 !important;
+.nota--llistat {
+  margin-bottom: var(--espai-m);
 }
 
+
 /* --- Selecció de mètode (altitud.html) --- */
+/* Contingut de la selecció de mètode: en un <div> normal (no un
+   <fieldset>/<legend>, que té massa peculiaritats natives de
+   renderitzat entre navegadors -- posicionament del legend a la vora
+   de la caixa, interacció estranya amb flex, etc.). L'agrupació
+   accessible es manté amb role="group" + aria-labelledby a l'HTML. */
+.metode-contingut {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espai-s);
+}
+
 .camp--radio {
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
 }
 
@@ -261,6 +600,19 @@ fieldset:disabled {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
+}
+
+/* Contingut annex d'una opció (com la distància de la malla): apilat a
+   sota de l'etiqueta del radio, mai al seu costat -- abans compartia
+   el mateix contenidor flex--row que l'etiqueta, cosa que en pantalla
+   estreta feia sortir els elements de la caixa. */
+.metode-malla-detalls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-left: 1.5rem;
+  min-width: 0;
 }
 
 /* --- Icona d'orientació (fletxa) als punts de la malla --- */
@@ -292,13 +644,68 @@ fieldset:disabled {
 
 .valor-nomes-lectura {
   margin: 0.25rem 0 0;
-  padding: 0.5rem;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  padding: 0.6rem 0.7rem;
+  background-color: var(--color-fons);
+  border-radius: var(--radi);
   color: #444;
 }
 
-/* --- Selector d'idioma (capçalera) --- */
+/* --- Icona d'ajuda amb explicació (hover a l'ordinador, toc al mòbil) --- */
+.ajuda {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 0.35rem;
+  border-radius: 50%;
+  background-color: var(--color-vora);
+  color: var(--color-primari-fosc);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-style: italic;
+  font-family: Georgia, serif;
+  cursor: help;
+  vertical-align: middle;
+  user-select: none;
+}
+
+.ajuda::after {
+  content: attr(data-ajuda);
+  position: absolute;
+  top: 135%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 240px;
+  background-color: var(--color-text);
+  color: white;
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: normal;
+  font-style: normal;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.35;
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 20;
+}
+
+.ajuda:hover::after,
+.ajuda:focus::after,
+.ajuda--oberta::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+#boto-desar-altimetria {
+  margin-top: var(--espai-m);
+}
 .selector-idioma {
   display: flex;
   gap: 0.25rem;
@@ -317,4 +724,22 @@ fieldset:disabled {
   background-color: white;
   color: var(--color-primari);
   font-weight: 600;
+}
+
+/* --- Peu de pàgina: una sola línia discreta, no un bloc pesant (una
+   app no necessita repetir un peu de pàgina complet a cada pantalla,
+   però una atribució petita de llicència/contacte hi té sentit). --- */
+.peu {
+  max-width: 1180px;
+  margin: var(--espai-l) auto 0;
+  padding: var(--espai-m);
+  border-top: 1px solid var(--color-vora);
+  font-size: 0.8rem;
+  color: var(--color-text-mut);
+  text-align: center;
+}
+
+.peu a {
+  color: var(--color-text-mut);
+  text-decoration: underline;
 }
