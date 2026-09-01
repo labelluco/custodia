@@ -1,20 +1,26 @@
 // Service worker bàsic: cache dels fitxers estàtics per a ús offline.
 // Actualitzar la llista si s'afegeixen pantalles noves.
 
-const NOM_CACHE = 'custodia-v11';
+const NOM_CACHE = 'custodia-v12';
 
 const FITXERS_PER_CACHE = [
   './',
   './index.html',
+  './parceles.html',
   './afegir.html',
   './detall.html',
   './altitud.html',
+  './agrupacions.html',
+  './afegir-agrupacio.html',
   './css/estils.css',
   './js/registrar-sw.js',
   './js/inici.js',
+  './js/parceles.js',
   './js/afegir.js',
   './js/detall.js',
   './js/altitud.js',
+  './js/agrupacions.js',
+  './js/afegir-agrupacio.js',
   './js/model/parcela.js',
   './js/model/agrupacio.js',
   './js/serveis/cadastre.js',

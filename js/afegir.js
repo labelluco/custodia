@@ -185,7 +185,7 @@ formulari.addEventListener('submit', async (event) => {
     }
 
     mostrarEstat(t('Parcel·la desada correctament.'), 'exit');
-    window.location.href = 'index.html';
+    window.location.href = 'parceles.html';
   } catch (error) {
     console.error(error);
     mostrarEstat(`${t('No s\'ha pogut desar la parcel·la:')} ${error.message}`, 'error');

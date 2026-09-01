@@ -9,9 +9,6 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icones/icona-192.png">
   <link rel="apple-touch-icon" href="icones/icona-192.png">
   <meta name="theme-color" content="#396a49">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin="">
   <link rel="stylesheet" href="css/estils.css">
 </head>
 <body>
@@ -19,6 +16,7 @@
     <h1>Custòdia</h1>
     <nav class="menu" id="menu-principal">
       <a href="index.html" class="menu__enllac menu__enllac--actiu" data-i18n="Inici">Inici</a>
+      <a href="parceles.html" class="menu__enllac" data-i18n="Parcel·les">Parcel·les</a>
       <a href="afegir.html" class="menu__enllac" data-i18n="Afegir parcel·la">Afegir parcel·la</a>
     </nav>
     <div class="capcalera__dreta">
@@ -30,32 +28,43 @@
   </header>
 
   <main>
-    <section id="mapa" class="mapa" aria-label="Mapa de parcel·les"></section>
+    <h2 data-i18n="Què vols fer?">Què vols fer?</h2>
 
-    <section class="llistat fitxa-parcela-contenidor">
-      <h2 data-i18n="Les meves parcel·les">Les meves parcel·les</h2>
-      <p class="nota nota--llistat" data-i18n="Toca una parcel·la en el llistat per veure'n el perímetre al mapa. Per veure el detall, fes clic en el perímetre o en el botó «Detall».">Toca una parcel·la en el llistat per veure'n el perímetre al mapa. Per veure el detall, fes clic en el perímetre o en el botó «Detall».</p>
-      <p id="missatge-buit" hidden>
-        <span data-i18n="Encara no has afegit cap parcel·la.">Encara no has afegit cap parcel·la.</span>
-        <a href="afegir.html" data-i18n="Afegeix-ne una">Afegeix-ne una</a>.
-      </p>
-      <div class="taula-parceles-contenidor">
-        <table class="taula-parceles">
-          <thead>
-            <tr>
-              <th data-i18n="Població">Població</th>
-              <th data-i18n="Polígon">Polígon</th>
-              <th data-i18n="Parcel·la">Parcel·la</th>
-              <th data-i18n="Ús">Ús</th>
-              <th data-i18n="Superfície">Superfície</th>
-              <th data-i18n="Risc">Risc</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="llistat-parceles"></tbody>
-        </table>
-      </div>
-    </section>
+    <div class="menu-icones">
+      <a href="parceles.html" class="icona-menu">
+        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M8 22 L18 10 L34 12 L40 24 L32 38 L14 36 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+        </svg>
+        <span data-i18n="Parcel·les">Parcel·les</span>
+      </a>
+
+      <a href="agrupacions.html" class="icona-menu">
+        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M4 20 L13 10 L26 12 L30 24 L23 34 L8 32 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M20 26 L29 16 L42 18 L46 30 L38 40 L23 38 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+        </svg>
+        <span data-i18n="Agrupacions de parcel·les">Agrupacions de parcel·les</span>
+      </a>
+
+      <a href="afegir.html" class="icona-menu">
+        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M8 22 L18 10 L34 12 L40 24 L32 38 L14 36 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="36" cy="12" r="9" fill="var(--color-accent)" stroke="none"/>
+          <path d="M36 8 V16 M32 12 H40" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span data-i18n="Afegir parcel·la">Afegir parcel·la</span>
+      </a>
+
+      <a href="afegir-agrupacio.html" class="icona-menu">
+        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M4 24 L13 14 L26 16 L28 28 L21 36 L8 34 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M18 30 L27 20 L40 22 L42 32 L35 40 L22 38 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="38" cy="12" r="9" fill="var(--color-accent)" stroke="none"/>
+          <path d="M38 8 V16 M34 12 H42" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span data-i18n="Afegir agrupació">Afegir agrupació</span>
+      </a>
+    </div>
   </main>
 
   <footer class="peu">
@@ -66,9 +75,6 @@
     </p>
   </footer>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-          crossorigin=""></script>
   <script type="module" src="js/inici.js"></script>
   <script type="module" src="js/registrar-sw.js"></script>
 </body>

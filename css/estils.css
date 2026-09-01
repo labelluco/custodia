@@ -743,3 +743,39 @@ legend {
   color: var(--color-text-mut);
   text-decoration: underline;
 }
+
+/* --- Menú d'icones (pantalla d'inici) --- */
+.menu-icones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--espai-m);
+  margin-top: var(--espai-m);
+}
+
+.icona-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espai-s);
+  padding: var(--espai-l) var(--espai-m);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-vora);
+  border-radius: var(--radi);
+  box-shadow: var(--ombra);
+  color: var(--color-text);
+  text-decoration: none;
+  text-align: center;
+  font-weight: 600;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.icona-menu:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(35, 38, 31, 0.12);
+}
+
+.icona-menu__icona {
+  width: 56px;
+  height: 56px;
+  color: var(--color-primari);
+}

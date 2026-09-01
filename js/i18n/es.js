@@ -158,4 +158,13 @@ export const ES = {
   'les agrupacions': 'las agrupaciones',
   'Cal treure-la de l\'agrupació abans de poder esborrar-la.':
     'Hay que sacarla de la agrupación antes de poder borrarla.',
+
+  // Reestructuració de la navegació (pantalla d'inici, parceles.html)
+  'Parcel·les': 'Parcelas',
+  'Què vols fer?': '¿Qué quieres hacer?',
+  'Agrupacions de parcel·les': 'Agrupaciones de parcelas',
+  'Afegir agrupació': 'Añadir agrupación',
+  '← Tornar a l\'inici': '← Volver al inicio',
+  'Aquesta funcionalitat encara no està disponible -- estarà a punt en una propera versió.':
+    'Esta funcionalidad todavía no está disponible -- estará lista en una próxima versión.',
 };

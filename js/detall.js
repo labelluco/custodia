@@ -321,7 +321,7 @@ botoEsborrar.addEventListener('click', async () => {
 
   await bd.esborrarSubparcelesDe(parcelaActual.id);
   await bd.esborrarParcela(parcelaActual.id);
-  window.location.href = 'index.html';
+  window.location.href = 'parceles.html';
 });
 
 iniciar().catch((error) => {
