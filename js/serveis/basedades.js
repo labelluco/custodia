@@ -8,9 +8,10 @@
 //   const totes = await bd.llegirTotesLesParceles();
 
 const NOM_BD = 'custodia';
-const VERSIO_BD = 2; // v2: afegeix el magatzem de subparceles
+const VERSIO_BD = 3; // v3: afegeix el magatzem d'agrupacions
 const MAGATZEM_PARCELES = 'parceles';
 const MAGATZEM_SUBPARCELES = 'subparceles';
+const MAGATZEM_AGRUPACIONS = 'agrupacions';
 
 export class BaseDades {
   constructor(idb) {
@@ -25,6 +26,18 @@ export class BaseDades {
   static obrir() {
     return new Promise((resolve, reject) => {
       const peticio = indexedDB.open(NOM_BD, VERSIO_BD);
+
+      // Si l'usuari té una altra pestanya de l'app oberta amb una
+      // versió anterior encara connectada a la BD, la pujada d'esquema
+      // es queda bloquejada -- sense això, la crida es quedaria
+      // penjada per sempre, sense cap avís.
+      peticio.onblocked = () => {
+        reject(
+          new Error(
+            "BaseDades: cal tancar les altres pestanyes de Custòdia obertes per acabar d'actualitzar la base de dades"
+          )
+        );
+      };
 
       peticio.onupgradeneeded = (event) => {
         const idb = event.target.result;
@@ -43,6 +56,21 @@ export class BaseDades {
             autoIncrement: true,
           });
           magatzemSub.createIndex('parcelaId', 'parcelaId', { unique: false });
+        }
+
+        if (!idb.objectStoreNames.contains(MAGATZEM_AGRUPACIONS)) {
+          const magatzemAgr = idb.createObjectStore(MAGATZEM_AGRUPACIONS, {
+            keyPath: 'id',
+            autoIncrement: true,
+          });
+          // multiEntry: cada element de parcelaIds genera la seva pròpia
+          // entrada a l'índex -- permet cercar "a quines agrupacions
+          // pertany la parcel·la X" directament, sense haver de llegir
+          // totes les agrupacions i filtrar-les a mà.
+          magatzemAgr.createIndex('parcelaIds', 'parcelaIds', {
+            unique: false,
+            multiEntry: true,
+          });
         }
       };
 
@@ -160,6 +188,76 @@ export class BaseDades {
       transaccio.oncomplete = () => resolve();
       transaccio.onerror = (event) =>
         reject(new Error(`BaseDades: no s'han pogut esborrar les subparceles (${event.target.error})`));
+    });
+  }
+
+  afegirAgrupacio(agrupacio) {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(MAGATZEM_AGRUPACIONS, 'readwrite');
+      const magatzem = transaccio.objectStore(MAGATZEM_AGRUPACIONS);
+      const dades = agrupacio.toObject();
+      if (dades.id === null || dades.id === undefined) {
+        delete dades.id;
+      }
+      const peticio = magatzem.put(dades);
+
+      peticio.onsuccess = () => resolve(peticio.result);
+      peticio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'ha pogut afegir l'agrupació (${event.target.error})`));
+    });
+  }
+
+  llegirAgrupacio(id) {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(MAGATZEM_AGRUPACIONS, 'readonly');
+      const magatzem = transaccio.objectStore(MAGATZEM_AGRUPACIONS);
+      const peticio = magatzem.get(Number(id));
+
+      peticio.onsuccess = () => resolve(peticio.result);
+      peticio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'ha pogut llegir l'agrupació (${event.target.error})`));
+    });
+  }
+
+  llegirTotesLesAgrupacions() {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(MAGATZEM_AGRUPACIONS, 'readonly');
+      const magatzem = transaccio.objectStore(MAGATZEM_AGRUPACIONS);
+      const peticio = magatzem.getAll();
+
+      peticio.onsuccess = () => resolve(peticio.result);
+      peticio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'han pogut llegir les agrupacions (${event.target.error})`));
+    });
+  }
+
+  esborrarAgrupacio(id) {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(MAGATZEM_AGRUPACIONS, 'readwrite');
+      const magatzem = transaccio.objectStore(MAGATZEM_AGRUPACIONS);
+      const peticio = magatzem.delete(Number(id));
+
+      peticio.onsuccess = () => resolve();
+      peticio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'ha pogut esborrar l'agrupació (${event.target.error})`));
+    });
+  }
+
+  /**
+   * Totes les agrupacions a què pertany una parcel·la concreta -- via
+   * l'índex multiEntry de parcelaIds. Es fa servir, per exemple, per
+   * impedir esborrar una parcel·la que encara forma part d'alguna
+   * agrupació.
+   */
+  llegirAgrupacionsAmbParcela(parcelaId) {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(MAGATZEM_AGRUPACIONS, 'readonly');
+      const index = transaccio.objectStore(MAGATZEM_AGRUPACIONS).index('parcelaIds');
+      const peticio = index.getAll(Number(parcelaId));
+
+      peticio.onsuccess = () => resolve(peticio.result);
+      peticio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'han pogut llegir les agrupacions d'aquesta parcel·la (${event.target.error})`));
     });
   }
 }

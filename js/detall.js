@@ -305,6 +305,15 @@ botoExportarGpx.addEventListener('click', () => {
 });
 
 botoEsborrar.addEventListener('click', async () => {
+  const agrupacions = await bd.llegirAgrupacionsAmbParcela(parcelaActual.id);
+  if (agrupacions.length > 0) {
+    const noms = agrupacions.map((a) => a.nom).join(', ');
+    alert(
+      `${t('Aquesta parcel·la forma part de')} ${agrupacions.length === 1 ? t('l\'agrupació') : t('les agrupacions')} "${noms}". ${t('Cal treure-la de l\'agrupació abans de poder esborrar-la.')}`
+    );
+    return;
+  }
+
   const confirmat = confirm(
     `${t('Segur que vols esborrar la parcel·la de')} ${parcelaActual.poblacio}? ${t('Aquesta acció no es pot desfer.')}`
   );

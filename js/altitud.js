@@ -22,7 +22,7 @@ inicialitzarAjudes();
 // Límit de punts per consultar en una sola crida a l'API, per evitar
 // generar peticions desproporcionades si algú tria una distància molt
 // petita en una parcel·la gran.
-const MAXIM_PUNTS_MALLA = 400;
+const LLINDAR_AVIS_PUNTS = 1000;
 
 const instruccioMapa = document.getElementById('instruccio-mapa');
 const resum = document.getElementById('resum-altimetria');
@@ -61,6 +61,8 @@ function establirEstatResum(tipus) {
 let bd;
 let parcelaActual;
 let valorsCalculats = null;
+let puntsCalculats = null;
+let metodeCalculat = null;
 let mapaActual = null;
 
 async function iniciar() {
@@ -94,14 +96,16 @@ async function iniciar() {
   mapa.afegirParcela(parcelaActual);
   mapa.ajustarVistaATotes();
 
-  mostrarValorsDesats();
+  mostrarValorsDesats(mapa);
 }
 
 /**
  * Si la parcel·la ja té valors desats (d'un càlcul anterior), es
- * mostren de seguida, sense haver de tornar a calcular-los.
+ * mostren de seguida, sense haver de tornar a calcular-los -- i, si hi
+ * ha punts individuals guardats, es pinten també al mapa (sense haver
+ * de tornar a consultar l'IDEE).
  */
-function mostrarValorsDesats() {
+function mostrarValorsDesats(mapa) {
   const jaCalculat =
     parcelaActual.altitudMaxima != null &&
     parcelaActual.altitudMinima != null &&
@@ -114,6 +118,10 @@ function mostrarValorsDesats() {
     establirEstatResum('info');
     contingutResum.textContent = t('Encara no s\'ha calculat l\'altimetria d\'aquesta parcel·la.');
     return;
+  }
+
+  if (parcelaActual.puntsAltitud?.length > 0) {
+    pintarPuntsDesats(mapa, parcelaActual.puntsAltitud, parcelaActual.metodeAltitud);
   }
 
   pintarResum({
@@ -130,6 +138,23 @@ function mostrarValorsDesats() {
     'afterbegin',
     `<p class="nota">${t('Valors ja desats d\'un càlcul anterior. Selecciona un mètode i prem "Calcular" per refer-los.')}</p>`
   );
+}
+
+/** Torna a pintar al mapa els punts d'un càlcul anterior, ja desats. */
+function pintarPuntsDesats(mapa, punts, metode) {
+  if (metode === 'vertexs') {
+    mapa.afegirVertexsAmbAltitud(
+      punts.map((p) => p.coordenades),
+      punts.map((p) => p.altitud)
+    );
+  } else {
+    mapa.afegirPuntsAmbOrientacio(
+      punts.map((p) => ({
+        ...p,
+        etiqueta: p.orientacio == null ? null : t(ServeiOrientacio.etiquetaBruixola(p.orientacio)),
+      }))
+    );
+  }
 }
 
 /**
@@ -155,13 +180,26 @@ botoCalcular.addEventListener('click', async () => {
   instruccioMapa.hidden = true;
 
   try {
+    let calculat;
     if (metode === 'vertexs') {
-      await calcularAmbVertexs();
-      instruccioMapa.textContent = t('Toca un vèrtex del perímetre per veure la seva altitud.');
+      calculat = await calcularAmbVertexs();
+      calculat = calculat !== false;
     } else {
-      await calcularAmbMalla();
-      instruccioMapa.textContent = t('Toca un punt de la malla per veure la seva altitud i orientació.');
+      calculat = await calcularAmbMalla();
+      calculat = calculat !== false;
     }
+
+    if (!calculat) {
+      // L'usuari ha cancel·lat l'avís de "massa punts" -- no és un
+      // error, es torna a mostrar el que ja hi havia abans (desat o
+      // "encara no calculat"), no es deixa la targeta buida.
+      mostrarValorsDesats(mapaActual);
+      return;
+    }
+
+    instruccioMapa.textContent = metode === 'vertexs'
+      ? t('Toca un vèrtex del perímetre per veure la seva altitud.')
+      : t('Toca un punt de la malla per veure la seva altitud i orientació.');
     aplicarEstatMissatge(instruccioMapa, 'info');
     instruccioMapa.hidden = false;
   } catch (error) {
@@ -186,6 +224,12 @@ async function calcularAmbVertexs() {
   // lloc de null) indica a l'hora de desar que no s'ha de tocar el que
   // ja hi hagués desat abans.
   valorsCalculats = ServeiAltimetria.calcularResum(parcelaActual.coordenades, altituds);
+  puntsCalculats = parcelaActual.coordenades.map((coordenades, i) => ({
+    coordenades,
+    altitud: altituds[i],
+    orientacio: null,
+  }));
+  metodeCalculat = 'vertexs';
   pintarResum(valorsCalculats);
   botoDesar.hidden = false;
 }
@@ -202,12 +246,21 @@ async function calcularAmbMalla() {
   if (coordenades.length === 0) {
     throw new Error(t('Cap punt de la malla cau dins del perímetre; prova amb una distància més petita'));
   }
-  if (coordenades.length > MAXIM_PUNTS_MALLA) {
-    throw new Error(
-      `${t('La malla generaria {n} punts (màxim {max}); tria una distància més gran')
-        .replace('{n}', coordenades.length)
-        .replace('{max}', MAXIM_PUNTS_MALLA)}`
+  // A partir d'un cert nombre de punts, la consulta pot trigar una mica
+  // -- s'avisa i es deixa triar, en lloc de bloquejar-ho: forçar una
+  // distància diferent només per quedar per sota d'un límit fixe donaria
+  // precisions inconsistents entre parcel·les (10 m en una, 30 m en
+  // una altra de més gran), cosa que no té sentit.
+  if (coordenades.length > LLINDAR_AVIS_PUNTS) {
+    const continuar = confirm(
+      t('La malla generarà {n} punts; la consulta pot trigar una mica. Vols continuar?').replace(
+        '{n}',
+        coordenades.length
+      )
     );
+    if (!continuar) {
+      return false;
+    }
   }
 
   const altituds = await ServeiAltimetria.consultarAltituds(coordenades);
@@ -256,8 +309,15 @@ async function calcularAmbMalla() {
   );
 
   valorsCalculats = { ...resumPendent, orientacioMitjana };
+  puntsCalculats = puntsPerAlMapa.map(({ coordenades, altitud, orientacio }) => ({
+    coordenades,
+    altitud,
+    orientacio,
+  }));
+  metodeCalculat = 'malla';
   pintarResum(valorsCalculats);
   botoDesar.hidden = false;
+  return true;
 }
 
 function pintarResum({ minima, maxima, desnivell, pendentMitja, orientacioMitjana }) {
@@ -307,6 +367,8 @@ botoDesar.addEventListener('click', async () => {
         valorsCalculats.orientacioMitjana !== undefined
           ? valorsCalculats.orientacioMitjana
           : (parcelaActual.orientacioMitjana ?? null),
+      puntsAltitud: puntsCalculats,
+      metodeAltitud: metodeCalculat,
     });
 
     await bd.afegirParcela(parcelaActualitzada);

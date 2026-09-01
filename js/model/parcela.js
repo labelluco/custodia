@@ -45,6 +45,15 @@ export class Parcela {
     // abans d'aquest camp no la tindran mai (queda null per sempre) --
     // útil per saber si les dades poden haver quedat desactualitzades.
     dataCreacio = null,
+    // Punts individuals de l'últim càlcul d'altimetria (coordenades +
+    // altitud, i orientació si es va fer servir el mètode de malla) --
+    // es guarden per poder tornar-los a pintar al mapa en entrar de nou
+    // a la pàgina, sense haver de tornar a consultar l'IDEE ni haver-ho
+    // de recalcular. metodeAltitud indica quina funció de Mapa cal fer
+    // servir per pintar-los. Les parcel·les calculades abans d'aquest
+    // camp (o mai calculades) el tindran a null.
+    puntsAltitud = null,
+    metodeAltitud = null,
   }) {
     if (!poligon || !parcelaCadastral || !poblacio) {
       throw new Error('Parcela: poligon, parcelaCadastral i poblacio son obligatoris');
@@ -70,6 +79,8 @@ export class Parcela {
     this.pendentMitja = pendentMitja;
     this.orientacioMitjana = orientacioMitjana;
     this.dataCreacio = dataCreacio;
+    this.puntsAltitud = puntsAltitud;
+    this.metodeAltitud = metodeAltitud;
   }
 
   /** Cert si la parcel·la ja té calculades les dades d'altimetria. */
@@ -96,6 +107,8 @@ export class Parcela {
       pendentMitja: this.pendentMitja,
       orientacioMitjana: this.orientacioMitjana,
       dataCreacio: this.dataCreacio,
+      puntsAltitud: this.puntsAltitud,
+      metodeAltitud: this.metodeAltitud,
     };
   }
 

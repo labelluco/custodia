@@ -107,8 +107,8 @@ export const ES = {
   'La distància entre punts ha de ser un número positiu': 'La distancia entre puntos debe ser un número positivo',
   'Cap punt de la malla cau dins del perímetre; prova amb una distància més petita':
     'Ningún punto de la malla cae dentro del perímetro; prueba con una distancia más pequeña',
-  'La malla generaria {n} punts (màxim {max}); tria una distància més gran':
-    'La malla generaría {n} puntos (máximo {max}); elige una distancia mayor',
+  'La malla generarà {n} punts; la consulta pot trigar una mica. Vols continuar?':
+    'La malla generará {n} puntos; la consulta puede tardar un poco. ¿Quieres continuar?',
   'Altitud mínima': 'Altitud mínima',
   'Altitud màxima': 'Altitud máxima',
   'Desnivell': 'Desnivel',
@@ -153,4 +153,9 @@ export const ES = {
   'Programari lliure': 'Software libre',
   'Codi font': 'Código fuente',
   'Contacte': 'Contacto',
+  'Aquesta parcel·la forma part de': 'Esta parcela forma parte de',
+  'l\'agrupació': 'la agrupación',
+  'les agrupacions': 'las agrupaciones',
+  'Cal treure-la de l\'agrupació abans de poder esborrar-la.':
+    'Hay que sacarla de la agrupación antes de poder borrarla.',
 };
