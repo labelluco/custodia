@@ -5,6 +5,7 @@ import { ExportadorGpx } from './serveis/exportadorGpx.js';
 import { ServeiOrientacio } from './serveis/orientacio.js';
 import { ServeiRisc } from './serveis/risc.js';
 import { inicialitzarAjudes, iconaAjuda } from './ui/ajuda.js';
+import { crearAnellSvg, filaComponent } from './ui/risc-visual.js';
 import { t, idiomaActual, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
 
@@ -19,6 +20,7 @@ const llistatSubparceles = document.getElementById('llistat-subparceles');
 const seccioRiscCalculat = document.getElementById('seccio-risc-calculat');
 const contingutRiscCalculat = document.getElementById('contingut-risc-calculat');
 const seccioAccions = document.getElementById('accions-parcela');
+const botoPendentOrientacio = document.getElementById('boto-pendent-orientacio');
 const botoExportarGpx = document.getElementById('boto-exportar-gpx');
 const botoEsborrar = document.getElementById('boto-esborrar');
 
@@ -28,6 +30,7 @@ let parcelaActual;
 async function iniciar() {
   const parametres = new URLSearchParams(window.location.search);
   const id = parametres.get('id');
+  const idAgrupacio = parametres.get('agrupacio');
 
   if (!id) {
     contenidorDades.textContent = t('No s\'ha indicat cap parcel·la.');
@@ -40,6 +43,14 @@ async function iniciar() {
   if (!parcelaActual) {
     contenidorDades.textContent = t('No s\'ha trobat aquesta parcel·la.');
     return;
+  }
+
+  // Si s'hi arriba des del detall d'una agrupació (via el paràmetre
+  // "agrupacio" a la URL), l'enllaç de tornada hi porta de nou, en
+  // lloc de portar al llistat general de parcel·les.
+  if (idAgrupacio) {
+    document.getElementById('enllac-tornar').innerHTML =
+      `<a href="detall-agrupacio.html?id=${encodeURIComponent(idAgrupacio)}" class="enllac-tornar">&larr; ${t('Tornar a l\'agrupació')}</a>`;
   }
 
   document.title = `Custòdia — ${parcelaActual.poblacio}`;
@@ -89,52 +100,6 @@ function pintarSubparceles(subparceles) {
  * acolorit amb el mateix gradient verd-roig que ja fem servir per a les
  * parcel·les al mapa -- el "senyal" visual de l'índex de perillositat.
  */
-function crearAnellSvg(index, color) {
-  const radi = 52;
-  const circumferencia = 2 * Math.PI * radi;
-  const p = Math.min(Math.max(index, 0), 100);
-  const offset = circumferencia * (1 - p / 100);
-
-  return `
-    <svg viewBox="0 0 120 120" role="img" aria-label="${t('Índex de perillositat')}: ${index.toFixed(0)}">
-      <circle cx="60" cy="60" r="${radi}" fill="none" stroke="#e2ddd2" stroke-width="12"></circle>
-      <circle cx="60" cy="60" r="${radi}" fill="none" stroke="${color}" stroke-width="12"
-        stroke-linecap="round" stroke-dasharray="${circumferencia}" stroke-dashoffset="${offset}"
-        transform="rotate(-90 60 60)"></circle>
-    </svg>
-  `;
-}
-
-/** Una fila d'un component del risc (etiqueta + barra acolorida segons el seu propi valor, o "no disponible"). */
-function filaComponent(etiqueta, valor01, textNoDisponible) {
-  if (valor01 == null) {
-    return `
-      <div class="risc-component">
-        <div class="risc-component__capcalera">
-          <span>${etiqueta}</span>
-          <span>${textNoDisponible}</span>
-        </div>
-        <div class="risc-component__barra"></div>
-      </div>
-    `;
-  }
-
-  const percentatge = valor01 * 100;
-  const color = ServeiRisc.colorSegonsRisc(percentatge);
-
-  return `
-    <div class="risc-component">
-      <div class="risc-component__capcalera">
-        <span>${etiqueta}</span>
-        <span>${percentatge.toFixed(0)} / 100</span>
-      </div>
-      <div class="risc-component__barra">
-        <div class="risc-component__valor" style="width: ${percentatge}%; background-color: ${color};"></div>
-      </div>
-    </div>
-  `;
-}
-
 /**
  * A diferència de l'altimetria, aquest càlcul no consulta cap servei
  * extern (només combina dades ja desades: pendent, orientació,
@@ -157,8 +122,7 @@ function pintarRisc(subparceles) {
     seccioRiscCalculat.style.borderTopColor = '';
     contingutRiscCalculat.innerHTML = `
       <p>
-        ${t('Cal calcular primer el pendent mitjà')}
-        (<a href="altitud.html?id=${encodeURIComponent(parcelaActual.id)}">${t('calcular-ho')}</a>).
+        ${t('Cal fer primer els càlculs d\'')}<a href="altitud.html?id=${encodeURIComponent(parcelaActual.id)}">${t('Altimetria')}</a>.
       </p>
     `;
     return ServeiRisc.COLOR_NEUTRE;
@@ -177,7 +141,7 @@ function pintarRisc(subparceles) {
   contingutRiscCalculat.innerHTML = `
     <div class="risc-panell">
       <div class="risc-gauge">
-        ${crearAnellSvg(indexPerillositat, colorTotal)}
+        ${crearAnellSvg(indexPerillositat, colorTotal, t('Índex de perillositat'))}
         <div class="risc-gauge__valor">
           <span class="risc-gauge__numero">${indexPerillositat.toFixed(0)}</span>
           <span class="risc-gauge__escala">/ 100</span>
@@ -201,34 +165,18 @@ function pintarFitxa(parcela) {
   const ajudaPendent = iconaAjuda(
     t('Inclinació mitjana del terreny, calculada a partir del model digital d\'elevacions de l\'IDEE (vèrtexs del perímetre o una malla de punts interiors).')
   );
-  const filaAltimetria = parcela.pendentMitja != null
-    ? `
-      <dt>${t('Pendent mitjà')}${ajudaPendent}</dt>
-      <dd>
-        ${parcela.pendentMitja.toFixed(1)} %
-        (<a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular de nou')}</a>)
-      </dd>
-    `
-    : `
-      <dt>${t('Pendent mitjà')}${ajudaPendent}</dt>
-      <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular-ho')}</a></dd>
-    `;
+  const filaAltimetria = `
+    <dt>${t('Pendent mitjà')}${ajudaPendent}</dt>
+    <dd>${parcela.pendentMitja != null ? `${parcela.pendentMitja.toFixed(1)} %` : '—'}</dd>
+  `;
 
   const ajudaOrientacio = iconaAjuda(
     t('Direcció cap on "mira" el pendent del terreny. Només es calcula amb el mètode de malla, no amb els vèrtexs del perímetre.')
   );
-  const filaOrientacio = parcela.orientacioMitjana != null
-    ? `
-      <dt>${t('Orientació mitjana')}${ajudaOrientacio}</dt>
-      <dd>
-        ${parcela.orientacioMitjana.toFixed(0)}° (${t(ServeiOrientacio.etiquetaBruixola(parcela.orientacioMitjana))})
-        (<a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular de nou')}</a>)
-      </dd>
-    `
-    : `
-      <dt>${t('Orientació mitjana')}${ajudaOrientacio}</dt>
-      <dd><a href="altitud.html?id=${encodeURIComponent(parcela.id)}">${t('Calcular-ho (mètode de malla)')}</a></dd>
-    `;
+  const filaOrientacio = `
+    <dt>${t('Orientació mitjana')}${ajudaOrientacio}</dt>
+    <dd>${parcela.orientacioMitjana != null ? `${parcela.orientacioMitjana.toFixed(0)}° (${t(ServeiOrientacio.etiquetaBruixola(parcela.orientacioMitjana))})` : '—'}</dd>
+  `;
 
   const localeData = idiomaActual() === 'ca' ? 'ca-ES' : 'es-ES';
   const ajudaData = iconaAjuda(
@@ -299,6 +247,10 @@ function referenciaAmbEnllac(parcela) {
 
   return `${parcela.referenciaCadastral} (<a href="${url}" target="_blank" rel="noopener">${t('veure al Cadastre')}</a>)`;
 }
+
+botoPendentOrientacio.addEventListener('click', () => {
+  window.location.href = `altitud.html?id=${encodeURIComponent(parcelaActual.id)}`;
+});
 
 botoExportarGpx.addEventListener('click', () => {
   ExportadorGpx.descarregar(parcelaActual);

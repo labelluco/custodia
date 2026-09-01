@@ -86,7 +86,7 @@ async function iniciar() {
     return;
   }
 
-  document.title = `Custòdia — Altitud (${parcelaActual.poblacio})`;
+  document.title = `Custòdia — ${t('Altimetria')} (${parcelaActual.poblacio})`;
   document.getElementById('enllac-tornar').innerHTML =
     `<a href="detall.html?id=${encodeURIComponent(id)}" class="enllac-tornar">&larr; ${t('Tornar al detall')}</a>`;
 

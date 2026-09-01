@@ -18,6 +18,8 @@
       <a href="index.html" class="menu__enllac" data-i18n="Inici">Inici</a>
       <a href="parceles.html" class="menu__enllac" data-i18n="Parcel·les">Parcel·les</a>
       <a href="afegir.html" class="menu__enllac" data-i18n="Afegir parcel·la">Afegir parcel·la</a>
+      <a href="agrupacions.html" class="menu__enllac menu__enllac--actiu" data-i18n="Agrupacions">Agrupacions</a>
+      <a href="afegir-agrupacio.html" class="menu__enllac" data-i18n="Afegir agrupació">Afegir agrupació</a>
     </nav>
     <div class="capcalera__dreta">
       <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">
@@ -32,9 +34,26 @@
 
     <section class="fitxa-parcela-contenidor">
       <h2 data-i18n="Agrupacions de parcel·les">Agrupacions de parcel·les</h2>
-      <p data-i18n="Aquesta funcionalitat encara no està disponible -- estarà a punt en una propera versió.">
-        Aquesta funcionalitat encara no està disponible -- estarà a punt en una propera versió.
+      <p class="nota nota--llistat" data-i18n="Toca «Detall» per veure el risc i l'altimetria conjunts d'una agrupació.">
+        Toca «Detall» per veure el risc i l'altimetria conjunts d'una agrupació.
       </p>
+      <p id="missatge-buit" hidden>
+        <span data-i18n="Encara no has creat cap agrupació.">Encara no has creat cap agrupació.</span>
+        <a href="afegir-agrupacio.html" data-i18n="Crea'n una">Crea'n una</a>.
+      </p>
+      <div class="taula-parceles-contenidor">
+        <table class="taula-parceles">
+          <thead>
+            <tr>
+              <th data-i18n="Nom">Nom</th>
+              <th data-i18n="Nombre de parcel·les">Nombre de parcel·les</th>
+              <th data-i18n="Superfície total">Superfície total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="llistat-agrupacions"></tbody>
+        </table>
+      </div>
     </section>
   </main>
 

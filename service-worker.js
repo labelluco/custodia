@@ -1,7 +1,7 @@
 // Service worker bàsic: cache dels fitxers estàtics per a ús offline.
 // Actualitzar la llista si s'afegeixen pantalles noves.
 
-const NOM_CACHE = 'custodia-v12';
+const NOM_CACHE = 'custodia-v20';
 
 const FITXERS_PER_CACHE = [
   './',
@@ -9,7 +9,9 @@ const FITXERS_PER_CACHE = [
   './parceles.html',
   './afegir.html',
   './detall.html',
+  './detall-agrupacio.html',
   './altitud.html',
+  './altitud-agrupacio.html',
   './agrupacions.html',
   './afegir-agrupacio.html',
   './css/estils.css',
@@ -18,7 +20,9 @@ const FITXERS_PER_CACHE = [
   './js/parceles.js',
   './js/afegir.js',
   './js/detall.js',
+  './js/detall-agrupacio.js',
   './js/altitud.js',
+  './js/altitud-agrupacio.js',
   './js/agrupacions.js',
   './js/afegir-agrupacio.js',
   './js/model/parcela.js',
@@ -29,6 +33,7 @@ const FITXERS_PER_CACHE = [
   './js/serveis/altimetria.js',
   './js/serveis/orientacio.js',
   './js/serveis/risc.js',
+  './js/serveis/agregacioAgrupacio.js',
   './js/serveis/vegetacio.js',
   './js/serveis/ubicacions.js',
   './js/i18n.js',
@@ -37,6 +42,7 @@ const FITXERS_PER_CACHE = [
   './js/geometria/gradient.js',
   './js/ui/mapa.js',
   './js/ui/ajuda.js',
+  './js/ui/risc-visual.js',
   './js/ui/menu.js',
   './manifest.json',
   './icones/icona.svg',

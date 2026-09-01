@@ -62,6 +62,36 @@ export class ServeiOrientacio {
   }
 
   /**
+   * Mitjana circular d'un conjunt d'orientacions ja calculades (per
+   * exemple, la de cada parcel·la d'una agrupació), ponderada per un
+   * pes (superfície). Mateix principi que calcularOrientacioMalla
+   * (vectors, no mitjana aritmètica directa), però a partir d'angles ja
+   * fets, no de gradients -- reutilitzable sense necessitat de graella.
+   *
+   * @param {Array<{angle: number, pes: number}>} valors angle en graus (0-360)
+   * @returns {number|null} graus (0-360), o null si no hi ha cap valor
+   */
+  static mitjanaCircularPonderada(valors) {
+    let sumaSinus = 0;
+    let sumaCosinus = 0;
+    let sumaPesos = 0;
+
+    for (const { angle, pes } of valors) {
+      if (angle == null) continue;
+      const rad = (angle * Math.PI) / 180;
+      sumaSinus += Math.sin(rad) * pes;
+      sumaCosinus += Math.cos(rad) * pes;
+      sumaPesos += pes;
+    }
+
+    if (sumaPesos === 0) return null;
+
+    let mitjana = (Math.atan2(sumaSinus / sumaPesos, sumaCosinus / sumaPesos) * 180) / Math.PI;
+    if (mitjana < 0) mitjana += 360;
+    return mitjana;
+  }
+
+  /**
    * Converteix un gradient (dz/dx, dz/dy) a una orientació en graus
    * (0-360, 0 = Nord, sentit horari): és la direcció cap on "mira" el
    * pendent (cap on baixa el terreny), per això s'inverteix el signe

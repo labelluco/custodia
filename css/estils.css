@@ -779,3 +779,38 @@ legend {
   height: 56px;
   color: var(--color-primari);
 }
+
+/* --- Llista de parcel·les triades (afegir-agrupacio.html) --- */
+.llistat-triades {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.llistat-triades li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espai-s);
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-fons);
+  border-radius: var(--radi);
+}
+
+.boto-treure-triada {
+  background: transparent;
+  border: none;
+  color: var(--color-perill);
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+}
+
+.boto-treure-triada:hover {
+  background-color: var(--color-hover);
+  border-radius: 4px;
+}

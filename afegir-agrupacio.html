@@ -9,6 +9,9 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icones/icona-192.png">
   <link rel="apple-touch-icon" href="icones/icona-192.png">
   <meta name="theme-color" content="#396a49">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="">
   <link rel="stylesheet" href="css/estils.css">
 </head>
 <body>
@@ -18,6 +21,8 @@
       <a href="index.html" class="menu__enllac" data-i18n="Inici">Inici</a>
       <a href="parceles.html" class="menu__enllac" data-i18n="Parcel·les">Parcel·les</a>
       <a href="afegir.html" class="menu__enllac" data-i18n="Afegir parcel·la">Afegir parcel·la</a>
+      <a href="agrupacions.html" class="menu__enllac" data-i18n="Agrupacions">Agrupacions</a>
+      <a href="afegir-agrupacio.html" class="menu__enllac menu__enllac--actiu" data-i18n="Afegir agrupació">Afegir agrupació</a>
     </nav>
     <div class="capcalera__dreta">
       <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">
@@ -30,12 +35,38 @@
   <main>
     <p><a href="index.html" class="enllac-tornar" data-i18n="← Tornar a l'inici">&larr; Tornar a l'inici</a></p>
 
-    <section class="fitxa-parcela-contenidor">
-      <h2 data-i18n="Afegir agrupació">Afegir agrupació</h2>
-      <p data-i18n="Aquesta funcionalitat encara no està disponible -- estarà a punt en una propera versió.">
-        Aquesta funcionalitat encara no està disponible -- estarà a punt en una propera versió.
-      </p>
-    </section>
+    <h2 data-i18n="Afegir agrupació">Afegir agrupació</h2>
+    <p class="nota nota--llistat" data-i18n="Toca una parcel·la al mapa per afegir-la (o treure-la) de l'agrupació.">
+      Toca una parcel·la al mapa per afegir-la (o treure-la) de l'agrupació.
+    </p>
+
+    <section id="mapa-agrupacio" class="mapa" aria-label="Mapa de parcel·les"></section>
+
+    <div class="panell">
+      <section id="parcela-triada" class="fitxa-parcela-contenidor" hidden>
+        <h2 data-i18n="Parcel·la triada">Parcel·la triada</h2>
+        <div id="contingut-parcela-triada"></div>
+        <button type="button" id="boto-afegir-treure" class="boto-estret"></button>
+      </section>
+
+      <section class="fitxa-parcela-contenidor">
+        <h2 data-i18n="Parcel·les de l'agrupació">Parcel·les de l'agrupació</h2>
+        <p id="missatge-buides" class="nota" data-i18n="Encara no has afegit cap parcel·la a l'agrupació.">
+          Encara no has afegit cap parcel·la a l'agrupació.
+        </p>
+        <ul id="llistat-triades" class="llistat-triades"></ul>
+      </section>
+
+      <section class="fitxa-parcela-contenidor">
+        <h2 data-i18n="Nom de l'agrupació">Nom de l'agrupació</h2>
+        <div class="camp">
+          <label for="nom-agrupacio" data-i18n="Nom">Nom</label>
+          <input type="text" id="nom-agrupacio" required>
+        </div>
+        <button type="button" id="boto-guardar" class="boto-estret" style="margin-top: var(--espai-s);" data-i18n="Guardar agrupació">Guardar agrupació</button>
+        <p id="missatge-estat" class="missatge-estat" hidden></p>
+      </section>
+    </div>
   </main>
 
   <footer class="peu">
@@ -46,6 +77,9 @@
     </p>
   </footer>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
   <script type="module" src="js/afegir-agrupacio.js"></script>
   <script type="module" src="js/registrar-sw.js"></script>
 </body>

@@ -45,6 +45,7 @@ export const ES = {
 
   // Compartit (mapes, general)
   '← Tornar al llistat': '← Volver al listado',
+  'Tornar a l\'agrupació': 'Volver a la agrupación',
 
   // Pàgina de detall (detall.html / detall.js)
   'No s\'ha indicat cap parcel·la.': 'No se ha indicado ninguna parcela.',
@@ -59,8 +60,7 @@ export const ES = {
   'Codi': 'Código',
   'Exportar track (GPX)': 'Exportar track (GPX)',
   'Esborrar parcel·la': 'Borrar parcela',
-  'Cal calcular primer el pendent mitjà': 'Primero hay que calcular la pendiente media',
-  'calcular-ho': 'calcularlo',
+  'Cal fer primer els càlculs d\'': 'Hay que hacer primero los cálculos de ',
   'Índex de perillositat': 'Índice de peligrosidad',
   'Component vegetació': 'Componente vegetación',
   'No disponible (sense subparceles)': 'No disponible (sin subparcelas)',
@@ -74,10 +74,7 @@ export const ES = {
   'segons el mateix criteri, no una probabilitat ni una freqüència d\'incendis: un 62 no vol dir "62% de possibilitats de cremar-se", ni "es crema 6 anys de cada 10".':
     'según el mismo criterio, no una probabilidad ni una frecuencia de incendios: un 62 no significa "62% de posibilidades de quemarse", ni "se quema 6 años de cada 10".',
   'Pendent mitjà': 'Pendiente media',
-  'Calcular de nou': 'Calcular de nuevo',
-  'Calcular-ho': 'Calcularlo',
   'Orientació mitjana': 'Orientación media',
-  'Calcular-ho (mètode de malla)': 'Calcularlo (método de malla)',
   'Dades consultades el': 'Datos consultados el',
   'Referència cadastral': 'Referencia catastral',
   'Segur que vols esborrar la parcel·la de': '¿Seguro que quieres borrar la parcela de',
@@ -85,7 +82,6 @@ export const ES = {
   'No s\'ha pogut carregar el detall de la parcel·la.': 'No se ha podido cargar el detalle de la parcela.',
 
   // Pàgina d'altitud (altitud.html / altitud.js)
-  'Altitud i pendent': 'Altitud y pendiente',
   'Calculant...': 'Calculando...',
   'Mètode de càlcul': 'Método de cálculo',
   'Vèrtexs del perímetre': 'Vértices del perímetro',
@@ -150,6 +146,7 @@ export const ES = {
   'Toca una parcel·la en el llistat per veure\'n el perímetre al mapa. Per veure el detall, fes clic en el perímetre o en el botó «Detall».':
     'Toca una parcela en el listado para ver su perímetro en el mapa. Para ver el detalle, haz clic en el perímetro o en el botón «Detalle».',
   'Resultats': 'Resultados',
+  'Altimetria': 'Altimetría',
   'Programari lliure': 'Software libre',
   'Codi font': 'Código fuente',
   'Contacte': 'Contacto',
@@ -163,8 +160,61 @@ export const ES = {
   'Parcel·les': 'Parcelas',
   'Què vols fer?': '¿Qué quieres hacer?',
   'Agrupacions de parcel·les': 'Agrupaciones de parcelas',
+  'Agrupacions': 'Agrupaciones',
   'Afegir agrupació': 'Añadir agrupación',
   '← Tornar a l\'inici': '← Volver al inicio',
   'Aquesta funcionalitat encara no està disponible -- estarà a punt en una propera versió.':
     'Esta funcionalidad todavía no está disponible -- estará lista en una próxima versión.',
+
+  // Afegir agrupació (afegir-agrupacio.html / afegir-agrupacio.js)
+  'Parcel·la triada': 'Parcela elegida',
+  'Toca una parcel·la al mapa per afegir-la (o treure-la) de l\'agrupació.':
+    'Toca una parcela en el mapa para añadirla (o quitarla) de la agrupación.',
+  'Parcel·les de l\'agrupació': 'Parcelas de la agrupación',
+  'Encara no has afegit cap parcel·la a l\'agrupació.':
+    'Todavía no has añadido ninguna parcela a la agrupación.',
+  'Nom de l\'agrupació': 'Nombre de la agrupación',
+  'Nom': 'Nombre',
+  'Guardar agrupació': 'Guardar agrupación',
+  'Treure de l\'agrupació': 'Quitar de la agrupación',
+  'Afegir a l\'agrupació': 'Añadir a la agrupación',
+  'Treure': 'Quitar',
+  'Cal indicar un nom per a l\'agrupació.': 'Hay que indicar un nombre para la agrupación.',
+  'Cal afegir-hi almenys una parcel·la.': 'Hay que añadir al menos una parcela.',
+  'No s\'ha pogut desar l\'agrupació:': 'No se ha podido guardar la agrupación:',
+  'No s\'han pogut carregar les parcel·les.': 'No se han podido cargar las parcelas.',
+
+  // Llistat d'agrupacions (agrupacions.html / agrupacions.js)
+  'Toca «Detall» per veure el risc i l\'altimetria conjunts d\'una agrupació.':
+    'Toca «Detalle» para ver el riesgo y la altimetría conjuntos de una agrupación.',
+  'Encara no has creat cap agrupació.': 'Todavía no has creado ninguna agrupación.',
+  'Crea\'n una': 'Crea una',
+
+  // Detall d'agrupació (detall-agrupacio.html / detall-agrupacio.js)
+  'Detall de l\'agrupació': 'Detalle de la agrupación',
+  'No s\'ha indicat cap agrupació.': 'No se ha indicado ninguna agrupación.',
+  'No s\'ha trobat aquesta agrupació.': 'No se ha encontrado esta agrupación.',
+  'Dades de l\'agrupació': 'Datos de la agrupación',
+  'Nombre de parcel·les': 'Número de parcelas',
+  'Superfície total': 'Superficie total',
+  'Terreny (agregat)': 'Terreno (agregado)',
+  'Cal calcular primer l\'altitud (mètode de malla) de totes les parcel·les de l\'agrupació.':
+    'Hay que calcular primero la altitud (método de malla) de todas las parcelas de la agrupación.',
+  'Cal calcular l\'altitud amb el mètode de malla per a totes les parcel·les de l\'agrupació abans de poder-ne calcular el risc conjunt. Falta per a:':
+    'Hay que calcular la altitud con el método de malla para todas las parcelas de la agrupación antes de poder calcular su riesgo conjunto. Falta para:',
+  'Segur que vols esborrar l\'agrupació': '¿Seguro que quieres borrar la agrupación',
+  'Aquesta acció no es pot desfer (les parcel·les que la formen no s\'esborraran).':
+    'Esta acción no se puede deshacer (las parcelas que la forman no se borrarán).',
+  'No s\'ha pogut carregar l\'agrupació.': 'No se ha podido cargar la agrupación.',
+  'Esborrar agrupació': 'Borrar agrupación',
+  'Veure punts d\'altitud': 'Ver puntos de altitud',
+
+  // Punts d'altitud combinats (altitud-agrupacio.html / altitud-agrupacio.js)
+  '← Tornar al detall': '← Volver al detalle',
+  'Punts d\'altitud de l\'agrupació': 'Puntos de altitud de la agrupación',
+  'Es mostren els punts ja calculats i desats de cada parcel·la, combinats en un sol mapa -- no es torna a consultar res.':
+    'Se muestran los puntos ya calculados y guardados de cada parcela, combinados en un solo mapa -- no se vuelve a consultar nada.',
+  'Punts d\'altitud': 'Puntos de altitud',
+  'Cal calcular l\'altitud amb el mètode de malla per a totes les parcel·les de l\'agrupació. Falta per a:':
+    'Hay que calcular la altitud con el método de malla para todas las parcelas de la agrupación. Falta para:',
 };
