@@ -217,4 +217,16 @@ export const ES = {
   'Punts d\'altitud': 'Puntos de altitud',
   'Cal calcular l\'altitud amb el mètode de malla per a totes les parcel·les de l\'agrupació. Falta per a:':
     'Hay que calcular la altitud con el método de malla para todas las parcelas de la agrupación. Falta para:',
+
+  // Mapa de selecció al Cadastre (afegir.html / afegir.js)
+  'Tria la parcel·la al mapa': 'Elige la parcela en el mapa',
+  'Amplia el mapa fins que hi vegis les parcel·les i toca la que vulguis afegir. També pots ometre aquest pas i escriure les dades a mà, més avall.':
+    'Amplía el mapa hasta que veas las parcelas y toca la que quieras añadir. También puedes omitir este paso y escribir los datos a mano, más abajo.',
+  'Es mostren les parcel·les que cauen dins del requadre marcat (línia discontínua) o que en toquen alguna part -- desplaça el mapa fins que hi càpiga la teva zona.':
+    'Se muestran las parcelas que caen dentro del recuadro marcado (línea discontinua) o que lo tocan en alguna parte -- desplaza el mapa hasta que quepa tu zona.',
+  'Carregant les parcel·les d\'aquesta zona...': 'Cargando las parcelas de esta zona...',
+  'No s\'ha pogut identificar el polígon i la parcel·la d\'aquesta finca.':
+    'No se ha podido identificar el polígono y la parcela de esta finca.',
+  'No s\'ha pogut identificar automàticament la província i el municipi d\'aquesta parcel·la. Selecciona\'ls manualment i escriu el polígon i la parcel·la a mà.':
+    'No se ha podido identificar automáticamente la provincia y el municipio de esta parcela. Selecciónalos manualmente y escribe el polígono y la parcela a mano.',
 };

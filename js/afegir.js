@@ -11,6 +11,7 @@
 import { BaseDades } from './serveis/basedades.js';
 import { ServeiCadastre } from './serveis/cadastre.js';
 import { ServeiUbicacions } from './serveis/ubicacions.js';
+import { Mapa } from './ui/mapa.js';
 import { Parcela } from './model/parcela.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
@@ -199,3 +200,222 @@ function mostrarEstat(text, tipus) {
   missatgeEstat.className = `missatge-estat missatge-estat--${tipus}`;
   missatgeEstat.hidden = false;
 }
+
+// --- Mapa de selecció directa al Cadastre ---
+//
+// Alternativa a escriure polígon i parcel·la a mà: es mostren totes
+// les parcel·les del Cadastre visibles al requadre del mapa (consulta
+// WFS per BBOX, vegeu ServeiCadastre.consultarParcelesEnBBOX), i en
+// tocar-ne una s'omplen tots els camps automàticament (província,
+// població, polígon i parcel·la -- els dos primers, resolts a partir
+// dels codis que ja porta la pròpia referència cadastral) i es llança
+// la consulta de seguida, sense necessitat del pas manual.
+//
+// Es manté el formulari manual tal com estava: no tothom sap
+// identificar la seva finca en un mapa, però sí en pot conèixer el
+// polígon i la parcel·la de memòria.
+let mapaSeleccio = null;
+let capaIndicadorArea = null;
+const missatgeCarregantMapa = document.getElementById('carregant-parceles-mapa');
+// Es guarda un número de "generació" de cada consulta: si arriba la
+// resposta d'una consulta que ja no és la més recent (per exemple,
+// perquè l'usuari ha tornat a moure el mapa abans que arribés), es
+// descarta en lloc de pintar-la -- evita que una resposta antiga
+// "guanyi" per pura casualitat de temps a una de més nova.
+let generacioActual = 0;
+let referenciaTemporitzador = null;
+
+// Es va confirmar provant-ho en directe que el propi servei del
+// Cadastre no respon (zero resultats, sense cap error) si el requadre
+// de la consulta és massa gran -- per això no es fa servir tota la
+// zona visible del mapa (que pot ser molt gran si l'usuari s'allunya
+// per tenir context), sinó sempre una àrea fixa i petita al voltant
+// del centre, per sota d'aquest límit. L'usuari pot allunyar-se tant
+// com vulgui per orientar-se; només cal que desplaci el mapa perquè la
+// seva parcel·la caigui dins del requadre marcat.
+const COSTAT_AREA_CONSULTA_METRES = 700;
+
+// Temps mínim que es manté visible el missatge de "Carregant..." --
+// sense això, si la consulta respon molt ràpid (l'àrea és petita),
+// pot arribar a desaparèixer abans que l'ull humà l'arribi a notar.
+const DURADA_MINIMA_MISSATGE_CARREGA_MS = 300;
+
+function inicialitzarMapaSeleccio() {
+  mapaSeleccio = new Mapa('mapa-seleccio-cadastre');
+  // Es retarda una mica cada consulta (i es descarta l'anterior si
+  // encara no havia saltat): així, si l'usuari fa zoom o es desplaça
+  // diverses vegades seguides molt ràpid, només es llança una consulta
+  // per al punt final, no una per cada micro-moviment intermedi.
+  mapaSeleccio.leafletMap.on('moveend', () => {
+    clearTimeout(referenciaTemporitzador);
+    referenciaTemporitzador = setTimeout(actualitzarParcelesVisibles, 400);
+  });
+  actualitzarParcelesVisibles();
+}
+
+async function actualitzarParcelesVisibles() {
+  const generacioDAquestaConsulta = ++generacioActual;
+
+  const centre = mapaSeleccio.leafletMap.getCenter();
+  const bounds = centre.toBounds(COSTAT_AREA_CONSULTA_METRES);
+
+  if (capaIndicadorArea) {
+    mapaSeleccio.leafletMap.removeLayer(capaIndicadorArea);
+  }
+  capaIndicadorArea = L.rectangle(bounds, {
+    color: '#a1552e',
+    weight: 2,
+    fill: false,
+    dashArray: '6 4',
+  }).addTo(mapaSeleccio.leafletMap);
+
+  console.log('[mapa-cadastre] BBOX de consulta (lat/lng):', bounds.toBBoxString());
+  missatgeCarregantMapa.hidden = false;
+  const inicimostraCarrega = Date.now();
+  // Sense això, el navegador pot no arribar mai a repintar el canvi
+  // anterior (hidden = false) abans que comenci la feina llarga i
+  // seguida de sota (consultar + pintar centenars de polígons) -- es
+  // força explícitament un moment de respir perquè el missatge
+  // arribi a veure's de debò.
+  await new Promise(requestAnimationFrame);
+  try {
+    const parceles = await ServeiCadastre.consultarParcelesEnBBOX(
+      bounds.getSouth(),
+      bounds.getWest(),
+      bounds.getNorth(),
+      bounds.getEast()
+    );
+
+    if (generacioDAquestaConsulta !== generacioActual) {
+      console.log('[mapa-cadastre] resposta descartada (ja no és la consulta més recent)');
+      return;
+    }
+
+    console.log('[mapa-cadastre] parcel·les rebudes:', parceles.length, parceles);
+    mapaSeleccio.buidar();
+    for (const p of parceles) {
+      if (p.coordenades.length === 0) {
+        console.log('[mapa-cadastre] parcel·la sense geometria, ignorada:', p.referenciaCadastral);
+        continue;
+      }
+      mapaSeleccio.afegirParcelaCandidata(p.coordenades, p.referenciaCadastral, () =>
+        seleccionarParcelaCandidata(p)
+      );
+    }
+  } catch (error) {
+    console.error('[mapa-cadastre] error en consultar les parcel·les:', error);
+  } finally {
+    // Sempre s'amaga en acabar (èxit, error, o resposta descartada per
+    // haver-n'hi una de més recent) -- mai es queda penjat. Com que la
+    // consulta pot ser molt ràpida (l'àrea és petita), es garanteix un
+    // temps mínim visible perquè no passi desapercebut.
+    if (generacioDAquestaConsulta === generacioActual) {
+      const tempsTranscorregut = Date.now() - inicimostraCarrega;
+      const esperaRestant = Math.max(0, DURADA_MINIMA_MISSATGE_CARREGA_MS - tempsTranscorregut);
+      setTimeout(() => {
+        if (generacioDAquestaConsulta === generacioActual) {
+          missatgeCarregantMapa.hidden = true;
+        }
+      }, esperaRestant);
+    }
+  }
+}
+
+/**
+ * En tocar una parcel·la del mapa: se n'obtenen província i municipi
+ * directament del Cadastre (Consulta_DNPRC_Codigos, amb els codis que
+ * ja porta la pròpia referència -- vegeu ServeiCadastre.consultarNomsPerCodis),
+ * s'omplen tots els camps del formulari, i es llança la consulta de seguida.
+ */
+async function seleccionarParcelaCandidata(parcelaCandidata) {
+  console.log(
+    '[mapa-cadastre] parcel·la triada -- referència en brut:', parcelaCandidata.referenciaCadastral,
+    '| polígon/parcel·la desglossats:', parcelaCandidata.poligon, '/', parcelaCandidata.parcelaCadastral
+  );
+
+  if (!parcelaCandidata.poligon || !parcelaCandidata.parcelaCadastral) {
+    alert(t('No s\'ha pogut identificar el polígon i la parcel·la d\'aquesta finca.'));
+    return;
+  }
+
+  // Es reinicia l'estat del formulari abans d'omplir-hi les dades
+  // noves: si ja s'havia consultat una altra parcel·la abans (des del
+  // mapa o a mà), el primer bloc del formulari -- amb el botó de
+  // "Consultar cadastre" inclòs -- va quedar deshabilitat, i un botó
+  // deshabilitat no dispara el seu clic ni que es cridi per codi. Sense
+  // aquest reinici, tocar una segona parcel·la al mapa no feia res, i
+  // es quedaven mostrats sempre els resultats de la primera.
+  fieldsetCadastre.disabled = false;
+  fieldsetUsRisc.hidden = true;
+  missatgeEstat.hidden = true;
+  dadesCadastre = null;
+  dadesFormulariConsultades = null;
+
+  const codiProvinciaRef = parcelaCandidata.referenciaCadastral.slice(0, 2);
+  const codiMunicipiRef = parcelaCandidata.referenciaCadastral.slice(2, 5);
+
+  try {
+    // Es demanen els noms directament al Cadastre amb els codis que ja
+    // porta la pròpia referència (Consulta_DNPRC_Codigos), en lloc de
+    // passar per ConsultaMunicipio -- un servei que s'ha demostrat que
+    // no llegim correctament per a algun municipi (vegeu
+    // ServeiCadastre.consultarNomsPerCodis).
+    const { provincia, municipi } = await ServeiCadastre.consultarNomsPerCodis(
+      codiProvinciaRef,
+      codiMunicipiRef,
+      parcelaCandidata.referenciaCadastral
+    );
+    console.log('[mapa-cadastre] provincia/municipi resolts pel Cadastre:', provincia, '/', municipi);
+
+    establirValorUbicacio('provincia', provincia);
+    // Encara no tenim la llista sencera de municipis d'aquesta
+    // província (no calia demanar-la) -- n'hi ha prou de crear-hi
+    // només l'opció d'aquest municipi concret.
+    establirValorUbicacio('poblacio', municipi, [{ codi: codiMunicipiRef, nom: municipi }]);
+    document.getElementById('poligon').value = parcelaCandidata.poligon;
+    document.getElementById('parcela').value = parcelaCandidata.parcelaCadastral;
+
+    botoConsultar.click();
+  } catch (error) {
+    console.error(error);
+    alert(
+      t(
+        'No s\'ha pogut identificar automàticament la província i el municipi d\'aquesta parcel·la. Selecciona\'ls manualment i escriu el polígon i la parcel·la a mà.'
+      )
+    );
+  }
+}
+
+/**
+ * Estableix el valor d'un camp de província/població, tant si encara
+ * és un <select> (cas normal) com si ha caigut a un <input> de text
+ * (si ServeiUbicacions va fallar en carregar la pàgina). Si calen
+ * opcions noves (per exemple, la població, que només es poblen quan
+ * es tria una província a mà), es passen a "opcions".
+ */
+function establirValorUbicacio(idElement, nom, opcions) {
+  const element = document.getElementById(idElement);
+  if (!element) return;
+
+  if (element.tagName === 'SELECT') {
+    if (opcions) {
+      element.innerHTML = opcions
+        .map((o) => `<option value="${o.nom}" data-codi="${o.codi}">${o.nom}</option>`)
+        .join('');
+      element.disabled = false;
+    }
+  }
+  element.value = nom;
+
+  // Si el navegador no ha trobat cap <option> amb aquest valor exacte,
+  // el camp es queda buit (o amb el valor anterior) sense cap avís --
+  // es detecta i es registra, en lloc de deixar-ho passar en silenci.
+  if (element.value !== nom) {
+    console.error(
+      `[mapa-cadastre] "${nom}" no coincideix amb cap opció de #${idElement}` +
+        (opcions ? ` -- opcions disponibles: ${opcions.map((o) => o.nom).join(', ')}` : '')
+    );
+  }
+}
+
+inicialitzarMapaSeleccio();

@@ -86,6 +86,25 @@ export class Mapa {
     this.leafletMap.fitBounds(entrada.capa.getBounds(), { padding: [40, 40], maxZoom: 17 });
   }
 
+  /**
+   * Una parcel·la "candidata" trobada al cercador del Cadastre (encara
+   * no desada, sense id propi) -- estil senzill i diferenciat de les
+   * parcel·les ja guardades, amb la referència cadastral com a tooltip.
+   */
+  afegirParcelaCandidata(coordenades, referenciaCadastral, onClick) {
+    const poligon = L.polygon(coordenades, {
+      color: '#396a49',
+      weight: 2,
+      fillColor: '#396a49',
+      fillOpacity: 0.15,
+    });
+    poligon.bindTooltip(referenciaCadastral);
+    if (onClick) {
+      poligon.on('click', onClick);
+    }
+    poligon.addTo(this.capaParceles);
+  }
+
   buidar() {
     this.capaParceles.clearLayers();
     this.parceles = [];

@@ -9,6 +9,9 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icones/icona-192.png">
   <link rel="apple-touch-icon" href="icones/icona-192.png">
   <meta name="theme-color" content="#396a49">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="">
   <link rel="stylesheet" href="css/estils.css">
 </head>
 <body>
@@ -30,6 +33,18 @@
   </header>
 
   <main>
+    <section class="fitxa-parcela-contenidor">
+      <h2 data-i18n="Tria la parcel·la al mapa">Tria la parcel·la al mapa</h2>
+      <p class="nota nota--llistat" data-i18n="Amplia el mapa fins que hi vegis les parcel·les i toca la que vulguis afegir. També pots ometre aquest pas i escriure les dades a mà, més avall.">
+        Amplia el mapa fins que hi vegis les parcel·les i toca la que vulguis afegir. També pots ometre aquest pas i escriure les dades a mà, més avall.
+      </p>
+      <section id="mapa-seleccio-cadastre" class="mapa" aria-label="Selecció de parcel·la al mapa del Cadastre"></section>
+      <p id="carregant-parceles-mapa" class="missatge-estat missatge-estat--info" style="margin-top: var(--espai-s);" hidden data-i18n="Carregant les parcel·les d'aquesta zona...">Carregant les parcel·les d'aquesta zona...</p>
+      <p id="avis-zoom-mapa" class="nota" data-i18n="Es mostren les parcel·les que cauen dins del requadre marcat (línia discontínua) o que en toquen alguna part -- desplaça el mapa fins que hi càpiga la teva zona.">
+        Es mostren les parcel·les que cauen dins del requadre marcat (línia discontínua) o que en toquen alguna part -- desplaça el mapa fins que hi càpiga la teva zona.
+      </p>
+    </section>
+
     <section class="formulari-parcela fitxa-parcela-contenidor">
       <h2 data-i18n="Afegir una nova parcel·la">Afegir una nova parcel·la</h2>
 
@@ -101,6 +116,9 @@
     </p>
   </footer>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.js"></script>
   <script type="module" src="js/afegir.js"></script>
   <script type="module" src="js/registrar-sw.js"></script>

@@ -1,7 +1,7 @@
 // Service worker bàsic: cache dels fitxers estàtics per a ús offline.
 // Actualitzar la llista si s'afegeixen pantalles noves.
 
-const NOM_CACHE = 'custodia-v20';
+const NOM_CACHE = 'custodia-v35';
 
 const FITXERS_PER_CACHE = [
   './',
