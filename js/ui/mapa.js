@@ -75,15 +75,39 @@ export class Mapa {
     if (!entrada) return;
 
     if (this._capaRessaltada) {
-      this._capaRessaltada.setStyle({ weight: 2 });
+      this._capaRessaltada.forEach((capa) => capa.setStyle({ weight: 2 }));
     }
 
     entrada.capa.setStyle({ weight: 5 });
     entrada.capa.bringToFront();
     entrada.capa.openTooltip();
-    this._capaRessaltada = entrada.capa;
+    this._capaRessaltada = [entrada.capa];
 
     this.leafletMap.fitBounds(entrada.capa.getBounds(), { padding: [40, 40], maxZoom: 17 });
+  }
+
+  /**
+   * Igual que ressaltarParcela, però per a diverses alhora (per
+   * exemple, totes les parcel·les d'una agrupació) -- ajusta la vista
+   * al conjunt de totes elles, no només a una.
+   */
+  ressaltarParceles(ids) {
+    if (this._capaRessaltada) {
+      this._capaRessaltada.forEach((capa) => capa.setStyle({ weight: 2 }));
+    }
+
+    const entrades = this.parceles.filter((p) => ids.includes(p.parcela.id));
+    if (entrades.length === 0) return;
+
+    const capes = entrades.map((e) => e.capa);
+    capes.forEach((capa) => {
+      capa.setStyle({ weight: 5 });
+      capa.bringToFront();
+    });
+    this._capaRessaltada = capes;
+
+    const limits = L.featureGroup(capes).getBounds();
+    this.leafletMap.fitBounds(limits, { padding: [40, 40], maxZoom: 17 });
   }
 
   /**

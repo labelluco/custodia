@@ -185,8 +185,8 @@ export const ES = {
   'No s\'han pogut carregar les parcel·les.': 'No se han podido cargar las parcelas.',
 
   // Llistat d'agrupacions (agrupacions.html / agrupacions.js)
-  'Toca «Detall» per veure el risc i l\'altimetria conjunts d\'una agrupació.':
-    'Toca «Detalle» para ver el riesgo y la altimetría conjuntos de una agrupación.',
+  'Toca una agrupació en el llistat per veure\'n les parcel·les al mapa. Per veure el detall, fes clic en una parcel·la o en el botó «Detall».':
+    'Toca una agrupación en el listado para ver sus parcelas en el mapa. Para ver el detalle, haz clic en una parcela o en el botón «Detalle».',
   'Encara no has creat cap agrupació.': 'Todavía no has creado ninguna agrupación.',
   'Crea\'n una': 'Crea una',
 
