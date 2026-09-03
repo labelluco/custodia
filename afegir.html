@@ -102,9 +102,18 @@
             </div>
           </div>
 
-          <button type="submit" id="boto-desar" class="boto-estret" data-i18n="Desar parcel·la">Desar parcel·la</button>
+          <button type="button" id="boto-desar" class="boto-estret" data-i18n="Afegir a la llista">Afegir a la llista</button>
         </fieldset>
       </form>
+    </section>
+
+    <section id="parceles-pendents" class="fitxa-parcela-contenidor" hidden>
+      <h2 data-i18n="Parcel·les per guardar">Parcel·les per guardar</h2>
+      <p class="nota" data-i18n="Pots seguir afegint-ne més (d'altres municipis també) abans de desar-les totes.">
+        Pots seguir afegint-ne més (d'altres municipis també) abans de desar-les totes.
+      </p>
+      <ul id="llistat-pendents" class="llistat-triades"></ul>
+      <button type="button" id="boto-guardar-totes" class="boto-estret" style="margin-top: var(--espai-s);" data-i18n="Guardar totes les parcel·les">Guardar totes les parcel·les</button>
     </section>
   </main>
 

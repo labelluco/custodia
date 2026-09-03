@@ -29,7 +29,7 @@ export const ES = {
   'Consultar cadastre': 'Consultar catastro',
   'Ús (segons el Cadastre)': 'Uso (según el Catastro)',
   'Desglossament de subparceles': 'Desglose de subparcelas',
-  'Desar parcel·la': 'Guardar parcela',
+  'Afegir a la llista': 'Añadir a la lista',
   'Tria una província': 'Elige una provincia',
   'p. ex. Teruel': 'p. ej. Teruel',
   'Tria un municipi': 'Elige un municipio',
@@ -40,7 +40,12 @@ export const ES = {
   'Cadastre consultat correctament.': 'Catastro consultado correctamente.',
   'No s\'ha pogut consultar el cadastre:': 'No se ha podido consultar el catastro:',
   'Primer cal consultar el cadastre.': 'Primero hay que consultar el catastro.',
-  'Parcel·la desada correctament.': 'Parcela guardada correctamente.',
+  'Parcel·les per guardar': 'Parcelas para guardar',
+  'Pots seguir afegint-ne més (d\'altres municipis també) abans de desar-les totes.':
+    'Puedes seguir añadiendo más (de otros municipios también) antes de guardarlas todas.',
+  'Afegida a la llista. Ja pots consultar-ne una altra, o desar-les totes.':
+    'Añadida a la lista. Ya puedes consultar otra, o guardarlas todas.',
+  'Guardar totes les parcel·les': 'Guardar todas las parcelas',
   'No s\'ha pogut desar la parcel·la:': 'No se ha podido guardar la parcela:',
 
   // Compartit (mapes, general)

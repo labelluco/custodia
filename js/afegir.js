@@ -31,9 +31,15 @@ const campDesglossament = document.getElementById('camp-desglossament');
 const llistatDesglossament = document.getElementById('llistat-desglossament');
 const selectProvincia = document.getElementById('provincia');
 const selectPoblacio = document.getElementById('poblacio');
+const seccioPendents = document.getElementById('parceles-pendents');
+const llistatPendents = document.getElementById('llistat-pendents');
+const botoGuardarTotes = document.getElementById('boto-guardar-totes');
 
 let dadesCadastre = null;
 let dadesFormulariConsultades = null;
+// Cada element: { dadesCadastre, dadesFormulariConsultades } -- es
+// construeix la Parcela real només en desar-les totes, no abans.
+const parcelesPendents = [];
 
 /**
  * Carrega el desplegable de províncies en obrir la pàgina, per evitar
@@ -161,37 +167,77 @@ botoConsultar.addEventListener('click', async () => {
   }
 });
 
-formulari.addEventListener('submit', async (event) => {
-  event.preventDefault();
-
+botoDesar.addEventListener('click', () => {
   if (!dadesCadastre || !dadesFormulariConsultades) {
     mostrarEstat(t('Primer cal consultar el cadastre.'), 'error');
     return;
   }
 
-  botoDesar.disabled = true;
+  parcelesPendents.push({ dadesCadastre, dadesFormulariConsultades });
+  pintarPendents();
 
-  try {
-    const parcela = new Parcela({
-      ...dadesCadastre,
-      ...dadesFormulariConsultades,
-      dataCreacio: new Date().toISOString(),
+  // Es reinicia el bloc de consulta perquè es pugui afegir una altra
+  // parcel·la de seguida -- es manté la província i la població
+  // triades (més àgil si la següent és del mateix municipi), però es
+  // buiden el polígon i la parcel·la; no calen ser del mateix municipi
+  // per continuar, és només més ràpid si ho són.
+  fieldsetCadastre.disabled = false;
+  fieldsetUsRisc.hidden = true;
+  document.getElementById('poligon').value = '';
+  document.getElementById('parcela').value = '';
+  dadesCadastre = null;
+  dadesFormulariConsultades = null;
+  mostrarEstat(t('Afegida a la llista. Ja pots consultar-ne una altra, o desar-les totes.'), 'exit');
+});
+
+/** Llistat de les parcel·les pendents de desar, amb un botó per treure-les. */
+function pintarPendents() {
+  seccioPendents.hidden = parcelesPendents.length === 0;
+
+  llistatPendents.innerHTML = parcelesPendents
+    .map(
+      ({ dadesFormulariConsultades: d }, index) => `
+        <li>
+          <span>${d.poblacio} — ${t('Polígon')} ${d.poligon}, ${t('Parcel·la')} ${d.parcelaCadastral}</span>
+          <button type="button" class="boto-treure-triada" data-index="${index}" aria-label="${t('Treure')}">&times;</button>
+        </li>
+      `
+    )
+    .join('');
+
+  llistatPendents.querySelectorAll('.boto-treure-triada').forEach((boto) => {
+    boto.addEventListener('click', () => {
+      parcelesPendents.splice(Number(boto.dataset.index), 1);
+      pintarPendents();
     });
+  });
+}
 
+botoGuardarTotes.addEventListener('click', async () => {
+  if (parcelesPendents.length === 0) return;
+
+  botoGuardarTotes.disabled = true;
+  try {
     const bd = await BaseDades.obrir();
-    const id = await bd.afegirParcela(parcela);
 
-    if (dadesCadastre.subparceles.length > 0) {
-      await bd.afegirSubparceles(id, dadesCadastre.subparceles);
+    for (const { dadesCadastre: dc, dadesFormulariConsultades: df } of parcelesPendents) {
+      const parcela = new Parcela({
+        ...dc,
+        ...df,
+        dataCreacio: new Date().toISOString(),
+      });
+      const id = await bd.afegirParcela(parcela);
+      if (dc.subparceles.length > 0) {
+        await bd.afegirSubparceles(id, dc.subparceles);
+      }
     }
 
-    mostrarEstat(t('Parcel·la desada correctament.'), 'exit');
     window.location.href = 'parceles.html';
   } catch (error) {
     console.error(error);
     mostrarEstat(`${t('No s\'ha pogut desar la parcel·la:')} ${error.message}`, 'error');
   } finally {
-    botoDesar.disabled = false;
+    botoGuardarTotes.disabled = false;
   }
 });
 
