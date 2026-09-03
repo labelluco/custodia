@@ -2,6 +2,12 @@
 // mapa (com parceles.js); en tocar-ne una, es pot afegir a l'agrupació
 // que s'està creant, o treure-la si ja hi era. Al final, es desa
 // l'agrupació amb el seu nom i la llista de parcel·les triades.
+//
+// La mateixa pàgina serveix per EDITAR una agrupació ja existent:
+// arribant-hi amb ?id=X (per exemple, des del botó "Editar" del
+// detall d'una agrupació), es carrega la seva composició actual en
+// lloc de començar de zero, i en guardar s'actualitza en lloc de
+// crear-ne una de nova.
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { Agrupacio } from './model/agrupacio.js';
@@ -19,6 +25,8 @@ inicialitzarMenu();
 const COLOR_NORMAL = '#396a49';
 const COLOR_TRIADA = '#a1552e';
 
+const titolPagina = document.querySelector('main h2');
+const enllacTornar = document.getElementById('enllac-tornar');
 const seccioParcelaTriada = document.getElementById('parcela-triada');
 const contingutParcelaTriada = document.getElementById('contingut-parcela-triada');
 const botoAfegirTreure = document.getElementById('boto-afegir-treure');
@@ -34,14 +42,39 @@ let totesLesParceles = [];
 const idsTriats = new Set();
 let parcelaMostrada = null;
 let mapa;
+// Si no és null, s'està editant aquesta agrupació (en lloc de crear-ne
+// una de nova) -- conserva el seu id per desar-hi a sobre.
+let agrupacioEnEdicio = null;
 
 async function iniciar() {
+  const parametres = new URLSearchParams(window.location.search);
+  const id = parametres.get('id');
+
   bd = await BaseDades.obrir();
+
+  if (id) {
+    agrupacioEnEdicio = await bd.llegirAgrupacio(id);
+    if (!agrupacioEnEdicio) {
+      mostrarEstat(t('No s\'ha trobat aquesta agrupació.'), 'error');
+      return;
+    }
+    for (const pid of agrupacioEnEdicio.parcelaIds) {
+      idsTriats.add(pid);
+    }
+    campNom.value = agrupacioEnEdicio.nom;
+
+    document.title = `Custòdia — ${t('Editar agrupació')}`;
+    titolPagina.textContent = t('Editar agrupació');
+    enllacTornar.innerHTML =
+      `<a href="detall-agrupacio.html?id=${encodeURIComponent(id)}" class="enllac-tornar">&larr; ${t('Tornar al detall')}</a>`;
+  }
+
   totesLesParceles = await bd.llegirTotesLesParceles();
 
   mapa = new Mapa('mapa-agrupacio');
   pintarMapa();
   mapa.ajustarVistaATotes();
+  pintarLlistatTriades();
 }
 
 /**
@@ -139,9 +172,15 @@ botoGuardar.addEventListener('click', async () => {
 
   botoGuardar.disabled = true;
   try {
-    const agrupacio = new Agrupacio({ nom, parcelaIds: Array.from(idsTriats) });
+    const agrupacio = new Agrupacio({
+      id: agrupacioEnEdicio?.id ?? null,
+      nom,
+      parcelaIds: Array.from(idsTriats),
+    });
     await bd.afegirAgrupacio(agrupacio);
-    window.location.href = 'agrupacions.html';
+    window.location.href = agrupacioEnEdicio
+      ? `detall-agrupacio.html?id=${encodeURIComponent(agrupacioEnEdicio.id)}`
+      : 'agrupacions.html';
   } catch (error) {
     console.error(error);
     mostrarEstat(`${t('No s\'ha pogut desar l\'agrupació:')} ${error.message}`, 'error');

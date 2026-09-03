@@ -28,6 +28,7 @@ const llistatParceles = document.getElementById('llistat-parceles-agrupacio');
 const seccioRisc = document.getElementById('seccio-risc-calculat');
 const contingutRisc = document.getElementById('contingut-risc-calculat');
 const seccioAccions = document.getElementById('accions-agrupacio');
+const botoEditar = document.getElementById('boto-editar');
 const botoPuntsAltitud = document.getElementById('boto-punts-altitud');
 const botoEsborrar = document.getElementById('boto-esborrar');
 
@@ -190,6 +191,10 @@ function pintarRisc(agregat) {
 
   return colorTotal;
 }
+
+botoEditar.addEventListener('click', () => {
+  window.location.href = `afegir-agrupacio.html?id=${encodeURIComponent(agrupacioActual.id)}`;
+});
 
 botoPuntsAltitud.addEventListener('click', () => {
   window.location.href = `altitud-agrupacio.html?id=${encodeURIComponent(agrupacioActual.id)}`;

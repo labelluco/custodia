@@ -206,6 +206,7 @@ export const ES = {
   'Aquesta acció no es pot desfer (les parcel·les que la formen no s\'esborraran).':
     'Esta acción no se puede deshacer (las parcelas que la forman no se borrarán).',
   'No s\'ha pogut carregar l\'agrupació.': 'No se ha podido cargar la agrupación.',
+  'Editar agrupació': 'Editar agrupación',
   'Esborrar agrupació': 'Borrar agrupación',
   'Veure punts d\'altitud': 'Ver puntos de altitud',
 
