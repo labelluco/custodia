@@ -16,12 +16,30 @@
     <h1>Custòdia</h1>
     <nav class="menu" id="menu-principal">
       <a href="index.html" class="menu__enllac menu__enllac--actiu" data-i18n="Inici">Inici</a>
-      <a href="parceles.html" class="menu__enllac" data-i18n="Parcel·les">Parcel·les</a>
-      <a href="afegir.html" class="menu__enllac" data-i18n="Afegir parcel·la">Afegir parcel·la</a>
-      <a href="agrupacions.html" class="menu__enllac" data-i18n="Agrupacions">Agrupacions</a>
-      <a href="afegir-agrupacio.html" class="menu__enllac" data-i18n="Afegir agrupació">Afegir agrupació</a>
-      <a href="geometries.html" class="menu__enllac" data-i18n="Geometries">Geometries</a>
-      <a href="afegir-geometria.html" class="menu__enllac" data-i18n="Afegir geometria">Afegir geometria</a>
+
+      <div class="menu__grup">
+        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Parcel·les">Parcel·les</button>
+        <div class="menu__submenu">
+          <a href="parceles.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
+          <a href="afegir.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
+        </div>
+      </div>
+
+      <div class="menu__grup">
+        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Agrupacions">Agrupacions</button>
+        <div class="menu__submenu">
+          <a href="agrupacions.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
+          <a href="afegir-agrupacio.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
+        </div>
+      </div>
+
+      <div class="menu__grup">
+        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Geometries">Geometries</button>
+        <div class="menu__submenu">
+          <a href="geometries.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
+          <a href="afegir-geometria.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
+        </div>
+      </div>
     </nav>
     <div class="capcalera__dreta">
       <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">

@@ -67,6 +67,7 @@ a {
 
 .menu {
   display: flex;
+  align-items: center;
   gap: var(--espai-m);
 }
 
@@ -80,6 +81,94 @@ a {
 .menu__enllac--actiu,
 .menu__enllac:hover {
   border-bottom-color: white;
+}
+
+/* --- Grups desplegables del menú (Parcel·les/Agrupacions/Geometries,
+   cadascun amb "Llistar"/"Afegir" a dins) --- */
+.menu__grup {
+  position: relative;
+}
+
+.menu__grup-boto {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  margin: 0;
+  padding: 0 0 2px;
+  color: white;
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+}
+
+.menu__grup-boto:hover,
+.menu__grup-boto:active {
+  background: transparent;
+  box-shadow: none;
+}
+
+.menu__grup-boto:focus-visible {
+  outline: none;
+  border-bottom-color: white;
+}
+
+.menu__grup-boto::after {
+  content: '▾';
+  font-size: 0.65em;
+  transform: translateY(1px);
+}
+
+.menu__grup-boto:hover,
+.menu__grup--te-actiu .menu__grup-boto {
+  border-bottom-color: white;
+}
+
+.menu__submenu {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.6rem;
+  background-color: white;
+  border: 1px solid var(--color-vora);
+  border-radius: var(--radi);
+  box-shadow: 0 6px 16px rgba(35, 38, 31, 0.18);
+  padding: 0.4rem 0;
+  overflow: hidden;
+  min-width: 170px;
+  z-index: 40;
+}
+
+.menu__grup--obert .menu__submenu {
+  display: flex;
+}
+
+.menu__submenu .menu__enllac {
+  color: var(--color-text);
+  padding: 0.6rem 0.9rem;
+  border-radius: 0;
+  border-left: 3px solid transparent;
+  border-bottom: none;
+  font-weight: 500;
+}
+
+.menu__submenu .menu__enllac--actiu,
+.menu__submenu .menu__enllac:hover {
+  background-color: var(--color-hover);
+  border-left-color: var(--color-primari);
+  border-bottom: none;
+}
+
+.menu__submenu .menu__enllac--actiu {
+  font-weight: 700;
+  color: var(--color-primari-fosc);
 }
 
 .capcalera__dreta {
@@ -146,6 +235,29 @@ a {
 
   .menu--obert {
     display: flex;
+  }
+
+  /* Dins del panell mòbil, el submenú ja no flota per sobre: s'expandeix
+     inline, una mica indentat, com una part més del mateix panell
+     vertical -- flotar-hi a sobre no té sentit quan tot el menú ja
+     ocupa tota l'amplada. */
+  .menu__submenu {
+    position: static;
+    box-shadow: none;
+    background: transparent;
+    padding: 0 0 0 var(--espai-m);
+    margin-top: var(--espai-xs);
+  }
+
+  .menu__submenu .menu__enllac {
+    color: white;
+    padding: 0.3rem 0;
+  }
+
+  .menu__submenu .menu__enllac--actiu,
+  .menu__submenu .menu__enllac:hover {
+    background-color: transparent;
+    border-bottom-color: white;
   }
 }
 

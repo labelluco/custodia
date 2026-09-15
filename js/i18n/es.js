@@ -6,6 +6,8 @@ export const ES = {
   // Capçalera / menú (compartit per totes les pàgines)
   'Inici': 'Inicio',
   'Afegir parcel·la': 'Añadir parcela',
+  'Llistar': 'Listar',
+  'Afegir': 'Añadir',
   'Tornar al llistat': 'Volver al listado',
   'Tornar al detall': 'Volver al detalle',
 
