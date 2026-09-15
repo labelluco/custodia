@@ -320,4 +320,43 @@ export class BaseDades {
         reject(new Error(`BaseDades: no s'ha pogut esborrar la geometria (${event.target.error})`));
     });
   }
+
+  /**
+   * Buida un magatzem sencer i el torna a omplir amb "registres",
+   * mantenint els id originals (put, no add amb autoincrement) --
+   * necessari en importar una còpia de seguretat, perquè les
+   * referències creuades (subparcela.parcelaId, agrupacio.parcelaIds)
+   * segueixin apuntant on toca.
+   */
+  _substituirMagatzem(nomMagatzem, registres) {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(nomMagatzem, 'readwrite');
+      const magatzem = transaccio.objectStore(nomMagatzem);
+
+      magatzem.clear();
+      for (const registre of registres) {
+        magatzem.put(registre);
+      }
+
+      transaccio.oncomplete = () => resolve();
+      transaccio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'ha pogut restaurar ${nomMagatzem} (${event.target.error})`));
+    });
+  }
+
+  substituirParceles(parceles) {
+    return this._substituirMagatzem(MAGATZEM_PARCELES, parceles);
+  }
+
+  substituirSubparceles(subparceles) {
+    return this._substituirMagatzem(MAGATZEM_SUBPARCELES, subparceles);
+  }
+
+  substituirAgrupacions(agrupacions) {
+    return this._substituirMagatzem(MAGATZEM_AGRUPACIONS, agrupacions);
+  }
+
+  substituirGeometries(geometries) {
+    return this._substituirMagatzem(MAGATZEM_GEOMETRIES, geometries);
+  }
 }

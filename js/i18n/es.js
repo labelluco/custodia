@@ -227,6 +227,26 @@ export const ES = {
     'Esta acción no se puede deshacer (las parcelas que la forman no se borrarán).',
   'No s\'ha pogut carregar l\'agrupació.': 'No se ha podido cargar la agrupación.',
   'Editar agrupació': 'Editar agrupación',
+
+  // Còpia de seguretat (copia-seguretat.html / copia-seguretat.js)
+  'Còpia de seguretat': 'Copia de seguridad',
+  'Exportar': 'Exportar',
+  'Es descarreguen quatre fitxers CSV (parceles, subparceles, agrupacions i geometries), amb totes les teves dades tal com estan ara mateix -- obribles amb qualsevol full de càlcul.':
+    'Se descargan cuatro archivos CSV (parcelas, subparcelas, agrupaciones y geometrías), con todos tus datos tal como están ahora mismo -- abribles con cualquier hoja de cálculo.',
+  'Exportar totes les dades': 'Exportar todos los datos',
+  'Importar': 'Importar',
+  'Selecciona un o més dels quatre fitxers CSV (es reconeixen pel seu nom). Compte: cada fitxer que seleccionis substitueix del tot les dades corresponents que ja tinguis -- no s\'hi afegeixen, se substitueixen.':
+    'Selecciona uno o más de los cuatro archivos CSV (se reconocen por su nombre). Cuidado: cada archivo que selecciones sustituye del todo los datos correspondientes que ya tengas -- no se añaden, se sustituyen.',
+  'Importar (substitueix les dades)': 'Importar (sustituye los datos)',
+  'Fitxers exportats correctament.': 'Archivos exportados correctamente.',
+  'No s\'ha pogut exportar:': 'No se ha podido exportar:',
+  'Cal triar almenys un fitxer CSV.': 'Hay que elegir al menos un archivo CSV.',
+  'Segur que vols importar aquests fitxers? Les dades corresponents que ja tinguis es perdran i se substituiran per les del fitxer. Aquesta acció no es pot desfer.':
+    '¿Seguro que quieres importar estos archivos? Los datos correspondientes que ya tengas se perderán y se sustituirán por los del archivo. Esta acción no se puede deshacer.',
+  'Cap dels fitxers triats s\'ha reconegut (els noms han de ser parceles.csv, subparceles.csv, agrupacions.csv o geometries.csv).':
+    'Ninguno de los archivos elegidos se ha reconocido (los nombres deben ser parceles.csv, subparceles.csv, agrupacions.csv o geometries.csv).',
+  'Importat correctament:': 'Importado correctamente:',
+  'No s\'ha pogut importar:': 'No se ha podido importar:',
   'Esborrar agrupació': 'Borrar agrupación',
   'Veure punts d\'altitud': 'Ver puntos de altitud',
 
