@@ -23,6 +23,8 @@
       <a href="afegir.html" class="menu__enllac" data-i18n="Afegir parcel·la">Afegir parcel·la</a>
       <a href="agrupacions.html" class="menu__enllac" data-i18n="Agrupacions">Agrupacions</a>
       <a href="afegir-agrupacio.html" class="menu__enllac" data-i18n="Afegir agrupació">Afegir agrupació</a>
+      <a href="geometries.html" class="menu__enllac" data-i18n="Geometries">Geometries</a>
+      <a href="afegir-geometria.html" class="menu__enllac" data-i18n="Afegir geometria">Afegir geometria</a>
     </nav>
     <div class="capcalera__dreta">
       <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">
@@ -44,14 +46,14 @@
       </p>
       <div class="taula-parceles-contenidor">
         <table class="taula-parceles">
-          <thead>
+          <thead id="capcalera-parceles">
             <tr>
-              <th data-i18n="Població">Població</th>
-              <th data-i18n="Polígon">Polígon</th>
-              <th data-i18n="Parcel·la">Parcel·la</th>
-              <th data-i18n="Ús">Ús</th>
-              <th data-i18n="Superfície">Superfície</th>
-              <th data-i18n="Risc">Risc</th>
+              <th data-i18n="Població" data-ordena="poblacio">Població</th>
+              <th data-i18n="Polígon" data-ordena="poligon">Polígon</th>
+              <th data-i18n="Parcel·la" data-ordena="parcela">Parcel·la</th>
+              <th data-i18n="Ús" data-ordena="us">Ús</th>
+              <th data-i18n="Superfície" data-ordena="superficie">Superfície</th>
+              <th data-i18n="Risc" data-ordena="risc">Risc</th>
               <th></th>
             </tr>
           </thead>

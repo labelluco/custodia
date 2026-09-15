@@ -4,6 +4,7 @@
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { ServeiRisc } from './serveis/risc.js';
+import { inicialitzarOrdenacio } from './ui/taula-ordenable.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
 
@@ -16,6 +17,7 @@ async function iniciar() {
   const mapaSeccio = document.getElementById('mapa');
   const contenidorLlistat = document.getElementById('llistat-geometries');
   const missatgeBuit = document.getElementById('missatge-buit');
+  const capcalera = document.getElementById('capcalera-geometries');
 
   const geometries = await bd.llegirTotesLesGeometries();
 
@@ -28,15 +30,38 @@ async function iniciar() {
 
   const mapa = new Mapa('mapa');
 
+  const files = [];
   for (const geometria of geometries) {
     // Reutilitzat tal qual de ServeiRisc: encara que és pensat per a
     // parcel·les, funciona igual per a geometries (bd.llegirSubparcelesDe
     // hi retorna una llista buida, i el càlcul de risc ja sap
     // redistribuir els pesos quan falta la vegetació).
     const { color, index } = await ServeiRisc.colorIIndexDe(bd, geometria);
-
     mapa.afegirParcela(geometria, (g) => obrirDetall(g.id), color);
+    files.push({ geometria, color, index });
+  }
+  mapa.ajustarVistaATotes();
 
+  const pintar = () => pintarFiles(contenidorLlistat, files, mapa);
+
+  inicialitzarOrdenacio(
+    capcalera,
+    files,
+    {
+      nom: (f) => f.geometria.nom,
+      risc: (f) => f.index,
+    },
+    pintar
+  );
+
+  pintar();
+}
+
+/** Pinta les files en l'ordre actual de "files" -- es crida de nou cada vegada que es reordena. */
+function pintarFiles(contenidorLlistat, files, mapa) {
+  contenidorLlistat.innerHTML = '';
+
+  for (const { geometria, color, index } of files) {
     const fila = document.createElement('tr');
     fila.className = 'fila-parcela';
     fila.dataset.id = geometria.id;
@@ -66,8 +91,6 @@ async function iniciar() {
     fila.querySelector('.boto-taula').addEventListener('click', (event) => event.stopPropagation());
     contenidorLlistat.appendChild(fila);
   }
-
-  mapa.ajustarVistaATotes();
 }
 
 function obrirDetall(id) {

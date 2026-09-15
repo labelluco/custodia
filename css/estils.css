@@ -196,6 +196,31 @@ a {
   white-space: nowrap;
 }
 
+/* --- Capçaleres ordenables (clicables), reutilitzat a parceles,
+   agrupacions i geometries --- */
+.th-ordenable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.th-ordenable:hover {
+  color: var(--color-primari-fosc);
+}
+
+.th-ordenable::after {
+  content: '';
+  display: inline-block;
+  width: 0.7em;
+}
+
+.th-ordenable--asc::after {
+  content: '▲';
+}
+
+.th-ordenable--desc::after {
+  content: '▼';
+}
+
 .taula-parceles tbody tr:last-child td {
   border-bottom: none;
 }

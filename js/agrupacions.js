@@ -9,6 +9,7 @@
 // mapa totes les parcel·les d'aquella agrupació.
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
+import { inicialitzarOrdenacio } from './ui/taula-ordenable.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
 
@@ -24,6 +25,7 @@ const COLOR_AGRUPACIO = '#a1552e';
 const seccioMapa = document.getElementById('mapa-agrupacions');
 const missatgeBuit = document.getElementById('missatge-buit');
 const llistatAgrupacions = document.getElementById('llistat-agrupacions');
+const capcalera = document.getElementById('capcalera-agrupacions');
 
 let mapa;
 
@@ -45,27 +47,48 @@ async function iniciar() {
   seccioMapa.hidden = false;
   mapa = new Mapa('mapa-agrupacions');
 
-  llistatAgrupacions.innerHTML = agrupacions
-    .map((agrupacio) => {
-      const parceles = agrupacio.parcelaIds.map((id) => parcelaPerId.get(id)).filter(Boolean);
-      const superficieTotal = parceles.reduce((acc, p) => acc + (p.superficie ?? 0), 0);
+  const files = agrupacions.map((agrupacio) => {
+    const parceles = agrupacio.parcelaIds.map((id) => parcelaPerId.get(id)).filter(Boolean);
+    const superficieTotal = parceles.reduce((acc, p) => acc + (p.superficie ?? 0), 0);
 
-      for (const parcela of parceles) {
-        mapa.afegirParcela(parcela, () => obrirDetall(agrupacio.id), COLOR_AGRUPACIO);
-      }
+    for (const parcela of parceles) {
+      mapa.afegirParcela(parcela, () => obrirDetall(agrupacio.id), COLOR_AGRUPACIO);
+    }
 
-      return `
+    return { agrupacio, superficieTotal };
+  });
+  mapa.ajustarVistaATotes();
+
+  const pintar = () => pintarFiles(files);
+
+  inicialitzarOrdenacio(
+    capcalera,
+    files,
+    {
+      nom: (f) => f.agrupacio.nom,
+      nombreParceles: (f) => f.agrupacio.parcelaIds.length,
+      superficieTotal: (f) => f.superficieTotal,
+    },
+    pintar
+  );
+
+  pintar();
+}
+
+/** Pinta les files en l'ordre actual de "files" -- es crida de nou cada vegada que es reordena. */
+function pintarFiles(files) {
+  llistatAgrupacions.innerHTML = files
+    .map(
+      ({ agrupacio, superficieTotal }) => `
         <tr class="fila-parcela" data-id="${agrupacio.id}" data-parceles="${agrupacio.parcelaIds.join(',')}">
           <td>${agrupacio.nom}</td>
           <td>${agrupacio.parcelaIds.length}</td>
           <td>${superficieTotal ? `${superficieTotal} m²` : '—'}</td>
           <td><a href="detall-agrupacio.html?id=${encodeURIComponent(agrupacio.id)}" class="boto-taula">${t('Detall')}</a></td>
         </tr>
-      `;
-    })
+      `
+    )
     .join('');
-
-  mapa.ajustarVistaATotes();
 
   // Tocar la fila ressalta al mapa totes les parcel·les de l'agrupació
   // (com al llistat de parceles.html); el botó "Detall" porta

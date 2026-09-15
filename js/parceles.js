@@ -2,6 +2,7 @@
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { ServeiRisc } from './serveis/risc.js';
+import { inicialitzarOrdenacio } from './ui/taula-ordenable.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
 
@@ -14,6 +15,7 @@ async function iniciar() {
   const mapa = new Mapa('mapa');
   const contenidorLlistat = document.getElementById('llistat-parceles');
   const missatgeBuit = document.getElementById('missatge-buit');
+  const capcalera = document.getElementById('capcalera-parceles');
 
   const parceles = await bd.llegirTotesLesParceles();
 
@@ -23,13 +25,42 @@ async function iniciar() {
   }
   missatgeBuit.hidden = true;
 
+  // Es calcula el color/índex de risc un sol cop per cada parcel·la, i
+  // es guarda junt amb la resta de dades -- necessari per poder
+  // reordenar-les sense haver de tornar a calcular-ho cada vegada que
+  // es clica una capçalera.
+  const files = [];
+  for (const parcela of parceles) {
+    const { color, index } = await ServeiRisc.colorIIndexDe(bd, parcela);
+    mapa.afegirParcela(parcela, (p) => obrirDetall(p.id), color);
+    files.push({ parcela, color, index });
+  }
+  mapa.ajustarVistaATotes();
+
+  const pintar = () => pintarFiles(contenidorLlistat, files, mapa);
+
+  inicialitzarOrdenacio(
+    capcalera,
+    files,
+    {
+      poblacio: (f) => f.parcela.poblacio,
+      poligon: (f) => f.parcela.poligon,
+      parcela: (f) => f.parcela.parcelaCadastral,
+      us: (f) => f.parcela.us,
+      superficie: (f) => f.parcela.superficie,
+      risc: (f) => f.index,
+    },
+    pintar
+  );
+
+  pintar();
+}
+
+/** Pinta les files en l'ordre actual de "files" -- es crida de nou cada vegada que es reordena. */
+function pintarFiles(contenidorLlistat, files, mapa) {
   contenidorLlistat.innerHTML = '';
 
-  for (const parcela of parceles) {
-    const { color, index } = await riscDeLaParcela(bd, parcela);
-
-    mapa.afegirParcela(parcela, (p) => obrirDetall(p.id), color);
-
+  for (const { parcela, color, index } of files) {
     const fila = document.createElement('tr');
     fila.className = 'fila-parcela';
     fila.dataset.id = parcela.id;
@@ -66,26 +97,6 @@ async function iniciar() {
     fila.querySelector('.boto-taula').addEventListener('click', (event) => event.stopPropagation());
     contenidorLlistat.appendChild(fila);
   }
-
-  mapa.ajustarVistaATotes();
-}
-
-/**
- * Neutre (sense índex) si encara no es pot calcular (falta el pendent
- * mitjà), o el color i l'índex reals si ja es pot.
- */
-async function riscDeLaParcela(bd, parcela) {
-  if (parcela.pendentMitja == null) {
-    return { color: ServeiRisc.COLOR_NEUTRE, index: null };
-  }
-
-  const subparceles = await bd.llegirSubparcelesDe(parcela.id);
-  const { indexPerillositat } = ServeiRisc.calcularRiscTotal({
-    pendentMitja: parcela.pendentMitja,
-    orientacioMitjana: parcela.orientacioMitjana,
-    subparceles,
-  });
-  return { color: ServeiRisc.colorSegonsRisc(indexPerillositat), index: indexPerillositat };
 }
 
 function obrirDetall(id) {
