@@ -8,10 +8,11 @@
 //   const totes = await bd.llegirTotesLesParceles();
 
 const NOM_BD = 'custodia';
-const VERSIO_BD = 3; // v3: afegeix el magatzem d'agrupacions
+const VERSIO_BD = 4; // v4: afegeix el magatzem de geometries
 const MAGATZEM_PARCELES = 'parceles';
 const MAGATZEM_SUBPARCELES = 'subparceles';
 const MAGATZEM_AGRUPACIONS = 'agrupacions';
+const MAGATZEM_GEOMETRIES = 'geometries';
 
 export class BaseDades {
   constructor(idb) {
@@ -70,6 +71,13 @@ export class BaseDades {
           magatzemAgr.createIndex('parcelaIds', 'parcelaIds', {
             unique: false,
             multiEntry: true,
+          });
+        }
+
+        if (!idb.objectStoreNames.contains(MAGATZEM_GEOMETRIES)) {
+          idb.createObjectStore(MAGATZEM_GEOMETRIES, {
+            keyPath: 'id',
+            autoIncrement: true,
           });
         }
       };
@@ -258,6 +266,58 @@ export class BaseDades {
       peticio.onsuccess = () => resolve(peticio.result);
       peticio.onerror = (event) =>
         reject(new Error(`BaseDades: no s'han pogut llegir les agrupacions d'aquesta parcel·la (${event.target.error})`));
+    });
+  }
+
+  afegirGeometria(geometria) {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(MAGATZEM_GEOMETRIES, 'readwrite');
+      const magatzem = transaccio.objectStore(MAGATZEM_GEOMETRIES);
+      const dades = geometria.toObject();
+      if (dades.id === null || dades.id === undefined) {
+        delete dades.id;
+      }
+      const peticio = magatzem.put(dades);
+
+      peticio.onsuccess = () => resolve(peticio.result);
+      peticio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'ha pogut afegir la geometria (${event.target.error})`));
+    });
+  }
+
+  llegirGeometria(id) {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(MAGATZEM_GEOMETRIES, 'readonly');
+      const magatzem = transaccio.objectStore(MAGATZEM_GEOMETRIES);
+      const peticio = magatzem.get(Number(id));
+
+      peticio.onsuccess = () => resolve(peticio.result);
+      peticio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'ha pogut llegir la geometria (${event.target.error})`));
+    });
+  }
+
+  llegirTotesLesGeometries() {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(MAGATZEM_GEOMETRIES, 'readonly');
+      const magatzem = transaccio.objectStore(MAGATZEM_GEOMETRIES);
+      const peticio = magatzem.getAll();
+
+      peticio.onsuccess = () => resolve(peticio.result);
+      peticio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'han pogut llegir les geometries (${event.target.error})`));
+    });
+  }
+
+  esborrarGeometria(id) {
+    return new Promise((resolve, reject) => {
+      const transaccio = this._idb.transaction(MAGATZEM_GEOMETRIES, 'readwrite');
+      const magatzem = transaccio.objectStore(MAGATZEM_GEOMETRIES);
+      const peticio = magatzem.delete(Number(id));
+
+      peticio.onsuccess = () => resolve();
+      peticio.onerror = (event) =>
+        reject(new Error(`BaseDades: no s'ha pogut esborrar la geometria (${event.target.error})`));
     });
   }
 }

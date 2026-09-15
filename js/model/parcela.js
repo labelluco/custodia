@@ -1,6 +1,8 @@
-// Dades d'una parcel·la. No sap res de cadastre ni de IndexedDB, només
-// representa la informació. La consulta al cadastre es fa a banda
-// (ServeiCadastre) perquè el constructor no pot ser async.
+// Dades d'una parcel·la. Hereta de Geometria (coordenades + dades
+// d'altimetria) i hi afegeix la informació cadastral. No sap res de
+// cadastre ni de IndexedDB, només representa la informació. La
+// consulta al cadastre es fa a banda (ServeiCadastre) perquè el
+// constructor no pot ser async.
 //
 // L'ús ("us") ja no és una categoria pròpia triada per l'usuari: es
 // desa tal com el retorna el Cadastre (per exemple "Agrario"), o null
@@ -11,14 +13,13 @@
 // sempre automàticament (vegeu ServeiRisc), a partir de la vegetació,
 // el pendent i l'orientació -- no té sentit que convisqui amb un valor
 // triat a mà que ningú actualitzaria.
+import { Geometria } from './geometria.js';
 
-export class Parcela {
+export class Parcela extends Geometria {
   constructor({
-    id = null,
     poligon,
     parcelaCadastral,
     poblacio,
-    coordenades,
     referenciaCadastral = null,
     superficie = null,
     us = null,
@@ -29,86 +30,37 @@ export class Parcela {
     provincia = null,
     codiProvincia = null,
     codiMunicipi = null,
-    // Dades d'altimetria: opcionals, es calculen a banda (pàgina
-    // d'altitud) i es desen a la parcel·la un cop calculades. Les
-    // parcel·les creades abans d'aquesta funcionalitat simplement no
-    // les tindran (queden a null) fins que algú les calculi.
-    altitudMaxima = null,
-    altitudMinima = null,
-    desnivell = null,
-    pendentMitja = null,
-    // Orientació mitjana en graus (0-360, 0=Nord), només calculable amb
-    // el mètode de malla. null si encara no s'ha calculat.
-    orientacioMitjana = null,
-    // Data (ISO) de quan es va crear la parcel·la, és a dir, de quan es
-    // van consultar les dades del Cadastre. Les parcel·les creades
-    // abans d'aquest camp no la tindran mai (queda null per sempre) --
-    // útil per saber si les dades poden haver quedat desactualitzades.
-    dataCreacio = null,
-    // Punts individuals de l'últim càlcul d'altimetria (coordenades +
-    // altitud, i orientació si es va fer servir el mètode de malla) --
-    // es guarden per poder tornar-los a pintar al mapa en entrar de nou
-    // a la pàgina, sense haver de tornar a consultar l'IDEE ni haver-ho
-    // de recalcular. metodeAltitud indica quina funció de Mapa cal fer
-    // servir per pintar-los. Les parcel·les calculades abans d'aquest
-    // camp (o mai calculades) el tindran a null.
-    puntsAltitud = null,
-    metodeAltitud = null,
+    ...resta
   }) {
     if (!poligon || !parcelaCadastral || !poblacio) {
       throw new Error('Parcela: poligon, parcelaCadastral i poblacio son obligatoris');
     }
-    if (!Array.isArray(coordenades) || coordenades.length === 0) {
-      throw new Error('Parcela: calen les coordenades del perimetre');
-    }
 
-    this.id = id;
+    super(resta);
+
     this.poligon = poligon;
     this.parcelaCadastral = parcelaCadastral;
     this.poblacio = poblacio;
-    this.coordenades = coordenades;
     this.referenciaCadastral = referenciaCadastral;
     this.superficie = superficie;
     this.us = us;
     this.provincia = provincia;
     this.codiProvincia = codiProvincia;
     this.codiMunicipi = codiMunicipi;
-    this.altitudMaxima = altitudMaxima;
-    this.altitudMinima = altitudMinima;
-    this.desnivell = desnivell;
-    this.pendentMitja = pendentMitja;
-    this.orientacioMitjana = orientacioMitjana;
-    this.dataCreacio = dataCreacio;
-    this.puntsAltitud = puntsAltitud;
-    this.metodeAltitud = metodeAltitud;
-  }
-
-  /** Cert si la parcel·la ja té calculades les dades d'altimetria. */
-  get teAltimetria() {
-    return this.desnivell !== null && this.pendentMitja !== null;
   }
 
   toObject() {
     return {
-      id: this.id,
+      ...super.toObject(),
       poligon: this.poligon,
       parcelaCadastral: this.parcelaCadastral,
       poblacio: this.poblacio,
-      coordenades: this.coordenades,
       referenciaCadastral: this.referenciaCadastral,
       superficie: this.superficie,
       us: this.us,
       provincia: this.provincia,
       codiProvincia: this.codiProvincia,
       codiMunicipi: this.codiMunicipi,
-      altitudMaxima: this.altitudMaxima,
-      altitudMinima: this.altitudMinima,
-      desnivell: this.desnivell,
-      pendentMitja: this.pendentMitja,
-      orientacioMitjana: this.orientacioMitjana,
-      dataCreacio: this.dataCreacio,
-      puntsAltitud: this.puntsAltitud,
-      metodeAltitud: this.metodeAltitud,
     };
   }
 

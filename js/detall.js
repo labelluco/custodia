@@ -20,6 +20,8 @@ const llistatSubparceles = document.getElementById('llistat-subparceles');
 const seccioRiscCalculat = document.getElementById('seccio-risc-calculat');
 const contingutRiscCalculat = document.getElementById('contingut-risc-calculat');
 const seccioAccions = document.getElementById('accions-parcela');
+const seccioFiltreMapa = document.getElementById('filtre-mapa');
+const selectFiltreMapa = document.getElementById('select-filtre-mapa');
 const botoPendentOrientacio = document.getElementById('boto-pendent-orientacio');
 const botoExportarGpx = document.getElementById('boto-exportar-gpx');
 const botoEsborrar = document.getElementById('boto-esborrar');
@@ -66,7 +68,38 @@ async function iniciar() {
   mapa.afegirParcela(parcelaActual, null, color);
   mapa.ajustarVistaATotes();
 
+  inicialitzarFiltreMapa(mapa, parcelaActual);
+
   seccioAccions.hidden = false;
+}
+
+/**
+ * Mostra la caixa de filtre només si hi ha punts d'altimetria ja
+ * calculats i desats (vegeu altitud.js) -- no es torna a calcular ni
+ * a consultar res, només es pinta el que ja hi ha. L'opció
+ * "Orientació" només es mostra si es va calcular amb el mètode de
+ * malla (l'únic que la calcula).
+ */
+function inicialitzarFiltreMapa(mapa, parcela) {
+  if (!parcela.puntsAltitud?.length) return;
+
+  seccioFiltreMapa.hidden = false;
+  const opcioOrientacio = selectFiltreMapa.querySelector('option[value="orientacio"]');
+  opcioOrientacio.hidden = parcela.metodeAltitud !== 'malla';
+
+  selectFiltreMapa.addEventListener('change', () => {
+    if (selectFiltreMapa.value === 'altitud') {
+      mapa.afegirFiltreAltitud(parcela.puntsAltitud);
+    } else if (selectFiltreMapa.value === 'orientacio') {
+      const punts = parcela.puntsAltitud.map((p) => ({
+        ...p,
+        etiqueta: p.orientacio == null ? null : t(ServeiOrientacio.etiquetaBruixola(p.orientacio)),
+      }));
+      mapa.afegirFiltreOrientacio(punts);
+    } else {
+      mapa.netejarFiltre();
+    }
+  });
 }
 
 function pintarSubparceles(subparceles) {

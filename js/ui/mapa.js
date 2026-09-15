@@ -34,6 +34,10 @@ export class Mapa {
       .addTo(this.leafletMap);
 
     this.capaParceles = L.layerGroup().addTo(this.leafletMap);
+    // Capa a part per als filtres opcionals (altitud/orientació) de les
+    // pàgines de detall -- separada de capaParceles perquè buidar-la no
+    // afecti mai el perímetre de la parcel·la ni les altres capes.
+    this.capaFiltre = L.layerGroup().addTo(this.leafletMap);
     this.parceles = [];
     this._capaRessaltada = null;
   }
@@ -54,7 +58,7 @@ export class Mapa {
       fillOpacity: 0.35,
     });
 
-    poligon.bindTooltip(`${parcela.poblacio}${parcela.us ? ` — ${parcela.us}` : ''}`);
+    poligon.bindTooltip(`${parcela.poblacio ?? parcela.nom ?? ''}${parcela.us ? ` — ${parcela.us}` : ''}`);
 
     if (onClick) {
       poligon.on('click', () => onClick(parcela));
@@ -108,6 +112,67 @@ export class Mapa {
 
     const limits = L.featureGroup(capes).getBounds();
     this.leafletMap.fitBounds(limits, { padding: [40, 40], maxZoom: 17 });
+  }
+
+  /** Treu només la capa de filtre (altitud/orientació), sense tocar el perímetre. */
+  netejarFiltre() {
+    this.capaFiltre.clearLayers();
+  }
+
+  /**
+   * Filtre d'altitud: un punt de color per cada punt d'altimetria ja
+   * calculat, en un degradat blau (més baix) -> roig (més alt) relatiu
+   * al mínim i màxim d'aquesta mateixa parcel·la (o agrupació) --
+   * deliberadament un degradat diferent del de risc (verd->roig), per
+   * no confondre "més alt" amb "més risc".
+   */
+  afegirFiltreAltitud(punts) {
+    this.netejarFiltre();
+    const valors = punts.map((p) => p.altitud).filter((a) => a != null);
+    if (valors.length === 0) return;
+    const minim = Math.min(...valors);
+    const maxim = Math.max(...valors);
+
+    for (const p of punts) {
+      if (p.altitud == null) continue;
+      const proporcio = maxim === minim ? 0.5 : (p.altitud - minim) / (maxim - minim);
+      const to = Math.round(240 - proporcio * 240); // 240=blau (baix) -> 0=roig (alt)
+      L.circleMarker(p.coordenades, {
+        radius: 6,
+        color: `hsl(${to}, 75%, 40%)`,
+        fillColor: `hsl(${to}, 75%, 50%)`,
+        fillOpacity: 0.85,
+        weight: 1,
+      })
+        .bindTooltip(`${Math.round(p.altitud)} m`)
+        .addTo(this.capaFiltre);
+    }
+  }
+
+  /**
+   * Filtre d'orientació: la mateixa fletxa rotada que ja fem servir a
+   * altitud.html (apunta cap on "mira" el pendent), en lloc d'un mapa
+   * de colors abstracte -- molt més intuïtiu i coherent amb la resta
+   * de l'app. Els punts sense orientació (plans) es marquen a part.
+   */
+  afegirFiltreOrientacio(punts) {
+    this.netejarFiltre();
+    for (const p of punts) {
+      if (p.orientacio == null) continue;
+
+      const icona = L.divIcon({
+        className: '',
+        html: `<div class="icona-orientacio" style="transform: rotate(${p.orientacio}deg);">&#8593;</div>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+      });
+
+      const marcador = L.marker(p.coordenades, { icon: icona });
+      const textOrientacio = `${p.orientacio.toFixed(0)}°${p.etiqueta ? ` (${p.etiqueta})` : ''}`;
+      marcador.bindTooltip(textOrientacio);
+      marcador.on('click', () => marcador.openTooltip());
+      marcador.addTo(this.capaFiltre);
+    }
   }
 
   /**

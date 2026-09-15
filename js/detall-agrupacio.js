@@ -28,6 +28,8 @@ const llistatParceles = document.getElementById('llistat-parceles-agrupacio');
 const seccioRisc = document.getElementById('seccio-risc-calculat');
 const contingutRisc = document.getElementById('contingut-risc-calculat');
 const seccioAccions = document.getElementById('accions-agrupacio');
+const seccioFiltreMapa = document.getElementById('filtre-mapa');
+const selectFiltreMapa = document.getElementById('select-filtre-mapa');
 const botoEditar = document.getElementById('boto-editar');
 const botoPuntsAltitud = document.getElementById('boto-punts-altitud');
 const botoEsborrar = document.getElementById('boto-esborrar');
@@ -71,11 +73,44 @@ async function iniciar() {
   parcelesAgrupacio.forEach((p) => mapa.afegirParcela(p, (parcela) => obrirDetall(parcela.id), color));
   mapa.ajustarVistaATotes();
 
+  inicialitzarFiltreMapa(mapa, parcelesAgrupacio);
+
   // Es pinta després de crear el mapa: cada fila necessita poder-hi
   // ressaltar la seva parcel·la en tocar-la.
   pintarParceles();
 
   seccioAccions.hidden = false;
+}
+
+/**
+ * Igual que a detall.js, però combinant els punts ja desats de totes
+ * les parcel·les de l'agrupació -- no es torna a calcular ni a
+ * consultar res. L'opció "Orientació" només es mostra si totes les
+ * parcel·les es van calcular amb el mètode de malla (com ja exigeix
+ * calcularAgregatAgrupacio per a la resta de valors agregats).
+ */
+function inicialitzarFiltreMapa(mapa, parceles) {
+  const puntsCombinats = parceles.flatMap((p) => p.puntsAltitud ?? []);
+  if (puntsCombinats.length === 0) return;
+
+  seccioFiltreMapa.hidden = false;
+  const totesAmbMalla = parceles.every((p) => p.metodeAltitud === 'malla');
+  const opcioOrientacio = selectFiltreMapa.querySelector('option[value="orientacio"]');
+  opcioOrientacio.hidden = !totesAmbMalla;
+
+  selectFiltreMapa.addEventListener('change', () => {
+    if (selectFiltreMapa.value === 'altitud') {
+      mapa.afegirFiltreAltitud(puntsCombinats);
+    } else if (selectFiltreMapa.value === 'orientacio') {
+      const punts = puntsCombinats.map((p) => ({
+        ...p,
+        etiqueta: p.orientacio == null ? null : t(ServeiOrientacio.etiquetaBruixola(p.orientacio)),
+      }));
+      mapa.afegirFiltreOrientacio(punts);
+    } else {
+      mapa.netejarFiltre();
+    }
+  });
 }
 
 /** Igual que a parceles.js: obre el detall, indicant que s'hi arriba des d'aquesta agrupació. */

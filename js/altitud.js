@@ -1,12 +1,14 @@
 // Controlador d'altitud.html. Calcula i permet desar l'altitud
-// màxima/mínima, el desnivell i el pendent mitjà d'una parcel·la, amb
-// dos mètodes possibles: vèrtexs del perímetre, o una malla de punts
-// interiors. Amb el mètode de malla, també es calcula l'orientació
-// mitjana (reutilitza els mateixos gradients que el pendent). L'id
-// arriba per URL: altitud.html?id=123
+// màxima/mínima, el desnivell i el pendent mitjà d'una parcel·la o
+// d'una geometria (afegida a mà), amb dos mètodes possibles: vèrtexs
+// del perímetre, o una malla de punts interiors. Amb el mètode de
+// malla, també es calcula l'orientació mitjana (reutilitza els
+// mateixos gradients que el pendent). L'id i el tipus arriben per URL:
+// altitud.html?id=123&tipus=geometria (per defecte, "parcela").
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { Parcela } from './model/parcela.js';
+import { Geometria } from './model/geometria.js';
 import { ServeiAltimetria } from './serveis/altimetria.js';
 import { ServeiOrientacio } from './serveis/orientacio.js';
 import { Malla } from './geometria/malla.js';
@@ -60,6 +62,7 @@ function establirEstatResum(tipus) {
 
 let bd;
 let parcelaActual;
+let tipusActual = 'parcela';
 let valorsCalculats = null;
 let puntsCalculats = null;
 let metodeCalculat = null;
@@ -68,27 +71,32 @@ let mapaActual = null;
 async function iniciar() {
   const parametres = new URLSearchParams(window.location.search);
   const id = parametres.get('id');
+  tipusActual = parametres.get('tipus') === 'geometria' ? 'geometria' : 'parcela';
 
   if (!id) {
     resum.hidden = false;
     establirEstatResum('error');
-    contingutResum.textContent = t('No s\'ha indicat cap parcel·la.');
+    contingutResum.textContent =
+      tipusActual === 'geometria' ? t('No s\'ha indicat cap geometria.') : t('No s\'ha indicat cap parcel·la.');
     return;
   }
 
   bd = await BaseDades.obrir();
-  parcelaActual = await bd.llegirParcela(id);
+  parcelaActual = tipusActual === 'geometria' ? await bd.llegirGeometria(id) : await bd.llegirParcela(id);
 
   if (!parcelaActual) {
     resum.hidden = false;
     establirEstatResum('error');
-    contingutResum.textContent = t('No s\'ha trobat aquesta parcel·la.');
+    contingutResum.textContent =
+      tipusActual === 'geometria' ? t('No s\'ha trobat aquesta geometria.') : t('No s\'ha trobat aquesta parcel·la.');
     return;
   }
 
-  document.title = `Custòdia — ${t('Altimetria')} (${parcelaActual.poblacio})`;
+  const nomEntitat = tipusActual === 'geometria' ? parcelaActual.nom : parcelaActual.poblacio;
+  const paginaDetall = tipusActual === 'geometria' ? 'detall-geometria.html' : 'detall.html';
+  document.title = `Custòdia — ${t('Altimetria')} (${nomEntitat})`;
   document.getElementById('enllac-tornar').innerHTML =
-    `<a href="detall.html?id=${encodeURIComponent(id)}" class="enllac-tornar">&larr; ${t('Tornar al detall')}</a>`;
+    `<a href="${paginaDetall}?id=${encodeURIComponent(id)}" class="enllac-tornar">&larr; ${t('Tornar al detall')}</a>`;
 
   // El mapa amb el perímetre es mostra de seguida, com a la resta de
   // pàgines, sense esperar cap càlcul.
@@ -355,7 +363,7 @@ botoDesar.addEventListener('click', async () => {
 
   botoDesar.disabled = true;
   try {
-    const parcelaActualitzada = new Parcela({
+    const dadesActualitzades = {
       ...parcelaActual,
       altitudMaxima: valorsCalculats.maxima,
       altitudMinima: valorsCalculats.minima,
@@ -369,11 +377,16 @@ botoDesar.addEventListener('click', async () => {
           : (parcelaActual.orientacioMitjana ?? null),
       puntsAltitud: puntsCalculats,
       metodeAltitud: metodeCalculat,
-    });
+    };
 
-    await bd.afegirParcela(parcelaActualitzada);
+    if (tipusActual === 'geometria') {
+      await bd.afegirGeometria(new Geometria(dadesActualitzades));
+    } else {
+      await bd.afegirParcela(new Parcela(dadesActualitzades));
+    }
 
-    missatgeEstat.textContent = t('Dades desades a la parcel·la.');
+    missatgeEstat.textContent =
+      tipusActual === 'geometria' ? t('Dades desades a la geometria.') : t('Dades desades a la parcel·la.');
     missatgeEstat.className = 'missatge-estat missatge-estat--exit';
     missatgeEstat.hidden = false;
   } catch (error) {
@@ -390,5 +403,6 @@ iniciar().catch((error) => {
   console.error(error);
   resum.hidden = false;
   establirEstatResum('error');
-  contingutResum.textContent = t('No s\'ha pogut carregar la parcel·la.');
+  contingutResum.textContent =
+    tipusActual === 'geometria' ? t('No s\'ha pogut carregar la geometria.') : t('No s\'ha pogut carregar la parcel·la.');
 });

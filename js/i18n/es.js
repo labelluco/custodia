@@ -151,6 +151,10 @@ export const ES = {
   'Toca una parcel·la en el llistat per veure\'n el perímetre al mapa. Per veure el detall, fes clic en el perímetre o en el botó «Detall».':
     'Toca una parcela en el listado para ver su perímetro en el mapa. Para ver el detalle, haz clic en el perímetro o en el botón «Detalle».',
   'Resultats': 'Resultados',
+  'Mostrar al mapa': 'Mostrar en el mapa',
+  'Només el perímetre': 'Solo el perímetro',
+  'Altitud': 'Altitud',
+  'Orientació': 'Orientación',
   'Altimetria': 'Altimetría',
   'Programari lliure': 'Software libre',
   'Codi font': 'Código fuente',
@@ -235,4 +239,34 @@ export const ES = {
     'No se ha podido identificar el polígono y la parcela de esta finca.',
   'No s\'ha pogut identificar automàticament la província i el municipi d\'aquesta parcel·la. Selecciona\'ls manualment i escriu el polígon i la parcel·la a mà.':
     'No se ha podido identificar automáticamente la provincia y el municipio de esta parcela. Selecciónalos manualmente y escribe el polígono y la parcela a mano.',
+
+  // Geometries (afegir-geometria, detall-geometria, geometries)
+  'Geometries': 'Geometrías',
+  'Afegir geometria': 'Añadir geometría',
+  'Toca el mapa per afegir-hi punts (calen almenys 3 per definir un perímetre). No es consulten dades del Cadastre -- només es podrà calcular l\'altitud, el pendent, l\'orientació i el risc d\'incendi a partir d\'aquests.':
+    'Toca el mapa para añadir puntos (hacen falta al menos 3 para definir un perímetro). No se consultan datos del Catastro -- solo se podrá calcular la altitud, la pendiente, la orientación y el riesgo de incendio a partir de estos.',
+  'Desfer l\'últim punt': 'Deshacer el último punto',
+  'Netejar-ho tot': 'Limpiarlo todo',
+  'Nom de la geometria': 'Nombre de la geometría',
+  'Guardar geometria': 'Guardar geometría',
+  'Cal indicar un nom per a la geometria.': 'Hay que indicar un nombre para la geometría.',
+  'Calen almenys 3 punts per definir un perímetre.': 'Hacen falta al menos 3 puntos para definir un perímetro.',
+  'No s\'ha pogut desar la geometria:': 'No se ha podido guardar la geometría:',
+  'Dades de la geometria': 'Datos de la geometría',
+  'Esborrar geometria': 'Borrar geometría',
+  'No s\'ha indicat cap geometria.': 'No se ha indicado ninguna geometría.',
+  'No s\'ha trobat aquesta geometria.': 'No se ha encontrado esta geometría.',
+  'Dades desades a la geometria.': 'Datos guardados en la geometría.',
+  'No s\'ha pogut carregar la geometria.': 'No se ha podido cargar la geometría.',
+  'No disponible (sense dades cadastrals)': 'No disponible (sin datos catastrales)',
+  'Dades desades a la base de dades local en el moment de crear la geometria. Per tornar-la a moure, cal esborrar-la i afegir-la de nou.':
+    'Datos guardados en la base de datos local en el momento de crear la geometría. Para volver a moverla, hay que borrarla y añadirla de nuevo.',
+  'Segur que vols esborrar la geometria': '¿Seguro que quieres borrar la geometría',
+  'No s\'ha pogut carregar el detall de la geometria.': 'No se ha podido cargar el detalle de la geometría.',
+  'Les meves geometries': 'Mis geometrías',
+  'Toca una geometria en el llistat per veure\'n el perímetre al mapa. Per veure el detall, fes clic en el perímetre o en el botó «Detall».':
+    'Toca una geometría en el listado para ver su perímetro en el mapa. Para ver el detalle, haz clic en el perímetro o en el botón «Detalle».',
+  'Encara no has afegit cap geometria.': 'Todavía no has añadido ninguna geometría.',
+  'No s\'han pogut carregar les geometries. Revisa la consola per a més detalls.':
+    'No se han podido cargar las geometrías. Revisa la consola para más detalles.',
 };

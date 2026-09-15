@@ -289,6 +289,25 @@ a {
   box-shadow: 0 0 0 3px rgba(57, 106, 73, 0.15);
 }
 
+/* Per a un <select> sol, fora d'un .camp (per exemple, el filtre del
+   mapa) -- mateix aspecte que els camps de formulari normals. */
+.select-simple {
+  width: 100%;
+  max-width: 320px;
+  min-width: 0;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--color-vora);
+  border-radius: var(--radi);
+  font-size: 1rem;
+  background-color: white;
+}
+
+.select-simple:focus {
+  outline: none;
+  border-color: var(--color-primari);
+  box-shadow: 0 0 0 3px rgba(57, 106, 73, 0.15);
+}
+
 button {
   padding: 0.75rem 1rem;
   background-color: var(--color-primari);

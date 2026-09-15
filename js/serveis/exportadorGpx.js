@@ -4,11 +4,13 @@
 
 export class ExportadorGpx {
   /**
-   * @param {Object} parcela Objecte pla amb .coordenades ([lat, lng]...) i .poblacio
+   * @param {Object} parcela Objecte pla amb .coordenades ([lat, lng]...), i .poblacio/.poligon/.parcelaCadastral (parcel·la) o .nom (geometria)
    * @returns {string} Contingut del fitxer GPX
    */
   static generar(parcela) {
-    const nom = `Custòdia — ${parcela.poblacio} (pol. ${parcela.poligon}, parc. ${parcela.parcelaCadastral})`;
+    const nom = parcela.poblacio
+      ? `Custòdia — ${parcela.poblacio} (pol. ${parcela.poligon}, parc. ${parcela.parcelaCadastral})`
+      : `Custòdia — ${parcela.nom}`;
 
     // Es tanca el perímetre (primer punt = últim) si encara no ho està,
     // perquè el track es vegi com un contorn tancat, no com un camí obert.

@@ -160,4 +160,26 @@ export class ServeiRisc {
       riscOrientacio,
     };
   }
+
+  /**
+   * Color (per pintar-la al mapa) i índex de perillositat d'una
+   * parcel·la ja desada -- neutre si encara no té pendent mitjà
+   * calculat. Necessita la BD per llegir-ne les subparceles: es fa
+   * servir a totes les pàgines que pinten un mapa amb parcel·les
+   * (llistat, selecció per a una agrupació...), per no duplicar
+   * aquesta lògica a cadascuna.
+   */
+  static async colorIIndexDe(bd, parcela) {
+    if (parcela.pendentMitja == null) {
+      return { color: ServeiRisc.COLOR_NEUTRE, index: null };
+    }
+
+    const subparceles = await bd.llegirSubparcelesDe(parcela.id);
+    const { indexPerillositat } = ServeiRisc.calcularRiscTotal({
+      pendentMitja: parcela.pendentMitja,
+      orientacioMitjana: parcela.orientacioMitjana,
+      subparceles,
+    });
+    return { color: ServeiRisc.colorSegonsRisc(indexPerillositat), index: indexPerillositat };
+  }
 }
