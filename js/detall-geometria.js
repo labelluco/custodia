@@ -85,6 +85,8 @@ function inicialitzarFiltreMapa(mapa, geometria) {
         etiqueta: p.orientacio == null ? null : t(ServeiOrientacio.etiquetaBruixola(p.orientacio)),
       }));
       mapa.afegirFiltreOrientacio(punts);
+    } else if (selectFiltreMapa.value === 'cotes') {
+      mapa.afegirFiltreCotes(geometria.puntsAltitud);
     } else {
       mapa.netejarFiltre();
     }

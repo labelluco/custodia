@@ -176,6 +176,41 @@ export class Mapa {
   }
 
   /**
+   * Filtre de cotes: només els dos punts extrems (l'altitud màxima i la
+   * mínima), no tots els de la malla/vèrtexs -- útil per localitzar-los
+   * ràpidament sobre el terreny, sense el soroll visual de la resta de
+   * punts.
+   */
+  afegirFiltreCotes(punts) {
+    this.netejarFiltre();
+    const ambAltitud = punts.filter((p) => p.altitud != null);
+    if (ambAltitud.length === 0) return;
+
+    const puntMaxim = ambAltitud.reduce((max, p) => (p.altitud > max.altitud ? p : max));
+    const puntMinim = ambAltitud.reduce((min, p) => (p.altitud < min.altitud ? p : min));
+
+    const afegirPunt = (punt, etiqueta, color) => {
+      L.circleMarker(punt.coordenades, {
+        radius: 8,
+        color: 'white',
+        weight: 2,
+        fillColor: color,
+        fillOpacity: 1,
+      })
+        .bindTooltip(`${etiqueta}: ${punt.altitud.toFixed(0)} m`)
+        .addTo(this.capaFiltre);
+    };
+
+    // Mateixos colors que als extrems del degradat d'afegirFiltreAltitud
+    // (roig = més alt, blau = més baix), perquè es reconegui d'un cop
+    // d'ull sense haver de llegir el tooltip.
+    afegirPunt(puntMaxim, t('Cota màxima'), 'hsl(0, 75%, 45%)');
+    if (puntMinim !== puntMaxim) {
+      afegirPunt(puntMinim, t('Cota mínima'), 'hsl(240, 75%, 45%)');
+    }
+  }
+
+  /**
    * Una parcel·la "candidata" trobada al cercador del Cadastre (encara
    * no desada, sense id propi) -- estil senzill i diferenciat de les
    * parcel·les ja guardades, amb la referència cadastral com a tooltip.
