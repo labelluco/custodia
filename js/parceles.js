@@ -1,4 +1,4 @@
-// Controlador de parceles.html: mapa + llistat.
+// Controlador de parceles.html: mapa + llistat, amb cerca i ordenació.
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { ServeiRisc } from './serveis/risc.js';
@@ -10,11 +10,15 @@ aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
 inicialitzarMenu();
 
+let termeCerca = '';
+
 async function iniciar() {
   const bd = await BaseDades.obrir();
   const mapa = new Mapa('mapa');
   const contenidorLlistat = document.getElementById('llistat-parceles');
   const missatgeBuit = document.getElementById('missatge-buit');
+  const missatgeSenseResultats = document.getElementById('missatge-sense-resultats');
+  const campCerca = document.getElementById('cerca-parceles');
   const capcalera = document.getElementById('capcalera-parceles');
 
   const parceles = await bd.llegirTotesLesParceles();
@@ -27,17 +31,44 @@ async function iniciar() {
 
   // Es calcula el color/índex de risc un sol cop per cada parcel·la, i
   // es guarda junt amb la resta de dades -- necessari per poder
-  // reordenar-les sense haver de tornar a calcular-ho cada vegada que
-  // es clica una capçalera.
+  // reordenar-les i filtrar-les sense haver de tornar a calcular-ho
+  // cada vegada.
   const files = [];
   for (const parcela of parceles) {
     const { color, index } = await ServeiRisc.colorIIndexDe(bd, parcela);
-    mapa.afegirParcela(parcela, (p) => obrirDetall(p.id), color);
     files.push({ parcela, color, index });
   }
-  mapa.ajustarVistaATotes();
 
-  const pintar = () => pintarFiles(contenidorLlistat, files, mapa);
+  /** Cert si la fila coincideix amb el terme de cerca actual (o si no hi ha cap cerca). */
+  function coincideix(fila) {
+    if (!termeCerca) return true;
+    const { parcela } = fila;
+    const text = [parcela.poblacio, parcela.poligon, parcela.parcelaCadastral, parcela.us]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return text.includes(termeCerca);
+  }
+
+  /**
+   * Pinta mapa i taula junts, a partir de l'ordre actual de "files" i
+   * del terme de cerca vigent -- es crida de nou en reordenar o en
+   * escriure a la cerca.
+   */
+  function pintar() {
+    const filesVisibles = files.filter(coincideix);
+    missatgeSenseResultats.hidden = filesVisibles.length > 0;
+
+    mapa.buidar();
+    for (const { parcela, color } of filesVisibles) {
+      mapa.afegirParcela(parcela, (p) => obrirDetall(p.id), color);
+    }
+    if (filesVisibles.length > 0) {
+      mapa.ajustarVistaATotes();
+    }
+
+    pintarFilesTaula(contenidorLlistat, filesVisibles, mapa);
+  }
 
   inicialitzarOrdenacio(
     capcalera,
@@ -53,11 +84,16 @@ async function iniciar() {
     pintar
   );
 
+  campCerca.addEventListener('input', () => {
+    termeCerca = campCerca.value.trim().toLowerCase();
+    pintar();
+  });
+
   pintar();
 }
 
-/** Pinta les files en l'ordre actual de "files" -- es crida de nou cada vegada que es reordena. */
-function pintarFiles(contenidorLlistat, files, mapa) {
+/** Pinta les files de la taula (no el mapa) en l'ordre i filtre actuals. */
+function pintarFilesTaula(contenidorLlistat, files, mapa) {
   contenidorLlistat.innerHTML = '';
 
   for (const { parcela, color, index } of files) {

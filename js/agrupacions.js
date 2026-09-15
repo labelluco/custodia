@@ -6,7 +6,7 @@
 //
 // Igual que a parceles.html: tocar una parcel·la al mapa porta al
 // detall de la seva agrupació; tocar una fila del llistat ressalta al
-// mapa totes les parcel·les d'aquella agrupació.
+// mapa totes les parcel·les d'aquella agrupació. Amb cerca i ordenació.
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { inicialitzarOrdenacio } from './ui/taula-ordenable.js';
@@ -24,10 +24,13 @@ const COLOR_AGRUPACIO = '#a1552e';
 
 const seccioMapa = document.getElementById('mapa-agrupacions');
 const missatgeBuit = document.getElementById('missatge-buit');
+const missatgeSenseResultats = document.getElementById('missatge-sense-resultats');
 const llistatAgrupacions = document.getElementById('llistat-agrupacions');
+const campCerca = document.getElementById('cerca-agrupacions');
 const capcalera = document.getElementById('capcalera-agrupacions');
 
 let mapa;
+let termeCerca = '';
 
 async function iniciar() {
   const bd = await BaseDades.obrir();
@@ -50,16 +53,30 @@ async function iniciar() {
   const files = agrupacions.map((agrupacio) => {
     const parceles = agrupacio.parcelaIds.map((id) => parcelaPerId.get(id)).filter(Boolean);
     const superficieTotal = parceles.reduce((acc, p) => acc + (p.superficie ?? 0), 0);
+    return { agrupacio, parceles, superficieTotal };
+  });
 
-    for (const parcela of parceles) {
-      mapa.afegirParcela(parcela, () => obrirDetall(agrupacio.id), COLOR_AGRUPACIO);
+  function coincideix(fila) {
+    if (!termeCerca) return true;
+    return fila.agrupacio.nom.toLowerCase().includes(termeCerca);
+  }
+
+  function pintar() {
+    const filesVisibles = files.filter(coincideix);
+    missatgeSenseResultats.hidden = filesVisibles.length > 0;
+
+    mapa.buidar();
+    for (const { agrupacio, parceles } of filesVisibles) {
+      for (const parcela of parceles) {
+        mapa.afegirParcela(parcela, () => obrirDetall(agrupacio.id), COLOR_AGRUPACIO);
+      }
+    }
+    if (filesVisibles.length > 0) {
+      mapa.ajustarVistaATotes();
     }
 
-    return { agrupacio, superficieTotal };
-  });
-  mapa.ajustarVistaATotes();
-
-  const pintar = () => pintarFiles(files);
+    pintarFilesTaula(filesVisibles);
+  }
 
   inicialitzarOrdenacio(
     capcalera,
@@ -72,11 +89,16 @@ async function iniciar() {
     pintar
   );
 
+  campCerca.addEventListener('input', () => {
+    termeCerca = campCerca.value.trim().toLowerCase();
+    pintar();
+  });
+
   pintar();
 }
 
-/** Pinta les files en l'ordre actual de "files" -- es crida de nou cada vegada que es reordena. */
-function pintarFiles(files) {
+/** Pinta les files de la taula (no el mapa) en l'ordre i filtre actuals. */
+function pintarFilesTaula(files) {
   llistatAgrupacions.innerHTML = files
     .map(
       ({ agrupacio, superficieTotal }) => `
