@@ -9,11 +9,14 @@ export class Malla {
   /**
    * @param {Array<[number, number]>} perimetre Vèrtexs [lat, lng] que tanquen la parcel·la
    * @param {number} distanciaMetres Separació desitjada entre punts, en metres
-   * @returns {{graella: Array<Array<[number, number]|null>>, files: number, columnes: number, distanciaMetres: number}}
+   * @returns {{graella: Array<Array<[number, number]|null>>, files: number, columnes: number, distanciaMetres: number, pasLat: number, pasLng: number}}
    *   graella[fila][columna] és [lat, lng] si el punt cau dins del
    *   perímetre, o null si queda fora -- es manté la posició buida
    *   (en lloc de treure el punt de la llista) perquè després es
    *   puguin trobar els veïns de cada punt per calcular-hi el pendent.
+   *   pasLat/pasLng són el pas de la graella en graus -- com que és
+   *   constant arreu, permeten dibuixar el quadrat exacte de
+   *   cobertura de cada punt sense haver de buscar-ne els veïns.
    */
   static generar(perimetre, distanciaMetres) {
     if (!Array.isArray(perimetre) || perimetre.length < 3) {
@@ -51,7 +54,7 @@ export class Malla {
       graella.push(fila);
     }
 
-    return { graella, files, columnes, distanciaMetres };
+    return { graella, files, columnes, distanciaMetres, pasLat, pasLng };
   }
 
   /**

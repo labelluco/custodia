@@ -80,16 +80,28 @@ async function iniciar() {
  * "Orientació" només es mostra si es va calcular amb el mètode de
  * malla (l'únic que la calcula).
  */
+/**
+ * Afegeix el pas de la graella (si es coneix) a cada punt, perquè
+ * Mapa pugui dibuixar-hi un quadrat de cobertura en lloc d'un punt sol.
+ */
+function ambPas(punts, entitat) {
+  return punts.map((p) => ({ ...p, pasLat: entitat.pasLatMalla, pasLng: entitat.pasLngMalla }));
+}
+
 function inicialitzarFiltreMapa(mapa, parcela) {
   if (!parcela.puntsAltitud?.length) return;
 
   seccioFiltreMapa.hidden = false;
   const opcioOrientacio = selectFiltreMapa.querySelector('option[value="orientacio"]');
   opcioOrientacio.hidden = parcela.metodeAltitud !== 'malla';
+  const opcioPendent = selectFiltreMapa.querySelector('option[value="pendent"]');
+  const opcioOmbres = selectFiltreMapa.querySelector('option[value="ombres"]');
+  opcioPendent.hidden = parcela.metodeAltitud !== 'malla';
+  opcioOmbres.hidden = parcela.metodeAltitud !== 'malla';
 
   selectFiltreMapa.addEventListener('change', () => {
     if (selectFiltreMapa.value === 'altitud') {
-      mapa.afegirFiltreAltitud(parcela.puntsAltitud);
+      mapa.afegirFiltreAltitud(ambPas(parcela.puntsAltitud, parcela));
     } else if (selectFiltreMapa.value === 'orientacio') {
       const punts = parcela.puntsAltitud.map((p) => ({
         ...p,
@@ -98,6 +110,10 @@ function inicialitzarFiltreMapa(mapa, parcela) {
       mapa.afegirFiltreOrientacio(punts);
     } else if (selectFiltreMapa.value === 'cotes') {
       mapa.afegirFiltreCotes(parcela.puntsAltitud);
+    } else if (selectFiltreMapa.value === 'pendent') {
+      mapa.afegirFiltrePendent(ambPas(parcela.puntsAltitud, parcela));
+    } else if (selectFiltreMapa.value === 'ombres') {
+      mapa.afegirFiltreOmbres(ambPas(parcela.puntsAltitud, parcela));
     } else {
       mapa.netejarFiltre();
     }

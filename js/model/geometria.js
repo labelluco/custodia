@@ -30,6 +30,12 @@ export class Geometria {
     // servir per pintar-los.
     puntsAltitud = null,
     metodeAltitud = null,
+    // Pas de la graella en graus (lat/lng), només amb el mètode de
+    // malla -- com que és constant arreu, permet dibuixar el quadrat
+    // exacte de cobertura de cada punt (en lloc d'un punt sol) sense
+    // haver de buscar-ne els veïns.
+    pasLatMalla = null,
+    pasLngMalla = null,
   }) {
     if (!Array.isArray(coordenades) || coordenades.length === 0) {
       throw new Error('Geometria: calen les coordenades del perímetre');
@@ -46,6 +52,8 @@ export class Geometria {
     this.dataCreacio = dataCreacio;
     this.puntsAltitud = puntsAltitud;
     this.metodeAltitud = metodeAltitud;
+    this.pasLatMalla = pasLatMalla;
+    this.pasLngMalla = pasLngMalla;
   }
 
   /** Cert si ja té calculades les dades d'altimetria. */
@@ -66,6 +74,8 @@ export class Geometria {
       dataCreacio: this.dataCreacio,
       puntsAltitud: this.puntsAltitud,
       metodeAltitud: this.metodeAltitud,
+      pasLatMalla: this.pasLatMalla,
+      pasLngMalla: this.pasLngMalla,
     };
   }
 

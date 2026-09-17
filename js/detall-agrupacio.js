@@ -90,13 +90,23 @@ async function iniciar() {
  * calcularAgregatAgrupacio per a la resta de valors agregats).
  */
 function inicialitzarFiltreMapa(mapa, parceles) {
-  const puntsCombinats = parceles.flatMap((p) => p.puntsAltitud ?? []);
+  // Cada punt es marca amb el pas de la SEVA parcel·la, no un de
+  // compartit -- si les parcel·les es van calcular amb distàncies
+  // diferents entre elles, cada una dibuixarà els seus propis quadrats
+  // a la mida correcta.
+  const puntsCombinats = parceles.flatMap((p) =>
+    (p.puntsAltitud ?? []).map((punt) => ({ ...punt, pasLat: p.pasLatMalla, pasLng: p.pasLngMalla }))
+  );
   if (puntsCombinats.length === 0) return;
 
   seccioFiltreMapa.hidden = false;
   const totesAmbMalla = parceles.every((p) => p.metodeAltitud === 'malla');
   const opcioOrientacio = selectFiltreMapa.querySelector('option[value="orientacio"]');
   opcioOrientacio.hidden = !totesAmbMalla;
+  const opcioPendent = selectFiltreMapa.querySelector('option[value="pendent"]');
+  const opcioOmbres = selectFiltreMapa.querySelector('option[value="ombres"]');
+  opcioPendent.hidden = !totesAmbMalla;
+  opcioOmbres.hidden = !totesAmbMalla;
 
   selectFiltreMapa.addEventListener('change', () => {
     if (selectFiltreMapa.value === 'altitud') {
@@ -109,6 +119,10 @@ function inicialitzarFiltreMapa(mapa, parceles) {
       mapa.afegirFiltreOrientacio(punts);
     } else if (selectFiltreMapa.value === 'cotes') {
       mapa.afegirFiltreCotes(puntsCombinats);
+    } else if (selectFiltreMapa.value === 'pendent') {
+      mapa.afegirFiltrePendent(puntsCombinats);
+    } else if (selectFiltreMapa.value === 'ombres') {
+      mapa.afegirFiltreOmbres(puntsCombinats);
     } else {
       mapa.netejarFiltre();
     }

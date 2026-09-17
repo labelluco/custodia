@@ -66,6 +66,7 @@ let tipusActual = 'parcela';
 let valorsCalculats = null;
 let puntsCalculats = null;
 let metodeCalculat = null;
+let pasMallaCalculat = null;
 let mapaActual = null;
 
 async function iniciar() {
@@ -238,6 +239,7 @@ async function calcularAmbVertexs() {
     orientacio: null,
   }));
   metodeCalculat = 'vertexs';
+  pasMallaCalculat = null;
   pintarResum(valorsCalculats);
   botoDesar.hidden = false;
 }
@@ -249,6 +251,7 @@ async function calcularAmbMalla() {
   }
 
   const malla = Malla.generar(parcelaActual.coordenades, distanciaMetres);
+  pasMallaCalculat = { pasLat: malla.pasLat, pasLng: malla.pasLng };
   const { coordenades, posicions } = Malla.puntsPerConsultar(malla);
 
   if (coordenades.length === 0) {
@@ -288,17 +291,18 @@ async function calcularAmbMalla() {
     altitudsGraella,
     distanciaMetres
   );
-  const orientacioPerPosicio = new Map(
-    orientacionsPerPunt.map(({ fila, columna, orientacio }) => [`${fila},${columna}`, orientacio])
+  const dadesPerPosicio = new Map(
+    orientacionsPerPunt.map(({ fila, columna, orientacio, pendent }) => [`${fila},${columna}`, { orientacio, pendent }])
   );
 
   const puntsPerAlMapa = coordenades.map((coord, i) => {
     const [f, c] = posicions[i];
-    const orientacio = orientacioPerPosicio.get(`${f},${c}`) ?? null;
+    const { orientacio, pendent } = dadesPerPosicio.get(`${f},${c}`) ?? { orientacio: null, pendent: null };
     return {
       coordenades: coord,
       altitud: altituds[i],
       orientacio,
+      pendent,
       etiqueta: orientacio == null ? null : t(ServeiOrientacio.etiquetaBruixola(orientacio)),
     };
   });
@@ -317,10 +321,11 @@ async function calcularAmbMalla() {
   );
 
   valorsCalculats = { ...resumPendent, orientacioMitjana };
-  puntsCalculats = puntsPerAlMapa.map(({ coordenades, altitud, orientacio }) => ({
+  puntsCalculats = puntsPerAlMapa.map(({ coordenades, altitud, orientacio, pendent }) => ({
     coordenades,
     altitud,
     orientacio,
+    pendent,
   }));
   metodeCalculat = 'malla';
   pintarResum(valorsCalculats);
@@ -377,6 +382,8 @@ botoDesar.addEventListener('click', async () => {
           : (parcelaActual.orientacioMitjana ?? null),
       puntsAltitud: puntsCalculats,
       metodeAltitud: metodeCalculat,
+      pasLatMalla: pasMallaCalculat?.pasLat ?? null,
+      pasLngMalla: pasMallaCalculat?.pasLng ?? null,
     };
 
     if (tipusActual === 'geometria') {

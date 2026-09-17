@@ -124,13 +124,20 @@ export class ServeiOrientacio {
    * @returns {Array<{fila: number, columna: number, orientacio: number|null}>}
    *   orientacio en graus (0-360), o null si el terreny hi és massa pla.
    */
+  /**
+   * Igual que abans, però ara també es retorna el pendent (%) de cada
+   * punt individual -- ja el calculàvem internament (el mòdul del
+   * gradient) per decidir si un punt és massa pla per tenir orientació,
+   * però es descartava. Es fa servir per als filtres de mapa "Ladera" i
+   * "Ombres".
+   */
   static calcularOrientacionsPerPunt(graella, altitudsGraella, distanciaMetres) {
     const gradients = calcularGradients(graella, altitudsGraella, distanciaMetres);
 
     return gradients.map(({ fila, columna, dzdx, dzdy }) => {
       const modul = Math.sqrt(dzdx ** 2 + dzdy ** 2);
       const orientacio = modul < LLINDAR_PLA ? null : ServeiOrientacio._gradientAOrientacio(dzdx, dzdy);
-      return { fila, columna, orientacio };
+      return { fila, columna, orientacio, pendent: modul * 100 };
     });
   }
 }

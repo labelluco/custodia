@@ -280,6 +280,36 @@ a {
   height: 380px;
 }
 
+/* En pantalla completa, el mapa ha d'ocupar tota la finestra -- sense
+   això, es queda amb la mida i les vores arrodonides d'abans, cosa que
+   no té sentit un cop ja no hi ha res més a la pantalla. */
+.mapa:fullscreen,
+.mapa:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+}
+
+.boto-pantalla-completa {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 18px;
+  text-align: center;
+  background-color: white;
+  color: var(--color-text);
+  border: none;
+  padding: 0;
+  display: block;
+  cursor: pointer;
+}
+
+.boto-pantalla-completa:hover {
+  background-color: var(--color-hover);
+}
+
 /* --- Taula de parcel·les --- */
 .taula-parceles-contenidor {
   overflow-x: auto;

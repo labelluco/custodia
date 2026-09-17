@@ -40,6 +40,54 @@ export class Mapa {
     this.capaFiltre = L.layerGroup().addTo(this.leafletMap);
     this.parceles = [];
     this._capaRessaltada = null;
+
+    this._afegirControlPantallaCompleta();
+  }
+
+  /**
+   * Botó de pantalla completa: fa servir l'API nativa del navegador
+   * (sense cap llibreria nova) sobre el propi contenidor del mapa.
+   * Alguns navegadors mòbils (Safari a iOS, sobretot) no admeten
+   * aquesta API per a elements que no siguin <video> -- en aquest cas,
+   * el botó simplement no farà res en tocar-lo, no dona cap error.
+   */
+  _afegirControlPantallaCompleta() {
+    const contenidor = this.leafletMap.getContainer();
+    let boto;
+
+    const ControlPantallaCompleta = L.Control.extend({
+      onAdd: () => {
+        boto = L.DomUtil.create('button', 'leaflet-bar leaflet-control boto-pantalla-completa');
+        boto.type = 'button';
+        boto.innerHTML = '⛶';
+        boto.setAttribute('aria-label', t('Pantalla completa'));
+        boto.title = t('Pantalla completa');
+
+        L.DomEvent.disableClickPropagation(boto);
+        L.DomEvent.on(boto, 'click', () => {
+          if (document.fullscreenElement === contenidor) {
+            document.exitFullscreen?.();
+          } else {
+            contenidor.requestFullscreen?.();
+          }
+        });
+
+        return boto;
+      },
+    });
+
+    new ControlPantallaCompleta({ position: 'topright' }).addTo(this.leafletMap);
+
+    // Un cop canvia l'estat de pantalla completa (des del botó, la
+    // tecla Esc, o el propi navegador), cal actualitzar la icona i
+    // avisar Leaflet que la mida del contenidor ha canviat -- si no,
+    // el mapa es queda mig en blanc fins que es torna a interactuar
+    // amb ell.
+    document.addEventListener('fullscreenchange', () => {
+      const enPantallaCompleta = document.fullscreenElement === contenidor;
+      boto.innerHTML = enPantallaCompleta ? '✕' : '⛶';
+      setTimeout(() => this.leafletMap.invalidateSize(), 100);
+    });
   }
 
   /**
@@ -120,7 +168,45 @@ export class Mapa {
   }
 
   /**
-   * Filtre d'altitud: un punt de color per cada punt d'altimetria ja
+   * Dibuixa la "cel·la" d'un punt del filtre: un quadrat que cobreix
+   * exactament l'espai fins als punts veïns (si es coneix el pas de la
+   * graella -- distanciaMetres/coordenades), en lloc d'un punt sol que
+   * deixa buits entre punts. Les dades calculades abans que
+   * guardéssim el pas de la graella (pasLat/pasLng) encara no en
+   * disposen -- es mostren com a punt sol fins que es recalculin.
+   */
+  _dibuixarCellaFiltre(punt, opcionsEstil) {
+    if (punt.pasLat && punt.pasLng) {
+      const [lat, lng] = punt.coordenades;
+      // Es fa cada quadrat un pèl més gran que el pas exacte (2%),
+      // perquè se solapi lleugerament amb els veïns en lloc de tocar-los
+      // vora amb vora -- si dos quadrats de colors diferents es toquen
+      // exactament, el difuminat (antialiasing) de la vora hi deixa una
+      // línia fina igualment, encara que la vora de cada quadrat sigui
+      // del mateix color que el seu propi farciment. IMPORTANT: com que
+      // se solapen, el farciment de cada filtre ha de dur fillOpacity: 1
+      // -- amb qualsevol transparència, a la franja de solapament es
+      // veuria una barreja dels dos colors veïns, en lloc del color net
+      // d'un d'ells, tornant a deixar una línia visible.
+      const mitjaLat = (punt.pasLat / 2) * 1.02;
+      const mitjaLng = (punt.pasLng / 2) * 1.02;
+      const limits = [
+        [lat - mitjaLat, lng - mitjaLng],
+        [lat + mitjaLat, lng + mitjaLng],
+      ];
+      // La vora es força al mateix color que el farciment (mai el que
+      // passi cada filtre per a la vora dels punts sols): així no es
+      // distingeix mai cap línia entre quadrats veïns, a cap zoom --
+      // però calia que existís (weight > 0), o un farciment que quedi
+      // per sota d'un píxel de pantalla (mapa molt allunyat) es pot
+      // arribar a arrodonir a "res" i el quadrat sencer desapareix.
+      return L.rectangle(limits, { ...opcionsEstil, weight: 1, color: opcionsEstil.fillColor }).addTo(this.capaFiltre);
+    }
+    return L.circleMarker(punt.coordenades, { radius: 6, weight: 1, ...opcionsEstil }).addTo(this.capaFiltre);
+  }
+
+  /**
+   * Filtre d'altitud: un quadrat de color per cada punt d'altimetria ja
    * calculat, en un degradat blau (més baix) -> roig (més alt) relatiu
    * al mínim i màxim d'aquesta mateixa parcel·la (o agrupació) --
    * deliberadament un degradat diferent del de risc (verd->roig), per
@@ -137,15 +223,11 @@ export class Mapa {
       if (p.altitud == null) continue;
       const proporcio = maxim === minim ? 0.5 : (p.altitud - minim) / (maxim - minim);
       const to = Math.round(240 - proporcio * 240); // 240=blau (baix) -> 0=roig (alt)
-      L.circleMarker(p.coordenades, {
-        radius: 6,
+      this._dibuixarCellaFiltre(p, {
         color: `hsl(${to}, 75%, 40%)`,
         fillColor: `hsl(${to}, 75%, 50%)`,
-        fillOpacity: 0.85,
-        weight: 1,
-      })
-        .bindTooltip(`${Math.round(p.altitud)} m`)
-        .addTo(this.capaFiltre);
+        fillOpacity: 1,
+      }).bindTooltip(`${Math.round(p.altitud)} m`);
     }
   }
 
@@ -207,6 +289,64 @@ export class Mapa {
     afegirPunt(puntMaxim, t('Cota màxima'), 'hsl(0, 75%, 45%)');
     if (puntMinim !== puntMaxim) {
       afegirPunt(puntMinim, t('Cota mínima'), 'hsl(240, 75%, 45%)');
+    }
+  }
+
+  /**
+   * Filtre de pendent ("laderes"): un punt de color per cada punt
+   * calculat, en un degradat verd (pla) -> roig (molt pendent).
+   * Llindar de saturació propi, diferent del que fem servir per al
+   * risc d'incendi -- aquí l'objectiu és només veure el relleu, no
+   * avaluar risc.
+   */
+  afegirFiltrePendent(punts) {
+    this.netejarFiltre();
+    const PENDENT_MAXIM_VISUAL = 60;
+
+    for (const p of punts) {
+      if (p.pendent == null) continue;
+      const proporcio = Math.min(p.pendent / PENDENT_MAXIM_VISUAL, 1);
+      const to = Math.round(120 - proporcio * 120); // 120=verd (pla) -> 0=roig (molt pendent)
+      this._dibuixarCellaFiltre(p, {
+        color: `hsl(${to}, 75%, 40%)`,
+        fillColor: `hsl(${to}, 75%, 50%)`,
+        fillOpacity: 1,
+      }).bindTooltip(`${p.pendent.toFixed(1)} %`);
+    }
+  }
+
+  /**
+   * Filtre d'ombres (hillshade): simula com incidiria la llum del sol
+   * sobre el relleu, a partir del pendent i l'orientació de cada punt.
+   * Paràmetres del sol (alçada 45°, azimut 315° = nord-oest) iguals
+   * als que fa servir per defecte la majoria de programari SIG (QGIS,
+   * ArcGIS) -- no és un valor arbitrari nostre.
+   */
+  afegirFiltreOmbres(punts) {
+    this.netejarFiltre();
+    const ALCADA_SOL = 45;
+    const AZIMUT_SOL = 315;
+    const zenitRad = ((90 - ALCADA_SOL) * Math.PI) / 180;
+    const azimutRad = (AZIMUT_SOL * Math.PI) / 180;
+
+    for (const p of punts) {
+      if (p.pendent == null) continue;
+      const pendentRad = Math.atan(p.pendent / 100);
+      // Un punt pla (pendent 0) no té orientació (null): no fa falta
+      // cap valor real, ja que sin(pendentRad) hi val 0 i cancel·la
+      // aquest terme de la fórmula igualment.
+      const aspecteRad = ((p.orientacio ?? 0) * Math.PI) / 180;
+
+      const illuminacio =
+        Math.cos(zenitRad) * Math.cos(pendentRad) +
+        Math.sin(zenitRad) * Math.sin(pendentRad) * Math.cos(azimutRad - aspecteRad);
+      const gris = Math.round(Math.max(0, Math.min(1, illuminacio)) * 100);
+
+      this._dibuixarCellaFiltre(p, {
+        color: `hsl(0, 0%, ${Math.max(gris - 15, 0)}%)`,
+        fillColor: `hsl(0, 0%, ${gris}%)`,
+        fillOpacity: 1,
+      }).bindTooltip(`${t('Il·luminació')}: ${gris}%`);
     }
   }
 
