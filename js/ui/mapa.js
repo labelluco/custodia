@@ -1,6 +1,7 @@
 // Embolcall sobre Leaflet. Necessita que L estigui carregat globalment
 // via <script> abans d'importar aquest mòdul.
 import { t } from '../i18n.js';
+import { colorAltitud, colorPendent, colorOmbres } from '../serveis/escalaColor.js';
 
 const COLOR_NEUTRE = '#000000';
 
@@ -221,11 +222,8 @@ export class Mapa {
 
     for (const p of punts) {
       if (p.altitud == null) continue;
-      const proporcio = maxim === minim ? 0.5 : (p.altitud - minim) / (maxim - minim);
-      const to = Math.round(240 - proporcio * 240); // 240=blau (baix) -> 0=roig (alt)
       this._dibuixarCellaFiltre(p, {
-        color: `hsl(${to}, 75%, 40%)`,
-        fillColor: `hsl(${to}, 75%, 50%)`,
+        ...colorAltitud(p.altitud, minim, maxim),
         fillOpacity: 1,
       }).bindTooltip(`${Math.round(p.altitud)} m`);
     }
@@ -301,15 +299,11 @@ export class Mapa {
    */
   afegirFiltrePendent(punts) {
     this.netejarFiltre();
-    const PENDENT_MAXIM_VISUAL = 60;
 
     for (const p of punts) {
       if (p.pendent == null) continue;
-      const proporcio = Math.min(p.pendent / PENDENT_MAXIM_VISUAL, 1);
-      const to = Math.round(120 - proporcio * 120); // 120=verd (pla) -> 0=roig (molt pendent)
       this._dibuixarCellaFiltre(p, {
-        color: `hsl(${to}, 75%, 40%)`,
-        fillColor: `hsl(${to}, 75%, 50%)`,
+        ...colorPendent(p.pendent),
         fillOpacity: 1,
       }).bindTooltip(`${p.pendent.toFixed(1)} %`);
     }
@@ -324,29 +318,13 @@ export class Mapa {
    */
   afegirFiltreOmbres(punts) {
     this.netejarFiltre();
-    const ALCADA_SOL = 45;
-    const AZIMUT_SOL = 315;
-    const zenitRad = ((90 - ALCADA_SOL) * Math.PI) / 180;
-    const azimutRad = (AZIMUT_SOL * Math.PI) / 180;
 
     for (const p of punts) {
       if (p.pendent == null) continue;
-      const pendentRad = Math.atan(p.pendent / 100);
-      // Un punt pla (pendent 0) no té orientació (null): no fa falta
-      // cap valor real, ja que sin(pendentRad) hi val 0 i cancel·la
-      // aquest terme de la fórmula igualment.
-      const aspecteRad = ((p.orientacio ?? 0) * Math.PI) / 180;
-
-      const illuminacio =
-        Math.cos(zenitRad) * Math.cos(pendentRad) +
-        Math.sin(zenitRad) * Math.sin(pendentRad) * Math.cos(azimutRad - aspecteRad);
-      const gris = Math.round(Math.max(0, Math.min(1, illuminacio)) * 100);
-
-      this._dibuixarCellaFiltre(p, {
-        color: `hsl(0, 0%, ${Math.max(gris - 15, 0)}%)`,
-        fillColor: `hsl(0, 0%, ${gris}%)`,
-        fillOpacity: 1,
-      }).bindTooltip(`${t('Il·luminació')}: ${gris}%`);
+      const { color, fillColor, gris } = colorOmbres(p.pendent, p.orientacio);
+      this._dibuixarCellaFiltre(p, { color, fillColor, fillOpacity: 1 }).bindTooltip(
+        `${t('Il·luminació')}: ${gris}%`
+      );
     }
   }
 

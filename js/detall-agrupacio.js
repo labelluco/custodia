@@ -9,6 +9,7 @@
 // d'intentar combinar dades incompletes.
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
+import { Mapa3D } from './ui/mapa3d.js';
 import { ServeiRisc } from './serveis/risc.js';
 import { ServeiOrientacio } from './serveis/orientacio.js';
 import { crearAnellSvg, filaComponent } from './ui/risc-visual.js';
@@ -30,6 +31,10 @@ const contingutRisc = document.getElementById('contingut-risc-calculat');
 const seccioAccions = document.getElementById('accions-agrupacio');
 const seccioFiltreMapa = document.getElementById('filtre-mapa');
 const selectFiltreMapa = document.getElementById('select-filtre-mapa');
+const seccioMapaLleaflet = document.getElementById('mapa-agrupacio');
+const seccioMapa3d = document.getElementById('mapa-agrupacio-3d');
+const botoMapa2d = document.getElementById('boto-mapa-2d');
+const botoMapa3d = document.getElementById('boto-mapa-3d');
 const botoEditar = document.getElementById('boto-editar');
 const botoPuntsAltitud = document.getElementById('boto-punts-altitud');
 const botoEsborrar = document.getElementById('boto-esborrar');
@@ -38,6 +43,7 @@ let bd;
 let agrupacioActual;
 let parcelesAgrupacio = [];
 let mapa;
+let mapa3d = null;
 
 async function iniciar() {
   const parametres = new URLSearchParams(window.location.search);
@@ -93,7 +99,8 @@ function inicialitzarFiltreMapa(mapa, parceles) {
   // Cada punt es marca amb el pas de la SEVA parcel·la, no un de
   // compartit -- si les parcel·les es van calcular amb distàncies
   // diferents entre elles, cada una dibuixarà els seus propis quadrats
-  // a la mida correcta.
+  // a la mida correcta (només fa falta per al 2D -- el 3D ja gestiona
+  // el pas de cadascuna per separat).
   const puntsCombinats = parceles.flatMap((p) =>
     (p.puntsAltitud ?? []).map((punt) => ({ ...punt, pasLat: p.pasLatMalla, pasLng: p.pasLngMalla }))
   );
@@ -102,13 +109,20 @@ function inicialitzarFiltreMapa(mapa, parceles) {
   seccioFiltreMapa.hidden = false;
   const totesAmbMalla = parceles.every((p) => p.metodeAltitud === 'malla');
   const opcioOrientacio = selectFiltreMapa.querySelector('option[value="orientacio"]');
-  opcioOrientacio.hidden = !totesAmbMalla;
   const opcioPendent = selectFiltreMapa.querySelector('option[value="pendent"]');
   const opcioOmbres = selectFiltreMapa.querySelector('option[value="ombres"]');
+  opcioOrientacio.hidden = !totesAmbMalla;
   opcioPendent.hidden = !totesAmbMalla;
   opcioOmbres.hidden = !totesAmbMalla;
 
-  selectFiltreMapa.addEventListener('change', () => {
+  // El mapa 3D també necessita el pendent per punt (mètode de malla) --
+  // per això només es mostra el botó "3D" quan es pot fer servir a
+  // TOTES les parcel·les de l'agrupació.
+  botoMapa3d.hidden = !totesAmbMalla;
+
+  let tipusMapaActual = '2d';
+
+  function aplicarFiltre2D() {
     if (selectFiltreMapa.value === 'altitud') {
       mapa.afegirFiltreAltitud(puntsCombinats);
     } else if (selectFiltreMapa.value === 'orientacio') {
@@ -126,6 +140,85 @@ function inicialitzarFiltreMapa(mapa, parceles) {
     } else {
       mapa.netejarFiltre();
     }
+  }
+
+  function aplicarFiltre3D() {
+    mapa3d?.amagarCotes();
+    mapa3d?.amagarPerimetre();
+
+    if (selectFiltreMapa.value === 'cotes') {
+      mapa3d?.aplicarCapa('ombres');
+      mapa3d?.mostrarCotes();
+    } else if (selectFiltreMapa.value === 'cap') {
+      mapa3d?.aplicarCapa('ombres');
+      mapa3d?.mostrarPerimetre();
+    } else {
+      mapa3d?.aplicarCapa(selectFiltreMapa.value);
+    }
+  }
+
+  selectFiltreMapa.addEventListener('change', () => {
+    if (tipusMapaActual === '3d') {
+      aplicarFiltre3D();
+    } else {
+      aplicarFiltre2D();
+    }
+  });
+
+  function activar2D() {
+    tipusMapaActual = '2d';
+    botoMapa2d.classList.add('boto-secundari--actiu');
+    botoMapa3d.classList.remove('boto-secundari--actiu');
+
+    mapa3d?.destruir();
+    mapa3d = null;
+
+    seccioMapa3d.hidden = true;
+    seccioMapaLleaflet.hidden = false;
+    // Leaflet s'ha quedat amb mida 0 mentre era amagat -- cal
+    // avisar-lo que ara sí que té espai real, o es queda mig en blanc.
+    mapa.leafletMap.invalidateSize();
+
+    Array.from(selectFiltreMapa.options).forEach((opcio) => {
+      opcio.hidden = false;
+    });
+    opcioOrientacio.hidden = !totesAmbMalla;
+    opcioPendent.hidden = !totesAmbMalla;
+    opcioOmbres.hidden = !totesAmbMalla;
+    selectFiltreMapa.value = 'cap';
+    mapa.netejarFiltre();
+  }
+
+  function activar3D() {
+    tipusMapaActual = '3d';
+    botoMapa3d.classList.add('boto-secundari--actiu');
+    botoMapa2d.classList.remove('boto-secundari--actiu');
+
+    // De moment el 3D no sap mostrar l'orientació (calen fletxes 3D
+    // pròpies, encara no fetes) -- es manté amagada mentre la resta
+    // d'opcions ja funcionen.
+    Array.from(selectFiltreMapa.options).forEach((opcio) => {
+      opcio.hidden = opcio.value === 'orientacio';
+    });
+    selectFiltreMapa.value = 'ombres';
+
+    seccioMapaLleaflet.hidden = true;
+    seccioMapa3d.hidden = false;
+
+    // A diferència d'una sola parcel·la, aquí es passa l'array sencer
+    // de parcel·les de l'agrupació -- Mapa3D ja sap dibuixar el
+    // relleu de cadascuna per separat, compartint un mateix punt de
+    // referència perquè quedin ben posicionades les unes respecte a
+    // les altres.
+    mapa3d = new Mapa3D('mapa-agrupacio-3d');
+    mapa3d.mostrarTerreny(parceles);
+  }
+
+  botoMapa2d.addEventListener('click', () => {
+    if (tipusMapaActual !== '2d') activar2D();
+  });
+  botoMapa3d.addEventListener('click', () => {
+    if (tipusMapaActual !== '3d') activar3D();
   });
 }
 

@@ -57,6 +57,12 @@
     <p id="enllac-tornar"><a href="parceles.html" class="enllac-tornar" data-i18n="← Tornar al llistat">&larr; Tornar al llistat</a></p>
 
     <section id="mapa-detall" class="mapa mapa--detall" aria-label="Perímetre de la parcel·la"></section>
+    <section id="mapa-detall-3d" class="mapa mapa--detall" aria-label="Relleu 3D de la parcel·la" hidden></section>
+
+    <div class="controls-tipus-mapa">
+      <button type="button" id="boto-mapa-2d" class="boto-secundari boto-secundari--actiu" data-i18n="2D">2D</button>
+      <button type="button" id="boto-mapa-3d" class="boto-secundari" data-i18n="3D">3D</button>
+    </div>
 
     <section id="filtre-mapa" class="fitxa-parcela-contenidor" hidden>
       <h2 data-i18n="Mostrar al mapa">Mostrar al mapa</h2>
@@ -118,6 +124,8 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossorigin=""></script>
+  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script type="module" src="js/detall.js"></script>
   <script type="module" src="js/registrar-sw.js"></script>
 </body>

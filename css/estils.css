@@ -310,6 +310,49 @@ a {
   background-color: var(--color-hover);
 }
 
+/* Variant per al mapa 3D: aquí no hi ha controls de Leaflet que ho
+   posicionin automàticament, cal fer-ho a mà. */
+.boto-pantalla-completa--3d {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+
+/* Brúixola superposada al mapa 3D: gira amb la càmera perquè sempre
+   assenyali el nord real (vegeu Mapa3D._actualitzarBrúixola). */
+.brúixola-3d {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+  transform-origin: center center;
+}
+
+.brúixola-3d__fletxa {
+  color: var(--color-accent);
+  font-size: 1rem;
+}
+
+.brúixola-3d__lletra {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
 /* --- Taula de parcel·les --- */
 .taula-parceles-contenidor {
   overflow-x: auto;
@@ -696,6 +739,26 @@ button:disabled {
 
 .boto-secundari:hover {
   background-color: var(--color-hover);
+}
+
+.boto-secundari--actiu,
+.boto-secundari--actiu:hover {
+  background-color: var(--color-primari);
+  color: white;
+  border-color: var(--color-primari);
+}
+
+.controls-tipus-mapa {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espai-xs);
+  margin-top: calc(-1 * var(--espai-m) + var(--espai-xs));
+  margin-bottom: var(--espai-m);
+}
+
+.controls-tipus-mapa .boto-secundari {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
 }
 
 .boto-perillos {

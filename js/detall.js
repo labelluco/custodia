@@ -1,6 +1,7 @@
 // Controlador de detall.html. L'id arriba per URL: detall.html?id=123
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
+import { Mapa3D } from './ui/mapa3d.js';
 import { ExportadorGpx } from './serveis/exportadorGpx.js';
 import { ServeiOrientacio } from './serveis/orientacio.js';
 import { ServeiRisc } from './serveis/risc.js';
@@ -22,6 +23,12 @@ const contingutRiscCalculat = document.getElementById('contingut-risc-calculat')
 const seccioAccions = document.getElementById('accions-parcela');
 const seccioFiltreMapa = document.getElementById('filtre-mapa');
 const selectFiltreMapa = document.getElementById('select-filtre-mapa');
+const seccioMapaLleaflet = document.getElementById('mapa-detall');
+const seccioMapa3d = document.getElementById('mapa-detall-3d');
+const botoMapa2d = document.getElementById('boto-mapa-2d');
+const botoMapa3d = document.getElementById('boto-mapa-3d');
+
+let mapa3d = null;
 const botoPendentOrientacio = document.getElementById('boto-pendent-orientacio');
 const botoExportarGpx = document.getElementById('boto-exportar-gpx');
 const botoEsborrar = document.getElementById('boto-esborrar');
@@ -92,14 +99,23 @@ function inicialitzarFiltreMapa(mapa, parcela) {
   if (!parcela.puntsAltitud?.length) return;
 
   seccioFiltreMapa.hidden = false;
+  const potFerMalla = parcela.metodeAltitud === 'malla';
+
   const opcioOrientacio = selectFiltreMapa.querySelector('option[value="orientacio"]');
-  opcioOrientacio.hidden = parcela.metodeAltitud !== 'malla';
   const opcioPendent = selectFiltreMapa.querySelector('option[value="pendent"]');
   const opcioOmbres = selectFiltreMapa.querySelector('option[value="ombres"]');
-  opcioPendent.hidden = parcela.metodeAltitud !== 'malla';
-  opcioOmbres.hidden = parcela.metodeAltitud !== 'malla';
+  opcioOrientacio.hidden = !potFerMalla;
+  opcioPendent.hidden = !potFerMalla;
+  opcioOmbres.hidden = !potFerMalla;
 
-  selectFiltreMapa.addEventListener('change', () => {
+  // El mapa 3D també necessita el pendent per punt (mètode de malla) --
+  // per això només es mostra el botó "3D" quan es pot fer servir,
+  // igual que Pendent/Ombres al filtre 2D.
+  botoMapa3d.hidden = !potFerMalla;
+
+  let tipusMapaActual = '2d';
+
+  function aplicarFiltre2D() {
     if (selectFiltreMapa.value === 'altitud') {
       mapa.afegirFiltreAltitud(ambPas(parcela.puntsAltitud, parcela));
     } else if (selectFiltreMapa.value === 'orientacio') {
@@ -117,6 +133,85 @@ function inicialitzarFiltreMapa(mapa, parcela) {
     } else {
       mapa.netejarFiltre();
     }
+  }
+
+  function aplicarFiltre3D() {
+    mapa3d?.amagarCotes();
+    mapa3d?.amagarPerimetre();
+
+    if (selectFiltreMapa.value === 'cotes') {
+      mapa3d?.aplicarCapa('ombres');
+      mapa3d?.mostrarCotes();
+    } else if (selectFiltreMapa.value === 'cap') {
+      mapa3d?.aplicarCapa('ombres');
+      mapa3d?.mostrarPerimetre();
+    } else {
+      mapa3d?.aplicarCapa(selectFiltreMapa.value);
+    }
+  }
+
+  selectFiltreMapa.addEventListener('change', () => {
+    if (tipusMapaActual === '3d') {
+      aplicarFiltre3D();
+    } else {
+      aplicarFiltre2D();
+    }
+  });
+
+  function activar2D() {
+    tipusMapaActual = '2d';
+    botoMapa2d.classList.add('boto-secundari--actiu');
+    botoMapa3d.classList.remove('boto-secundari--actiu');
+
+    mapa3d?.destruir();
+    mapa3d = null;
+
+    seccioMapa3d.hidden = true;
+    seccioMapaLleaflet.hidden = false;
+    // Leaflet s'ha quedat amb mida 0 mentre era amagat -- cal
+    // avisar-lo que ara sí que té espai real, o es queda mig en blanc.
+    mapa.leafletMap.invalidateSize();
+
+    // Primer es mostren totes les opcions (en entrar a 3D es van amagar
+    // totes menys Ombres/Cotes) i després es torna a amagar només les
+    // que depenen del mètode de malla -- "Només el perímetre",
+    // "Altitud" i "Cotes" sempre hi han de ser, siguem quin siguem el
+    // mètode de càlcul.
+    Array.from(selectFiltreMapa.options).forEach((opcio) => {
+      opcio.hidden = false;
+    });
+    opcioOrientacio.hidden = !potFerMalla;
+    opcioPendent.hidden = !potFerMalla;
+    opcioOmbres.hidden = !potFerMalla;
+    selectFiltreMapa.value = 'cap';
+    mapa.netejarFiltre();
+  }
+
+  function activar3D() {
+    tipusMapaActual = '3d';
+    botoMapa3d.classList.add('boto-secundari--actiu');
+    botoMapa2d.classList.remove('boto-secundari--actiu');
+
+    // De moment el 3D no sap mostrar l'orientació (calen fletxes 3D
+    // pròpies, encara no fetes) -- es manté amagada mentre la resta
+    // d'opcions ja funcionen.
+    Array.from(selectFiltreMapa.options).forEach((opcio) => {
+      opcio.hidden = opcio.value === 'orientacio';
+    });
+    selectFiltreMapa.value = 'ombres';
+
+    seccioMapaLleaflet.hidden = true;
+    seccioMapa3d.hidden = false;
+
+    mapa3d = new Mapa3D('mapa-detall-3d');
+    mapa3d.mostrarTerreny(parcela);
+  }
+
+  botoMapa2d.addEventListener('click', () => {
+    if (tipusMapaActual !== '2d') activar2D();
+  });
+  botoMapa3d.addEventListener('click', () => {
+    if (tipusMapaActual !== '3d') activar3D();
   });
 }
 

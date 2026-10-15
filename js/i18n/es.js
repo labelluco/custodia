@@ -154,6 +154,8 @@ export const ES = {
     'Toca una parcela en el listado para ver su perímetro en el mapa. Para ver el detalle, haz clic en el perímetro o en el botón «Detalle».',
   'Resultats': 'Resultados',
   'Mostrar al mapa': 'Mostrar en el mapa',
+  '2D': '2D',
+  '3D': '3D',
   'Pantalla completa': 'Pantalla completa',
   'Només el perímetre': 'Solo el perímetro',
   'Altitud': 'Altitud',
