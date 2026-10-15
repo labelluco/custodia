@@ -34,6 +34,10 @@
       <button type="button" id="boto-mapa-3d" class="pestanyes__opcio" role="tab" aria-selected="false" data-i18n="3D">3D</button>
     </div>
 
+    <div id="carrega-3d" class="carrega-3d" hidden>
+      <span class="spinner"></span><span data-i18n="Preparant el model 3D...">Preparant el model 3D...</span>
+    </div>
+
     <section class="panell" aria-labelledby="titol-detall">
       <button type="button" class="panell__ansa" aria-expanded="true" aria-label="Plegar o desplegar el panell" data-i18n-aria-label="Plegar o desplegar el panell"></button>
       <div class="panell__capcalera">
@@ -44,18 +48,40 @@
         </div>
       </div>
 
-      <section id="filtre-mapa" class="bloc" hidden>
-        <label class="camp">
+      <section id="controls-mapa" class="bloc" hidden>
+        <div id="controls-2d" class="grup-camps">
           <span class="camp__etiqueta" data-i18n="Mostrar al mapa">Mostrar al mapa</span>
-          <select id="select-filtre-mapa" class="camp__entrada">
-            <option value="cap" data-i18n="Només el perímetre">Només el perímetre</option>
-            <option value="altitud" data-i18n="Altitud">Altitud</option>
-            <option value="orientacio" data-i18n="Orientació">Orientació</option>
-            <option value="cotes" data-i18n="Cotes màxima i mínima">Cotes màxima i mínima</option>
-            <option value="pendent" data-i18n="Pendent (laderes)">Pendent (laderes)</option>
-            <option value="ombres" data-i18n="Mapa d'ombres">Mapa d'ombres</option>
-          </select>
-        </label>
+          <div class="pestanyes pestanyes--graella" role="radiogroup">
+            <button type="button" class="pestanyes__opcio" data-capa2d="cap" aria-selected="true" data-i18n="Perímetre">Perímetre</button>
+            <button type="button" class="pestanyes__opcio" data-capa2d="altitud" aria-selected="false" data-i18n="Altitud">Altitud</button>
+            <button type="button" class="pestanyes__opcio" data-capa2d="pendent" aria-selected="false" data-i18n="Pendent">Pendent</button>
+            <button type="button" class="pestanyes__opcio" data-capa2d="ombres" aria-selected="false" data-i18n="Ombres">Ombres</button>
+            <button type="button" class="pestanyes__opcio" data-capa2d="orientacio" aria-selected="false" data-i18n="Orientació">Orientació</button>
+            <button type="button" class="pestanyes__opcio" data-capa2d="cotes" aria-selected="false" data-i18n="Cotes">Cotes</button>
+          </div>
+          <p id="pista-capes-2d" class="panell__pista" hidden></p>
+        </div>
+        <div id="controls-3d" class="grup-camps" hidden>
+          <div class="camp">
+            <span class="camp__etiqueta" data-i18n="Aspecte">Aspecte</span>
+            <div id="selector-capa-3d" class="pestanyes pestanyes--petites" role="radiogroup">
+              <button type="button" class="pestanyes__opcio" data-capa3d="ortofoto" aria-selected="true" data-i18n="Ortofoto">Ortofoto</button>
+              <button type="button" class="pestanyes__opcio" data-capa3d="altitud" aria-selected="false" data-i18n="Altitud">Altitud</button>
+              <button type="button" class="pestanyes__opcio" data-capa3d="pendent" aria-selected="false" data-i18n="Pendent">Pendent</button>
+              <button type="button" class="pestanyes__opcio" data-capa3d="neutre" aria-selected="false" data-i18n="Maqueta">Maqueta</button>
+            </div>
+          </div>
+          <div class="camp">
+            <span class="camp__etiqueta" data-i18n="Detall">Detall</span>
+            <div id="selector-detall-3d" class="pestanyes pestanyes--petites" role="radiogroup">
+              <button type="button" class="pestanyes__opcio" data-detall3d="baix" aria-selected="false" data-i18n="Baix">Baix</button>
+              <button type="button" class="pestanyes__opcio" data-detall3d="mitja" aria-selected="true" data-i18n="Mitjà">Mitjà</button>
+              <button type="button" class="pestanyes__opcio" data-detall3d="alt" aria-selected="false" data-i18n="Alt">Alt</button>
+            </div>
+          </div>
+          <button type="button" id="boto-cotes-3d" class="boto boto--secundari boto--petit boto-commutador" aria-pressed="false"><svg><use href="#i-agulla"/></svg><span data-i18n="Cotes màxima i mínima">Cotes màxima i mínima</span></button>
+          <p id="pista-3d-antic" class="panell__pista panell__pista--destacada" hidden data-i18n="Sense connexió: es mostra el relleu amb els punts d'altimetria desats (sense ortofoto).">Sense connexió: es mostra el relleu amb els punts d'altimetria desats (sense ortofoto).</p>
+        </div>
       </section>
       <section id="seccio-risc-calculat" class="bloc bloc--risc" hidden>
         <h2 class="bloc__titol" data-i18n="Risc d'incendi calculat">Risc d'incendi calculat</h2>
@@ -85,6 +111,8 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossorigin=""></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.js"></script>
+  <script src="https://unpkg.com/poly2tri@1.5.0/dist/poly2tri.min.js"></script>
   <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
   <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script type="module" src="js/detall-geometria.js"></script>

@@ -20,6 +20,11 @@ const ICONES = {
   llapis: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13 7l4 4"/>',
   ordre: '<path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/>',
   tancar: '<path d="M6 6l12 12M18 6L6 18"/>',
+  capes: '<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>',
+  parcela: '<path d="M4 10l5-6 9 2 3 7-5 7-10-2z"/>',
+  agrupacio: '<path d="M2 9l4-5 6 1 2 6-4 5-7-1z"/><path d="M12 14l4-5 5 1 1 6-4 4-5-1"/>',
+  geometria: '<path d="M4 10l5-6 9 2 3 7-5 7-10-2z" stroke-dasharray="3 2.5"/>',
+  agulla: '<circle cx="12" cy="7" r="4"/><path d="M12 11v10"/>',
 };
 
 export function injectarIcones() {

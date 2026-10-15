@@ -38,10 +38,7 @@ export class Mapa {
     });
 
     capaOsm.addTo(this.leafletMap);
-
-    L.control
-      .layers({ 'Mapa': capaOsm, 'Ortofoto (PNOA)': capaOrtofoto })
-      .addTo(this.leafletMap);
+    this._afegirBotoFons(capaOsm, capaOrtofoto);
 
     this.capaParceles = L.layerGroup().addTo(this.leafletMap);
     // Capa a part per als filtres opcionals (altitud/orientació) de les
@@ -52,6 +49,40 @@ export class Mapa {
     this._capaRessaltada = null;
 
     this._afegirControlPantallaCompleta();
+  }
+
+  /**
+   * Botó per alternar el fons entre el mapa i l'ortofoto, com a Terra 3D:
+   * un sol toc, en lloc del desplegable de capes de Leaflet (només hi ha
+   * dues opcions).
+   */
+  _afegirBotoFons(capaMapa, capaOrtofoto) {
+    const ControlFons = L.Control.extend({
+      onAdd: () => {
+        const boto = L.DomUtil.create('button', 'boto-icona boto-fons-mapa');
+        boto.type = 'button';
+        boto.innerHTML = '<svg><use href="#i-capes"/></svg>';
+        const actualitzar = () => {
+          const ambOrtofoto = this.leafletMap.hasLayer(capaOrtofoto);
+          boto.title = ambOrtofoto ? t('Veure el mapa') : t("Veure l'ortofoto");
+          boto.setAttribute('aria-label', boto.title);
+          boto.setAttribute('aria-pressed', String(ambOrtofoto));
+        };
+        L.DomEvent.disableClickPropagation(boto);
+        L.DomEvent.on(boto, 'click', () => {
+          const [treure, posar] = this.leafletMap.hasLayer(capaOrtofoto)
+            ? [capaOrtofoto, capaMapa]
+            : [capaMapa, capaOrtofoto];
+          this.leafletMap.removeLayer(treure);
+          posar.addTo(this.leafletMap);
+          posar.bringToBack();
+          actualitzar();
+        });
+        actualitzar();
+        return boto;
+      },
+    });
+    new ControlFons({ position: 'topright' }).addTo(this.leafletMap);
   }
 
   /**

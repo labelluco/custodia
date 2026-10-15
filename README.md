@@ -27,8 +27,10 @@ l'orientació. Disponible en català i castellà.
   flotant, amb cerca, ordenació i accés directe al detall de cadascuna.
 - **Agrupacions i geometries**: parcel·les agrupades (amb els valors
   agregats) i perímetres dibuixats a mà, sense referència cadastral.
-- **Vista 3D del relleu** (Three.js) amb capes d'altitud, pendent, cotes i
-  perímetre, a partir dels punts d'altimetria ja calculats.
+- **Vista 3D del relleu**, com a Terra 3D: un bloc de terreny amb el
+  perímetre exacte, generat al moment a partir del MDT de l'IGN, amb capes
+  d'ortofoto, altitud, pendent i maqueta, cotes i tres nivells de detall.
+  Sense connexió, es mostra el relleu amb els punts d'altimetria desats.
 - **Còpia de seguretat** en CSV (exportar i importar).
 - **Exportació GPX**: el perímetre de qualsevol parcel·la es pot exportar
   per fer-lo servir amb un GPS o una app de navegació al camp.
@@ -89,8 +91,9 @@ custodia/
     ├── model/                 Parcela, Agrupacio, Geometria (dades pures)
     ├── serveis/               Altimetria, orientació, risc, IndexedDB, GPX, CSV
     ├── geometria/             Malla de punts i gradients (càlcul pur)
-    ├── ui/                    Mapa (Leaflet), Mapa3D (Three.js), menú,
-    │                          disposició del panell, diàlegs, llistats...
+    ├── ui/                    Mapa (Leaflet), Vista3D (visor del nucli, o
+    │                          Mapa3D sense connexió), controls del mapa,
+    │                          menú, disposició del panell, diàlegs...
     ├── i18n.js · i18n/es.js   Traduccions (sobre el sistema del nucli)
     └── <pàgina>.js            Un controlador per pàgina
 ```

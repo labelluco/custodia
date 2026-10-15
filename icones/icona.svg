@@ -1,11 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Fons: verd de pi/alzina, cantonades arrodonides -->
-  <rect width="512" height="512" rx="96" fill="#396a49"/>
+  <!-- Fons: verd de pi/alzina, cantonades com les de Terra 3D -->
+  <rect width="512" height="512" rx="112" fill="#396a49"/>
 
-  <!-- Pi estilitzat: silueta sòlida i geomètrica, sense contorns fins,
-       perquè es llegeixi bé fins i tot molt petit (favicon) -->
-  <g fill="#f3f1ea">
-    <path d="M 256 88 L 340 220 L 296 220 L 368 320 L 312 320 L 388 420 L 124 420 L 200 320 L 144 320 L 216 220 L 172 220 Z"/>
-  </g>
-  <rect x="234" y="420" width="44" height="52" rx="6" fill="#f3f1ea"/>
+  <!-- Relleu: una sola silueta de muntanya en pedra calcària, amb el
+       vessant il·luminat en ocre clar, sobre una franja de terra -->
+  <path d="M88 352 L176 216 L238 262 L306 148 L372 238 L424 352 Z" fill="#f3f1ea"/>
+  <path d="M306 148 L372 238 L338 262 L306 226 L276 262 L238 262 Z" fill="#e8b54a"/>
+  <path d="M88 352 L424 352 L424 382 L88 382 Z" fill="#a1552e"/>
 </svg>

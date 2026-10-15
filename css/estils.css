@@ -50,8 +50,7 @@ html:has(.pantalla-mapa) {
   font-family: var(--font);
 }
 
-.leaflet-bar a,
-.leaflet-control-layers {
+.leaflet-bar a {
   border-radius: var(--radi) !important;
 }
 
@@ -70,6 +69,50 @@ html:has(.pantalla-mapa) {
   background-color: var(--color-superficie-translucida);
   box-shadow: var(--ombra);
   backdrop-filter: blur(8px);
+}
+
+/* Panells una mica més amples que a Terra 3D: Custòdia hi posa més
+   contingut (risc, dades, llistats). */
+@media (min-width: 900px) {
+  .panell {
+    width: 460px;
+  }
+}
+
+/* Càrrega del model 3D (MDT + ortofoto), al mig de la part visible. */
+.carrega-3d {
+  position: fixed;
+  z-index: 640;
+  top: calc(112px + env(safe-area-inset-top));
+  left: calc((100% + var(--panell-esquerra, 0px)) / 2);
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: var(--radi-rodo);
+  background-color: var(--color-superficie);
+  box-shadow: var(--ombra-flotant);
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Brúixola del visor del nucli: per sota de la barra superior. */
+.pantalla-mapa .bruixola-3d {
+  top: calc(64px + env(safe-area-inset-top));
+  right: 10px;
+}
+
+/* Botó de fons del mapa (mapa / ortofoto), com a Terra 3D. */
+.boto-fons-mapa {
+  box-shadow: var(--ombra);
+}
+
+.boto-fons-mapa[aria-pressed="true"] {
+  background-color: var(--color-primari);
+  color: #fff;
 }
 
 /* --- Barra superior: navegació --- */
@@ -650,6 +693,94 @@ input[type="file"].camp__entrada {
   transition: width 0.4s ease;
 }
 
+/* --- Pestanyes de capes --- */
+.pestanyes--petites .pestanyes__opcio {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* 2D: sis capes en una graella de 3 x 2 (en una fila no hi caben). */
+.pestanyes--graella {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-radius: var(--radi);
+}
+
+.pestanyes--graella .pestanyes__opcio {
+  border-radius: calc(var(--radi) - 3px);
+  padding: 0.45rem 0.4rem;
+  font-size: 0.8rem;
+}
+
+.boto-commutador[aria-pressed="true"] {
+  background-color: var(--color-primari-suau);
+  border-color: var(--color-primari);
+  color: var(--color-primari-fosc);
+}
+
+/* --- Inici: accessos (tessel·les) --- */
+.tesseles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espai-xs);
+}
+
+.tessela {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem;
+  border-radius: var(--radi);
+  border: 1px solid var(--color-vora);
+  background-color: var(--color-superficie);
+  color: var(--color-text);
+  text-decoration: none;
+  min-width: 0;
+  transition: border-color var(--transicio), transform var(--transicio);
+}
+
+.tessela:hover {
+  border-color: var(--color-primari);
+}
+
+.tessela:active {
+  transform: scale(0.98);
+}
+
+.tessela__icona {
+  flex-shrink: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primari-suau);
+  color: var(--color-primari-fosc);
+}
+
+.tessela__icona svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.tessela__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tessela__nom {
+  font-weight: 700;
+  font-size: 0.92rem;
+  overflow-wrap: break-word;
+}
+
+.tessela__nombre {
+  font-size: 0.78rem;
+  color: var(--color-text-mut);
+}
+
 /* --- Altimetria: mètode amb pestanyes fetes de botons de ràdio --- */
 .pestanyes--radio .pestanyes__opcio {
   display: flex;
@@ -841,7 +972,7 @@ input[type="file"].camp__entrada {
   top: 56px;
 }
 
-/* --- Pantalla simple (inici, còpia de seguretat) --- */
+/* --- Pantalla simple (còpia de seguretat) --- */
 .pantalla-simple main {
   min-height: 100vh;
   padding: calc(72px + env(safe-area-inset-top)) var(--espai-s) var(--espai-l);
@@ -871,42 +1002,6 @@ input[type="file"].camp__entrada {
   width: 100%;
 }
 
-.menu-icones {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: var(--espai-s);
-}
-
-.icona-menu {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--espai-xs);
-  padding: var(--espai-m) var(--espai-s);
-  border-radius: var(--radi);
-  border: 1px solid var(--color-vora);
-  background-color: var(--color-superficie);
-  color: var(--color-text);
-  text-decoration: none;
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.92rem;
-  transition: transform var(--transicio), box-shadow var(--transicio), border-color var(--transicio);
-}
-
-.icona-menu:hover {
-  transform: translateY(-2px);
-  border-color: var(--color-primari);
-  box-shadow: var(--ombra);
-}
-
-.icona-menu__icona {
-  width: 48px;
-  height: 48px;
-  color: var(--color-primari);
-}
-
 @media (max-width: 899px) {
   /* Al mòbil el full inferior ocupa com a molt la meitat: el mapa ha de
      continuar veient-se. */
@@ -916,9 +1011,5 @@ input[type="file"].camp__entrada {
 
   .panell--plegat {
     max-height: 9.5rem;
-  }
-
-  .menu-icones {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

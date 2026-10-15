@@ -154,12 +154,9 @@ export const ES = {
   '2D': '2D',
   '3D': '3D',
   'Pantalla completa': 'Pantalla completa',
-  'Només el perímetre': 'Solo el perímetro',
   'Altitud': 'Altitud',
   'Orientació': 'Orientación',
   'Cotes màxima i mínima': 'Cotas máxima y mínima',
-  'Pendent (laderes)': 'Pendiente (laderas)',
-  'Mapa d\'ombres': 'Mapa de sombras',
   'Il·luminació': 'Iluminación',
   'Cerca...': 'Buscar...',
   'Per població, polígon, parcel·la o ús.': 'Por población, polígono, parcela o uso.',
@@ -181,7 +178,6 @@ export const ES = {
 
   // Reestructuració de la navegació (pantalla d'inici, parceles.html)
   'Parcel·les': 'Parcelas',
-  'Què vols fer?': '¿Qué quieres hacer?',
   'Agrupacions de parcel·les': 'Agrupaciones de parcelas',
   'Agrupacions': 'Agrupaciones',
   'Afegir agrupació': 'Añadir agrupación',
@@ -335,4 +331,35 @@ export const ES = {
   'Relleu 3D de la parcel·la': 'Relieve 3D de la parcela',
   'Relleu 3D de la geometria': 'Relieve 3D de la geometría',
   'Relleu 3D de l\'agrupació': 'Relieve 3D de la agrupación',
+  // Capes del mapa i 3D com a Terra 3D; inici amb mapa
+  'Preparant el model 3D...': 'Preparando el modelo 3D...',
+  'Perímetre': 'Perímetro',
+  'Pendent': 'Pendiente',
+  'Ombres': 'Sombras',
+  'Cotes': 'Cotas',
+  'Aspecte': 'Aspecto',
+  'Ortofoto': 'Ortofoto',
+  'Maqueta': 'Maqueta',
+  'Baix': 'Bajo',
+  'Mitjà': 'Medio',
+  'Alt': 'Alto',
+  'Sense connexió: es mostra el relleu amb els punts d\'altimetria desats (sense ortofoto).':
+    'Sin conexión: se muestra el relieve con los puntos de altimetría guardados (sin ortofoto).',
+  'Pendent, ombres i orientació necessiten l\'altimetria calculada amb el mètode de malla.':
+    'Pendiente, sombras y orientación necesitan la altimetría calculada con el método de malla.',
+  'Calcula l\'altimetria per veure-hi l\'altitud, el pendent i les cotes.':
+    'Calcula la altimetría para ver la altitud, la pendiente y las cotas.',
+  'No s\'ha pogut generar el model 3D.': 'No se ha podido generar el modelo 3D.',
+  'No s\'ha pogut generar el model 3D: cal connexió (o l\'altimetria calculada amb el mètode de malla).':
+    'No se ha podido generar el modelo 3D: hace falta conexión (o la altimetría calculada con el método de malla).',
+  'Veure el mapa': 'Ver el mapa',
+  'Veure l\'ortofoto': 'Ver la ortofoto',
+  'Mapa del teu territori': 'Mapa de tu territorio',
+  'El teu territori': 'Tu territorio',
+  'Parcel·les, agrupacions i geometries que tens desades en aquest dispositiu.':
+    'Parcelas, agrupaciones y geometrías que tienes guardadas en este dispositivo.',
+  'agrupació': 'agrupación',
+  'agrupacions': 'agrupaciones',
+  'geometria': 'geometría',
+  'geometries': 'geometrías',
 };

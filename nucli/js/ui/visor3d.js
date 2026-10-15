@@ -13,10 +13,11 @@
 //  - exageració vertical 1 per defecte (fidelitat geomètrica).
 //
 // Novetats: superfície i laterals en malles separades (la superfície
-// indexada, amb normals suaus; les parets amb normals planes), i tres
-// capes: ortofoto PNOA com a textura, color per altitud o neutre.
+// indexada, amb normals suaus; les parets amb normals planes), i quatre
+// capes: ortofoto PNOA com a textura, color per altitud, color per
+// pendent o neutre. Opcionalment, agulles a les cotes màxima i mínima.
 import { t } from '../i18n/i18n.js';
-import { colorAltitud } from '../serveis/escalaColor.js';
+import { colorAltitud, colorPendent } from '../serveis/escalaColor.js';
 import { trianglesModel } from '../geometria/solid.js';
 
 const COLOR_NEUTRE = '#b8ad95';
@@ -31,14 +32,16 @@ export class Visor3D {
     this._capa = 'neutre';
     this._grup = null;
     this._idAnimacio = null;
-    this._marges = () => ({ dreta: 0, inferior: 0 });
+    this._marges = () => ({ esquerra: 0, dreta: 0, inferior: 0 });
+    this._ambCotes = false;
+    this._grupCotes = null;
   }
 
   /**
-   * Espai (px) tapat per panells de l'app a la dreta i a sota. La càmera
-   * desplaça el seu centre òptic (setViewOffset) perquè el model quedi
-   * centrat a la part visible, sense deformar-lo.
-   * @param {() => {dreta: number, inferior: number}} funcio
+   * Espai (px) tapat per panells de l'app a l'esquerra, a la dreta i a
+   * sota. La càmera desplaça el seu centre òptic (setViewOffset) perquè
+   * el model quedi centrat a la part visible, sense deformar-lo.
+   * @param {() => {esquerra?: number, dreta?: number, inferior?: number}} funcio
    */
   establirMarges(funcio) {
     this._marges = funcio;
@@ -101,14 +104,25 @@ export class Visor3D {
     this._construirMalles();
   }
 
+  /** 'ortofoto' | 'altitud' | 'pendent' | 'neutre' */
   aplicarCapa(capa) {
     this._capa = capa;
     if (!this._superficie) return;
     const material = this._superficie.material;
+    const geometria = this._superficie.geometry;
     material.map = capa === 'ortofoto' ? this._textura : null;
-    material.vertexColors = capa === 'altitud';
+    material.vertexColors = capa === 'altitud' || capa === 'pendent';
+    if (material.vertexColors) {
+      geometria.setAttribute('color', geometria.userData[capa === 'pendent' ? 'colorsPendent' : 'colorsAltitud']);
+    }
     material.color.set(capa === 'neutre' ? COLOR_NEUTRE : '#ffffff');
     material.needsUpdate = true;
+  }
+
+  /** Mostra o amaga les agulles de les cotes màxima (roja) i mínima (blava). */
+  mostrarCotes(mostrar) {
+    this._ambCotes = mostrar;
+    this._construirCotes();
   }
 
   /** Torna a la vista inicial. */
@@ -148,6 +162,8 @@ export class Visor3D {
     const posicions = new Float32Array(n * 3);
     const uvs = new Float32Array(n * 2);
     const colors = new Float32Array(n * 3);
+    const colorsPendent = new Float32Array(n * 3);
+    const pendents = pendentsPerVertex(model);
     const requadreTextura = this._opcions.textura?.requadre;
     const color = new THREE.Color();
     for (let i = 0; i < n; i++) {
@@ -161,11 +177,15 @@ export class Visor3D {
       }
       color.set(colorAltitud(z, model.altitudMinima, model.altitudMaxima).fillColor);
       colors.set([color.r, color.g, color.b], i * 3);
+      color.set(colorPendent(pendents[i]).fillColor);
+      colorsPendent.set([color.r, color.g, color.b], i * 3);
     }
     const geometriaSuperficie = new THREE.BufferGeometry();
     geometriaSuperficie.setAttribute('position', new THREE.BufferAttribute(posicions, 3));
     geometriaSuperficie.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-    geometriaSuperficie.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometriaSuperficie.userData.colorsAltitud = new THREE.BufferAttribute(colors, 3);
+    geometriaSuperficie.userData.colorsPendent = new THREE.BufferAttribute(colorsPendent, 3);
+    geometriaSuperficie.setAttribute('color', geometriaSuperficie.userData.colorsAltitud);
     geometriaSuperficie.setIndex(new THREE.BufferAttribute(model.superior, 1));
     geometriaSuperficie.computeVertexNormals();
 
@@ -196,6 +216,59 @@ export class Visor3D {
 
     this._escena.add(this._grup);
     this.aplicarCapa(this._capa);
+    this._construirCotes();
+  }
+
+  /**
+   * Agulles (tija + cap) als vèrtexs d'altitud màxima i mínima, en
+   * coordenades de l'escena: (x, y, z) del model -> (x, z, -y), com fa el
+   * grup. Mida proporcional al model; es refan si canvia l'exageració.
+   */
+  _construirCotes() {
+    if (this._grupCotes) {
+      this._escena?.remove(this._grupCotes);
+      this._grupCotes.traverse((o) => {
+        o.geometry?.dispose();
+        o.material?.dispose();
+      });
+      this._grupCotes = null;
+    }
+    if (!this._ambCotes || !this._model || !this._escena) return;
+
+    const { vertexs, limits } = this._model;
+    let iMax = 0;
+    let iMin = 0;
+    for (let i = 0; i < vertexs.length / 3; i++) {
+      if (vertexs[i * 3 + 2] > vertexs[iMax * 3 + 2]) iMax = i;
+      if (vertexs[i * 3 + 2] < vertexs[iMin * 3 + 2]) iMin = i;
+    }
+
+    const mida = Math.max(limits.maxX - limits.minX, limits.maxY - limits.minY);
+    const alcada = mida * 0.12;
+    const radiCap = mida * 0.025;
+    const transformar = this._transformar();
+    this._grupCotes = new THREE.Group();
+
+    const afegir = (i, colorCap) => {
+      const [x, y, z] = transformar(vertexs[i * 3], vertexs[i * 3 + 1], vertexs[i * 3 + 2]);
+      const agulla = new THREE.Group();
+      const tija = new THREE.Mesh(
+        new THREE.CylinderGeometry(radiCap * 0.12, radiCap * 0.12, alcada, 8),
+        new THREE.MeshStandardMaterial({ color: '#3a3a3a', roughness: 0.5 })
+      );
+      tija.position.y = alcada / 2;
+      const cap = new THREE.Mesh(
+        new THREE.SphereGeometry(radiCap, 16, 16),
+        new THREE.MeshStandardMaterial({ color: colorCap, roughness: 0.5 })
+      );
+      cap.position.y = alcada;
+      agulla.add(tija, cap);
+      agulla.position.set(x, z, -y);
+      this._grupCotes.add(agulla);
+    };
+    afegir(iMax, '#c0392b');
+    if (iMin !== iMax) afegir(iMin, '#2c5aa0');
+    this._escena.add(this._grupCotes);
   }
 
   _carregarTextura() {
@@ -226,10 +299,10 @@ export class Visor3D {
     // lliure del visor (descomptant els panells; vegeu establirMarges).
     const esfera = new THREE.Box3().setFromObject(this._grup).getBoundingSphere(new THREE.Sphere());
     const { clientWidth: amplada, clientHeight: alcada } = this.contenidor;
-    const { dreta = 0, inferior = 0 } = this._marges();
+    const { esquerra = 0, dreta = 0, inferior = 0 } = this._marges();
     const tanVertical = Math.tan((this._camera.fov * Math.PI) / 360);
     const tanLliureVertical = (tanVertical * Math.max(alcada - inferior, 1)) / (alcada + inferior);
-    const tanLliureHoritzontal = (tanVertical * Math.max(amplada - dreta, 1)) / (alcada + inferior);
+    const tanLliureHoritzontal = (tanVertical * Math.max(amplada - dreta - esquerra, 1)) / (alcada + inferior);
     const distancia = (esfera.radius / Math.min(tanLliureVertical, tanLliureHoritzontal)) * 1.05;
 
     // Des del sud-est i una mica elevat: el sol ve del nord-oest, i així
@@ -270,16 +343,20 @@ export class Visor3D {
   }
 
   _aplicarMarges(amplada, alcada) {
-    const { dreta = 0, inferior = 0 } = this._marges();
+    const { esquerra = 0, dreta = 0, inferior = 0 } = this._marges();
     // L'aspecte ha de ser el de la vista virtual sencera: si fos el de la
     // part visible, el model sortiria estirat.
-    this._camera.aspect = (amplada + dreta) / (alcada + inferior);
-    if (dreta === 0 && inferior === 0) {
+    const ampladaVirtual = amplada + esquerra + dreta;
+    this._camera.aspect = ampladaVirtual / (alcada + inferior);
+    if (esquerra === 0 && dreta === 0 && inferior === 0) {
       this._camera.clearViewOffset();
     } else {
-      // Vista virtual més gran, de la qual es mostra la part superior
-      // esquerra: el centre de la vista virtual cau al mig de l'espai lliure.
-      this._camera.setViewOffset(amplada + dreta, alcada + inferior, dreta, inferior, amplada, alcada);
+      // Vista virtual més gran, de la qual se'n mostra una finestra: el
+      // centre virtual ha de caure al mig de l'espai lliure. En x, el
+      // centre lliure és (amplada + esquerra - dreta) / 2 i el virtual,
+      // ampladaVirtual / 2 - offsetX: per tant offsetX = dreta. En y,
+      // amb el panell a sota, offsetY = inferior.
+      this._camera.setViewOffset(ampladaVirtual, alcada + inferior, dreta, inferior, amplada, alcada);
     }
     this._camera.updateProjectionMatrix();
   }
@@ -304,6 +381,11 @@ export class Visor3D {
     this._renderer?.dispose();
     this._renderer?.domElement.remove();
     this._bruixola?.remove();
+    this._grupCotes?.traverse((o) => {
+      o.geometry?.dispose();
+      o.material?.dispose();
+    });
+    this._grupCotes = null;
     this._grup = null;
     this._superficie = null;
     this._textura = null;
@@ -312,4 +394,40 @@ export class Visor3D {
     this._escena = null;
     this._model = null;
   }
+}
+
+/**
+ * Pendent (%) de cada vèrtex de la superfície, amb l'exageració real (1):
+ * mitjana de les normals dels triangles que el toquen, ponderada per
+ * l'àrea (el producte vectorial ja hi és proporcional). Pendent =
+ * component horitzontal / vertical de la normal.
+ */
+function pendentsPerVertex(model) {
+  const { vertexs, superior } = model;
+  const n = vertexs.length / 3;
+  const normals = new Float64Array(n * 3);
+  for (let k = 0; k < superior.length; k += 3) {
+    const [a, b, c] = [superior[k], superior[k + 1], superior[k + 2]];
+    const ux = vertexs[b * 3] - vertexs[a * 3];
+    const uy = vertexs[b * 3 + 1] - vertexs[a * 3 + 1];
+    const uz = vertexs[b * 3 + 2] - vertexs[a * 3 + 2];
+    const vx = vertexs[c * 3] - vertexs[a * 3];
+    const vy = vertexs[c * 3 + 1] - vertexs[a * 3 + 1];
+    const vz = vertexs[c * 3 + 2] - vertexs[a * 3 + 2];
+    const nx = uy * vz - uz * vy;
+    const ny = uz * vx - ux * vz;
+    const nz = ux * vy - uy * vx;
+    for (const i of [a, b, c]) {
+      normals[i * 3] += nx;
+      normals[i * 3 + 1] += ny;
+      normals[i * 3 + 2] += nz;
+    }
+  }
+  const pendents = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const nz = Math.abs(normals[i * 3 + 2]);
+    const horitzontal = Math.hypot(normals[i * 3], normals[i * 3 + 1]);
+    pendents[i] = nz > 0 ? (horitzontal / nz) * 100 : 0;
+  }
+  return pendents;
 }

@@ -1,7 +1,7 @@
 // Service worker bàsic: cache dels fitxers estàtics per a ús offline.
 // Actualitzar la llista si s'afegeixen pantalles noves.
 
-const NOM_CACHE = 'custodia-v80';
+const NOM_CACHE = 'custodia-v81';
 
 const FITXERS_PER_CACHE = [
   './',
@@ -32,6 +32,7 @@ const FITXERS_PER_CACHE = [
   './nucli/js/pagaments/compres.js',
   './nucli/js/serveis/cadastre.js',
   './nucli/js/serveis/escalaColor.js',
+  './nucli/js/serveis/generadorModel.js',
   './nucli/js/serveis/magatzem.js',
   './nucli/js/serveis/mdt.js',
   './nucli/js/serveis/ortofoto.js',
@@ -81,6 +82,8 @@ const FITXERS_PER_CACHE = [
   './js/ui/ordenacio.js',
   './js/ui/llista.js',
   './js/ui/pestanyes.js',
+  './js/ui/vista3d.js',
+  './js/ui/controlsMapa.js',
   './manifest.json',
   './icones/icona.svg',
   './icones/icona-192.png',

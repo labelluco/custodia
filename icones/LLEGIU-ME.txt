@@ -1,30 +1,30 @@
-Icona de l'app, per al favicon i la instal·lació com a PWA (no es
-mostra enlloc més: la capçalera només porta el nom "Custòdia", sense
-logotip -- decisió final després de provar-ho amb icona).
+Icona de l'app, per al favicon, la instal·lació com a PWA i la marca de
+la barra superior.
 
-Concepte final: una silueta sòlida de pi, geomètrica i senzilla, sobre
-un fons verd de pi/alzina. Es van provar diverses alternatives abans
-de quedar-nos amb aquesta:
-1. El perímetre irregular d'una parcel·la + un arbre de cercles
-   superposats -- descartat: massa detall fi, es llegia com un pegot
-   indistint a mida petita.
-2. Mans (amb polze) sostenint un arbre de copa rodona -- descartat amb
-   raó: es llegia com "dos pits al costat d'un arbre", no com a mans.
-3. Mans sense polze (dues formes de copa abstractes) -- descartat
-   també: sense el polze, deixava de llegir-se com a mans i
-   s'assemblava a un bigoti o unes orelles.
+Concepte actual (octubre de 2026, en adoptar la interfície de Terra 3D):
+una silueta de muntanya en pedra calcària, amb el vessant il·luminat en
+ocre clar, sobre una franja de terra, damunt del verd de pi/alzina. Fa
+família amb la icona de Terra 3D (mateix fons, cantonades i paleta) i
+segueix sent una forma única i geomètrica, que es llegeix bé a 32 px.
+Mario la va triar entre tres propostes (pi sobre un bloc de terreny,
+escut amb pi, muntanya amb pi), i va demanar-la sense el pi.
 
-Conclusió: per a un símbol tan petit (favicon, 40px), una forma
-geomètrica única i sense ambigüitat (com aquest pi) funciona molt
-millor que una il·lustració amb més d'un element, per bona que sigui
-la idea de fons.
+Història: la primera icona era una silueta sòlida de pi. Es van provar
+abans, i descartar, el perímetre d'una parcel·la amb un arbre de cercles
+(massa detall fi a mida petita) i dues versions amb mans sostenint un
+arbre (no es llegien com a mans). Lliçó que es manté: per a un símbol tan
+petit, una forma geomètrica sense ambigüitat funciona millor que una
+il·lustració amb diversos elements.
 
 - icona.svg -- font vectorial, editable directament amb un editor de
   text.
-- icona-192.png / icona-512.png -- generades a partir de l'SVG (amb
-  cairosvg) per al manifest.json i el favicon.
+- icona-192.png / icona-512.png -- generades a partir de l'SVG per al
+  manifest.json i el favicon (amb canal alfa: cantonades transparents).
 
-Si mai cal regenerar els PNG després d'editar l'SVG:
-  pip install cairosvg --break-system-packages
-  python3 -c "import cairosvg; cairosvg.svg2png(url='icona.svg', write_to='icona-192.png', output_width=192, output_height=192)"
-  python3 -c "import cairosvg; cairosvg.svg2png(url='icona.svg', write_to='icona-512.png', output_width=512, output_height=512)"
+Per regenerar els PNG després d'editar l'SVG (Git Bash, amb Microsoft
+Edge instal·lat): crear un HTML amb <img src="icona.svg" width="512"
+height="512"> i fer-ne una captura sense finestra:
+  "/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" --headless=new \
+    --hide-scrollbars --default-background-color=00000000 \
+    --window-size=512,512 --screenshot=icona-512.png file:///.../icona-512.html
+(i igual amb 192).
