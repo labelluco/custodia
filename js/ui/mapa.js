@@ -17,6 +17,23 @@ function margeSuperior() {
   return Math.max(0, ...vores);
 }
 
+/**
+ * Leaflet no torna a demanar una tessel·la que ha fallat fins que canvia
+ * la vista: queda un forat gris al mapa. Es reintenta una sola vegada,
+ * al cap d'un segon (amb un paràmetre perquè el navegador no reutilitzi
+ * l'error de la memòria cau).
+ */
+function reintentarTesseles(capa) {
+  capa.on('tileerror', ({ tile }) => {
+    if (tile.dataset.reintentada) return;
+    tile.dataset.reintentada = '1';
+    const url = tile.src;
+    setTimeout(() => {
+      tile.src = `${url}${url.includes('?') ? '&' : '?'}reintent=1`;
+    }, 1000);
+  });
+}
+
 export class Mapa {
   constructor(idContenidor) {
     this.leafletMap = L.map(idContenidor).setView(CENTRE_PER_DEFECTE, ZOOM_PER_DEFECTE);
@@ -39,6 +56,8 @@ export class Mapa {
 
     capaOsm.addTo(this.leafletMap);
     this._afegirBotoFons(capaOsm, capaOrtofoto);
+    reintentarTesseles(capaOsm);
+    reintentarTesseles(capaOrtofoto);
 
     this.capaParceles = L.layerGroup().addTo(this.leafletMap);
     // Capa a part per als filtres opcionals (altitud/orientació) de les
