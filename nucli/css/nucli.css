@@ -474,6 +474,12 @@ select.camp__entrada {
    Disposició amb el mapa a pantalla completa (ve de Terra 3D): barra
    superior flotant i panell flotant -- full inferior al mòbil, targeta
    lateral a partir de 900 px. Cada app hi afegeix la resta.
+
+   Sense backdrop-filter (desenfocament del que hi ha a sota): a Chrome i
+   Edge de Windows, damunt d'un mapa Leaflet, deixava zones sense pintar
+   (llistats buits, blocs de mapa en gris) fins que es feia zoom --
+   vist a Custòdia el 2026-10-15. Amb el fons al 92 % d'opacitat, el
+   desenfocament amb prou feines es notava.
    ===================================================================== */
 .barra-superior {
   position: absolute;
@@ -500,7 +506,6 @@ select.camp__entrada {
   border-radius: var(--radi-rodo);
   background-color: var(--color-superficie-translucida);
   box-shadow: var(--ombra);
-  backdrop-filter: blur(8px);
   color: inherit;
   text-decoration: none;
   flex-shrink: 0;
@@ -528,7 +533,6 @@ select.camp__entrada {
 .barra-superior .selector-idioma {
   background-color: var(--color-superficie-translucida);
   box-shadow: var(--ombra);
-  backdrop-filter: blur(8px);
 }
 
 .panell {
@@ -542,7 +546,6 @@ select.camp__entrada {
   padding: var(--espai-xs) var(--espai-s) calc(var(--espai-s) + env(safe-area-inset-bottom));
   border-radius: var(--radi-gran) var(--radi-gran) 0 0;
   background-color: var(--color-superficie-translucida);
-  backdrop-filter: blur(12px);
   box-shadow: var(--ombra-flotant);
   display: flex;
   flex-direction: column;

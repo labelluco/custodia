@@ -68,7 +68,6 @@ html:has(.pantalla-mapa) {
   width: 9rem;
   background-color: var(--color-superficie-translucida);
   box-shadow: var(--ombra);
-  backdrop-filter: blur(8px);
 }
 
 /* Panells una mica més amples que a Terra 3D: Custòdia hi posa més
@@ -122,7 +121,6 @@ html:has(.pantalla-mapa) {
   min-width: 0;
   background-color: var(--color-superficie-translucida);
   box-shadow: var(--ombra);
-  backdrop-filter: blur(8px);
 }
 
 .navegacio .pestanyes__opcio {
