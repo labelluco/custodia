@@ -37,11 +37,9 @@ async function iniciar() {
 
   const files = [];
   for (const geometria of geometries) {
-    // Reutilitzat tal qual de ServeiRisc: encara que és pensat per a
-    // parcel·les, funciona igual per a geometries (bd.llegirSubparcelesDe
-    // hi retorna una llista buida, i el càlcul de risc ja sap
-    // redistribuir els pesos quan falta la vegetació).
-    const { color, index } = await ServeiRisc.colorIIndexDe(bd, geometria);
+    // Sense subparcel·les (esGeometria): el càlcul de risc ja sap
+    // redistribuir els pesos quan falta la vegetació, igual que al detall.
+    const { color, index } = await ServeiRisc.colorIIndexDe(bd, geometria, { esGeometria: true });
     files.push({ geometria, color, index });
   }
 

@@ -43,6 +43,9 @@ export function inicialitzarControlsMapa({ mapa, entitats, punts, potFerMalla, i
     const capa = boto.dataset.capa2d;
     boto.hidden = capa !== 'cap' && (!teAltimetria || (CAPES_NOMES_MALLA.includes(capa) && !potFerMalla));
   });
+  // Sense altimetria només hi hauria "Perímetre": no cal mostrar la
+  // graella de capes, n'hi ha prou amb l'explicació.
+  controls2d.querySelector('.pestanyes').hidden = !teAltimetria;
   pista2d.hidden = teAltimetria && potFerMalla;
   pista2d.textContent = teAltimetria
     ? t("Pendent, ombres i orientació necessiten l'altimetria calculada amb el mètode de malla.")

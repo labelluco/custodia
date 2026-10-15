@@ -95,6 +95,7 @@ export const ES = {
   'Amb aquest mètode també es calcula l\'orientació mitjana del terreny.':
     'Con este método también se calcula la orientación media del terreno.',
   'Calcular': 'Calcular',
+  'Desar a la geometria': 'Guardar en la geometría',
   'Desar a la parcel·la': 'Guardar en la parcela',
   'Encara no s\'ha calculat l\'altimetria d\'aquesta parcel·la.':
     'Todavía no se ha calculado la altimetría de esta parcela.',

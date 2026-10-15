@@ -168,13 +168,18 @@ export class ServeiRisc {
    * servir a totes les pàgines que pinten un mapa amb parcel·les
    * (llistat, selecció per a una agrupació...), per no duplicar
    * aquesta lògica a cadascuna.
+   *
+   * Per a una geometria cal passar esGeometria: no té subparcel·les, i
+   * el seu id no es pot fer servir per buscar-les -- parcel·les i
+   * geometries són magatzems diferents i tots dos numeren des d'1, de
+   * manera que la geometria 2 agafava les subparcel·les de la parcel·la 2.
    */
-  static async colorIIndexDe(bd, parcela) {
+  static async colorIIndexDe(bd, parcela, { esGeometria = false } = {}) {
     if (parcela.pendentMitja == null) {
       return { color: ServeiRisc.COLOR_NEUTRE, index: null };
     }
 
-    const subparceles = await bd.llegirSubparcelesDe(parcela.id);
+    const subparceles = esGeometria ? [] : await bd.llegirSubparcelesDe(parcela.id);
     const { indexPerillositat } = ServeiRisc.calcularRiscTotal({
       pendentMitja: parcela.pendentMitja,
       orientacioMitjana: parcela.orientacioMitjana,

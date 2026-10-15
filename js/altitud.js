@@ -17,6 +17,16 @@ import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
 import { confirmar, mostrarAvis } from './ui/dialegs.js';
 
+// La mateixa pàgina serveix per a parcel·les i geometries: la secció
+// activa del menú i el botó de desar depenen del tipus (abans sempre
+// deien "Parcel·les" i "Desar a la parcel·la").
+if (new URLSearchParams(window.location.search).get('tipus') === 'geometria') {
+  document.body.dataset.seccio = 'geometries';
+  const botoDesarGeometria = document.getElementById('boto-desar-altimetria');
+  botoDesarGeometria.dataset.i18n = 'Desar a la geometria';
+  botoDesarGeometria.textContent = 'Desar a la geometria';
+}
+
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
 inicialitzarMenu();

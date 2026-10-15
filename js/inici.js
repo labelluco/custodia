@@ -37,7 +37,7 @@ async function iniciar() {
     mapa.afegirParcela(parcela, (p) => obrir(`detall.html?id=${encodeURIComponent(p.id)}`), color);
   }
   for (const geometria of geometries) {
-    const { color } = await ServeiRisc.colorIIndexDe(bd, geometria);
+    const { color } = await ServeiRisc.colorIIndexDe(bd, geometria, { esGeometria: true });
     mapa.afegirParcela(geometria, (g) => obrir(`detall-geometria.html?id=${encodeURIComponent(g.id)}`), color);
   }
   mapa.ajustarVistaATotes();
