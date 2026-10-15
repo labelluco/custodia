@@ -1,7 +1,7 @@
 // Service worker bàsic: cache dels fitxers estàtics per a ús offline.
 // Actualitzar la llista si s'afegeixen pantalles noves.
 
-const NOM_CACHE = 'custodia-v81';
+const NOM_CACHE = 'custodia-v82';
 
 const FITXERS_PER_CACHE = [
   './',
@@ -92,7 +92,14 @@ const FITXERS_PER_CACHE = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(NOM_CACHE).then((cache) => cache.addAll(FITXERS_PER_CACHE))
+    // cache: 'reload': cada fitxer es demana a la xarxa, saltant-se la
+    // memòria cau HTTP del navegador. Codeberg Pages els serveix amb
+    // stale-while-revalidate=3600: sense això, una versió nova del
+    // service worker podia desar-se fitxers d'una hora abans (comprovat
+    // el 2026-10-15: v81 amb l'index.html de v80).
+    caches
+      .open(NOM_CACHE)
+      .then((cache) => cache.addAll(FITXERS_PER_CACHE.map((url) => new Request(url, { cache: 'reload' }))))
   );
   self.skipWaiting();
 });
