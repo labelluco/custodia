@@ -4,7 +4,9 @@
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { ServeiRisc } from './serveis/risc.js';
-import { inicialitzarOrdenacio } from './ui/taula-ordenable.js';
+import { inicialitzarOrdenacio } from './ui/ordenacio.js';
+import { elementLlista } from './ui/llista.js';
+import { avisar } from './ui/dialegs.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
 
@@ -16,23 +18,22 @@ let termeCerca = '';
 
 async function iniciar() {
   const bd = await BaseDades.obrir();
-  const mapaSeccio = document.getElementById('mapa');
   const contenidorLlistat = document.getElementById('llistat-geometries');
   const missatgeBuit = document.getElementById('missatge-buit');
+  const eines = document.getElementById('eines-llistat');
   const missatgeSenseResultats = document.getElementById('missatge-sense-resultats');
   const campCerca = document.getElementById('cerca-geometries');
-  const capcalera = document.getElementById('capcalera-geometries');
 
+  // El mapa és el fons de la pantalla: es mostra sempre.
+  const mapa = new Mapa('mapa');
   const geometries = await bd.llegirTotesLesGeometries();
 
   if (geometries.length === 0) {
     missatgeBuit.hidden = false;
+    eines.hidden = true;
     return;
   }
   missatgeBuit.hidden = true;
-  mapaSeccio.hidden = false;
-
-  const mapa = new Mapa('mapa');
 
   const files = [];
   for (const geometria of geometries) {
@@ -61,11 +62,21 @@ async function iniciar() {
       mapa.ajustarVistaATotes();
     }
 
-    pintarFilesTaula(contenidorLlistat, filesVisibles, mapa);
+    contenidorLlistat.replaceChildren(
+      ...filesVisibles.map(({ geometria, color, index }) =>
+        elementLlista({
+          titol: geometria.nom,
+          risc: { color, index },
+          href: `detall-geometria.html?id=${encodeURIComponent(geometria.id)}`,
+          onSeleccionar: () => mapa.ressaltarParcela(geometria.id),
+        })
+      )
+    );
   }
 
   inicialitzarOrdenacio(
-    capcalera,
+    document.getElementById('ordre-geometries'),
+    document.getElementById('ordre-geometries-sentit'),
     files,
     {
       nom: (f) => f.geometria.nom,
@@ -82,47 +93,11 @@ async function iniciar() {
   pintar();
 }
 
-/** Pinta les files de la taula (no el mapa) en l'ordre i filtre actuals. */
-function pintarFilesTaula(contenidorLlistat, files, mapa) {
-  contenidorLlistat.innerHTML = '';
-
-  for (const { geometria, color, index } of files) {
-    const fila = document.createElement('tr');
-    fila.className = 'fila-parcela';
-    fila.dataset.id = geometria.id;
-    fila.innerHTML = `
-      <td>${geometria.nom}</td>
-      <td>
-        ${
-          index != null
-            ? `
-              <span class="taula-parceles__risc">
-                <span class="taula-parceles__punt-risc" style="background-color: ${color};"></span>
-                ${index.toFixed(0)} / 100
-              </span>
-            `
-            : '—'
-        }
-      </td>
-      <td><a href="detall-geometria.html?id=${encodeURIComponent(geometria.id)}" class="boto-taula">${t('Detall')}</a></td>
-    `;
-    fila.addEventListener('click', () => {
-      mapa.ressaltarParcela(geometria.id);
-
-      const anteriorSeleccionada = contenidorLlistat.querySelector('.fila-parcela--seleccionada');
-      anteriorSeleccionada?.classList.remove('fila-parcela--seleccionada');
-      fila.classList.add('fila-parcela--seleccionada');
-    });
-    fila.querySelector('.boto-taula').addEventListener('click', (event) => event.stopPropagation());
-    contenidorLlistat.appendChild(fila);
-  }
-}
-
 function obrirDetall(id) {
   window.location.href = `detall-geometria.html?id=${encodeURIComponent(id)}`;
 }
 
 iniciar().catch((error) => {
   console.error(error);
-  alert(t('No s\'han pogut carregar les geometries. Revisa la consola per a més detalls.'));
+  avisar(t('No s\'han pogut carregar les geometries. Revisa la consola per a més detalls.'));
 });

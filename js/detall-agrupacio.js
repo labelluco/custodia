@@ -17,6 +17,8 @@ import { calcularAgregatAgrupacio } from './serveis/agregacioAgrupacio.js';
 import { inicialitzarAjudes, iconaAjuda } from './ui/ajuda.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
+import { confirmar } from './ui/dialegs.js';
+import { elementLlista, formatSuperficie, nombreParceles } from './ui/llista.js';
 
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
@@ -63,6 +65,7 @@ async function iniciar() {
   }
 
   document.title = `Custòdia — ${agrupacioActual.nom}`;
+  document.getElementById('titol-detall').textContent = agrupacioActual.nom;
 
   // filter(Boolean): si mai s'esborrés una parcel·la que forma part
   // d'una agrupació (l'app ho impedeix, però per si de cas), es
@@ -70,6 +73,7 @@ async function iniciar() {
   parcelesAgrupacio = (
     await Promise.all(agrupacioActual.parcelaIds.map((pid) => bd.llegirParcela(pid)))
   ).filter(Boolean);
+  document.getElementById('subtitol-detall').textContent = nombreParceles(parcelesAgrupacio.length);
 
   const agregat = await calcularAgregatAgrupacio(bd, parcelesAgrupacio);
   pintarDades(agregat);
@@ -167,8 +171,8 @@ function inicialitzarFiltreMapa(mapa, parceles) {
 
   function activar2D() {
     tipusMapaActual = '2d';
-    botoMapa2d.classList.add('boto-secundari--actiu');
-    botoMapa3d.classList.remove('boto-secundari--actiu');
+    botoMapa2d.setAttribute('aria-selected', 'true');
+    botoMapa3d.setAttribute('aria-selected', 'false');
 
     mapa3d?.destruir();
     mapa3d = null;
@@ -191,8 +195,8 @@ function inicialitzarFiltreMapa(mapa, parceles) {
 
   function activar3D() {
     tipusMapaActual = '3d';
-    botoMapa3d.classList.add('boto-secundari--actiu');
-    botoMapa2d.classList.remove('boto-secundari--actiu');
+    botoMapa3d.setAttribute('aria-selected', 'true');
+    botoMapa2d.setAttribute('aria-selected', 'false');
 
     // De moment el 3D no sap mostrar l'orientació (calen fletxes 3D
     // pròpies, encara no fetes) -- es manté amagada mentre la resta
@@ -228,35 +232,19 @@ function obrirDetall(idParcela) {
 }
 
 function pintarParceles() {
-  llistatParceles.innerHTML = parcelesAgrupacio
-    .map(
-      (p) => `
-        <tr class="fila-parcela" data-id="${p.id}">
-          <td>${p.poblacio}</td>
-          <td>${p.poligon}</td>
-          <td>${p.parcelaCadastral}</td>
-          <td>${p.superficie ? `${p.superficie} m²` : '—'}</td>
-          <td>
-            <a href="detall.html?id=${encodeURIComponent(p.id)}&agrupacio=${encodeURIComponent(agrupacioActual.id)}" class="boto-taula">${t('Detall')}</a>
-          </td>
-        </tr>
-      `
+  // Tocar una parcel·la la ressalta al mapa (com al llistat de
+  // parceles.html); el botó "Detall" porta directament a la seva fitxa.
+  llistatParceles.replaceChildren(
+    ...parcelesAgrupacio.map((p) =>
+      elementLlista({
+        titol: `${p.poblacio} · ${p.poligon}/${p.parcelaCadastral}`,
+        detall: formatSuperficie(p.superficie),
+        href: `detall.html?id=${encodeURIComponent(p.id)}&agrupacio=${encodeURIComponent(agrupacioActual.id)}`,
+        onSeleccionar: () => mapa.ressaltarParcela(p.id),
+      })
     )
-    .join('');
+  );
   seccioParceles.hidden = false;
-
-  // Tocar la fila la ressalta al mapa (com al llistat de parceles.html);
-  // el botó "Detall" porta directament a la fitxa de la parcel·la.
-  llistatParceles.querySelectorAll('.fila-parcela').forEach((fila) => {
-    fila.addEventListener('click', () => {
-      mapa.ressaltarParcela(Number(fila.dataset.id));
-
-      const anteriorSeleccionada = llistatParceles.querySelector('.fila-parcela--seleccionada');
-      anteriorSeleccionada?.classList.remove('fila-parcela--seleccionada');
-      fila.classList.add('fila-parcela--seleccionada');
-    });
-    fila.querySelector('.boto-taula').addEventListener('click', (event) => event.stopPropagation());
-  });
 }
 
 function pintarDades(agregat) {
@@ -345,8 +333,9 @@ botoPuntsAltitud.addEventListener('click', () => {
 });
 
 botoEsborrar.addEventListener('click', async () => {
-  const confirmat = confirm(
-    `${t('Segur que vols esborrar l\'agrupació')} "${agrupacioActual.nom}"? ${t('Aquesta acció no es pot desfer (les parcel·les que la formen no s\'esborraran).')}`
+  const confirmat = await confirmar(
+    `${t('Segur que vols esborrar l\'agrupació')} "${agrupacioActual.nom}"? ${t('Aquesta acció no es pot desfer (les parcel·les que la formen no s\'esborraran).')}`,
+    { accio: t('Esborrar'), perillos: true }
   );
   if (!confirmat) return;
 

@@ -15,6 +15,7 @@ import { Malla } from './geometria/malla.js';
 import { inicialitzarAjudes, iconaAjuda } from './ui/ajuda.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
+import { confirmar, mostrarAvis } from './ui/dialegs.js';
 
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
@@ -96,8 +97,8 @@ async function iniciar() {
   const nomEntitat = tipusActual === 'geometria' ? parcelaActual.nom : parcelaActual.poblacio;
   const paginaDetall = tipusActual === 'geometria' ? 'detall-geometria.html' : 'detall.html';
   document.title = `Custòdia — ${t('Altimetria')} (${nomEntitat})`;
-  document.getElementById('enllac-tornar').innerHTML =
-    `<a href="${paginaDetall}?id=${encodeURIComponent(id)}" class="enllac-tornar">&larr; ${t('Tornar al detall')}</a>`;
+  document.getElementById('enllac-tornar').href = `${paginaDetall}?id=${encodeURIComponent(id)}`;
+  document.getElementById('subtitol-pagina').textContent = nomEntitat;
 
   // El mapa amb el perímetre es mostra de seguida, com a la resta de
   // pàgines, sense esperar cap càlcul.
@@ -263,7 +264,7 @@ async function calcularAmbMalla() {
   // precisions inconsistents entre parcel·les (10 m en una, 30 m en
   // una altra de més gran), cosa que no té sentit.
   if (coordenades.length > LLINDAR_AVIS_PUNTS) {
-    const continuar = confirm(
+    const continuar = await confirmar(
       t('La malla generarà {n} punts; la consulta pot trigar una mica. Vols continuar?').replace(
         '{n}',
         coordenades.length
@@ -274,7 +275,11 @@ async function calcularAmbMalla() {
     }
   }
 
-  const altituds = await ServeiAltimetria.consultarAltituds(coordenades);
+  // Malla: una sola graella del MDT (WCS) interpolada localment, en
+  // lloc d'enviar tots els punts a getElevation (vegeu
+  // ServeiAltimetria.consultarAltitudsMDT). Els vèrtexs, pocs i
+  // exactes, continuen amb getElevation.
+  const altituds = await ServeiAltimetria.consultarAltitudsMDT(coordenades);
 
   // Es torna a col·locar cada altitud a la mateixa posició (fila, columna)
   // que el seu punt a la graella, per poder-hi buscar veïns després.
@@ -392,10 +397,8 @@ botoDesar.addEventListener('click', async () => {
       await bd.afegirParcela(new Parcela(dadesActualitzades));
     }
 
-    missatgeEstat.textContent =
-      tipusActual === 'geometria' ? t('Dades desades a la geometria.') : t('Dades desades a la parcel·la.');
-    missatgeEstat.className = 'missatge-estat missatge-estat--exit';
-    missatgeEstat.hidden = false;
+    missatgeEstat.hidden = true;
+    mostrarAvis(tipusActual === 'geometria' ? t('Dades desades a la geometria.') : t('Dades desades a la parcel·la.'));
   } catch (error) {
     console.error(error);
     missatgeEstat.textContent = `${t('No s\'ha pogut desar:')} ${error.message}`;

@@ -16,6 +16,7 @@ import { inicialitzarAjudes, iconaAjuda } from './ui/ajuda.js';
 import { crearAnellSvg, filaComponent } from './ui/risc-visual.js';
 import { t, idiomaActual, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
+import { avisar, confirmar } from './ui/dialegs.js';
 
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
@@ -59,6 +60,7 @@ async function iniciar() {
   }
 
   document.title = `Custòdia — ${geometriaActual.nom}`;
+  document.getElementById('titol-detall').textContent = geometriaActual.nom;
   pintarFitxa(geometriaActual);
 
   // A diferència d'una parcel·la, no hi ha subparceles -- es passa una
@@ -149,8 +151,8 @@ function inicialitzarFiltreMapa(mapa, geometria) {
 
   function activar2D() {
     tipusMapaActual = '2d';
-    botoMapa2d.classList.add('boto-secundari--actiu');
-    botoMapa3d.classList.remove('boto-secundari--actiu');
+    botoMapa2d.setAttribute('aria-selected', 'true');
+    botoMapa3d.setAttribute('aria-selected', 'false');
 
     mapa3d?.destruir();
     mapa3d = null;
@@ -173,8 +175,8 @@ function inicialitzarFiltreMapa(mapa, geometria) {
 
   function activar3D() {
     tipusMapaActual = '3d';
-    botoMapa3d.classList.add('boto-secundari--actiu');
-    botoMapa2d.classList.remove('boto-secundari--actiu');
+    botoMapa3d.setAttribute('aria-selected', 'true');
+    botoMapa2d.setAttribute('aria-selected', 'false');
 
     // De moment el 3D no sap mostrar l'orientació (calen fletxes 3D
     // pròpies, encara no fetes) -- es manté amagada mentre la resta
@@ -296,8 +298,9 @@ botoExportarGpx.addEventListener('click', () => {
 });
 
 botoEsborrar.addEventListener('click', async () => {
-  const confirmat = confirm(
-    `${t('Segur que vols esborrar la geometria')} "${geometriaActual.nom}"? ${t('Aquesta acció no es pot desfer.')}`
+  const confirmat = await confirmar(
+    `${t('Segur que vols esborrar la geometria')} "${geometriaActual.nom}"? ${t('Aquesta acció no es pot desfer.')}`,
+    { accio: t('Esborrar'), perillos: true }
   );
   if (!confirmat) return;
 
@@ -307,5 +310,5 @@ botoEsborrar.addEventListener('click', async () => {
 
 iniciar().catch((error) => {
   console.error(error);
-  alert(t('No s\'ha pogut carregar el detall de la geometria.'));
+  avisar(t('No s\'ha pogut carregar el detall de la geometria.'));
 });

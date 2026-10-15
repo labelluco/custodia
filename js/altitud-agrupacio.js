@@ -36,8 +36,8 @@ async function iniciar() {
   }
 
   document.title = `Custòdia — ${t('Altimetria')} (${agrupacio.nom})`;
-  document.getElementById('enllac-tornar').innerHTML =
-    `<a href="detall-agrupacio.html?id=${encodeURIComponent(id)}" class="enllac-tornar">&larr; ${t('Tornar al detall')}</a>`;
+  document.getElementById('enllac-tornar').href = `detall-agrupacio.html?id=${encodeURIComponent(id)}`;
+  document.getElementById('subtitol-pagina').textContent = agrupacio.nom;
 
   const parceles = (await Promise.all(agrupacio.parcelaIds.map((pid) => bd.llegirParcela(pid)))).filter(
     Boolean

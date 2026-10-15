@@ -124,6 +124,15 @@ a {
   box-shadow: 0 4px 12px rgba(176, 122, 31, 0.35);
 }
 
+.boto--perill {
+  background-color: var(--color-perill);
+  color: #fff;
+}
+
+.boto--perill:hover:not(:disabled) {
+  background-color: #9e2f23;
+}
+
 .boto--secundari {
   background-color: var(--color-superficie);
   border-color: var(--color-vora);
@@ -458,6 +467,214 @@ select.camp__entrada {
 @keyframes gira {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* =====================================================================
+   Disposició amb el mapa a pantalla completa (ve de Terra 3D): barra
+   superior flotant i panell flotant -- full inferior al mòbil, targeta
+   lateral a partir de 900 px. Cada app hi afegeix la resta.
+   ===================================================================== */
+.barra-superior {
+  position: absolute;
+  top: calc(var(--espai-xs) + env(safe-area-inset-top));
+  left: var(--espai-xs);
+  right: var(--espai-xs);
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espai-xs);
+  pointer-events: none;
+}
+
+.barra-superior > * {
+  pointer-events: auto;
+}
+
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.9rem 0.35rem 0.4rem;
+  border-radius: var(--radi-rodo);
+  background-color: var(--color-superficie-translucida);
+  box-shadow: var(--ombra);
+  backdrop-filter: blur(8px);
+  color: inherit;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.marca__icona {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+.marca__nom {
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--color-primari-fosc);
+}
+
+.barra-superior__accions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espai-xs);
+}
+
+.barra-superior .selector-idioma {
+  background-color: var(--color-superficie-translucida);
+  box-shadow: var(--ombra);
+  backdrop-filter: blur(8px);
+}
+
+.panell {
+  position: absolute;
+  z-index: 600;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 72vh;
+  overflow-y: auto;
+  padding: var(--espai-xs) var(--espai-s) calc(var(--espai-s) + env(safe-area-inset-bottom));
+  border-radius: var(--radi-gran) var(--radi-gran) 0 0;
+  background-color: var(--color-superficie-translucida);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--ombra-flotant);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--espai-s);
+  transition: max-height var(--transicio);
+}
+
+.panell--plegat {
+  max-height: 9.5rem;
+  overflow: hidden;
+}
+
+.panell__ansa {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  align-self: center;
+  width: 40px;
+  height: 5px;
+  border-radius: var(--radi-rodo);
+  background-color: var(--color-vora);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.panell__titol {
+  margin: 0;
+  font-size: 1.3rem;
+  letter-spacing: -0.01em;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.panell__subtitol {
+  margin: 0.15rem 0 0;
+  color: var(--color-text-mut);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.panell__pista {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--color-text-mut);
+  line-height: 1.4;
+}
+
+.panell__pista--destacada {
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radi);
+  background-color: var(--color-primari-suau);
+  color: var(--color-primari-fosc);
+}
+
+.boto-icona--pla {
+  box-shadow: none;
+  background-color: var(--color-hover);
+  flex-shrink: 0;
+}
+
+/* Dades en graella de dues columnes (<dl> amb un <div> per parella) */
+.dades-zona {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espai-xs);
+}
+
+.dades-zona__element {
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radi);
+  background-color: var(--color-fons);
+  min-width: 0;
+}
+
+.dades-zona__element--ample {
+  grid-column: 1 / -1;
+}
+
+.dades-zona dt {
+  font-size: 0.75rem;
+  color: var(--color-text-mut);
+  font-weight: 600;
+}
+
+.dades-zona dd {
+  margin: 0.1rem 0 0;
+  font-weight: 700;
+  overflow-wrap: break-word;
+}
+
+.avis-privacitat {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--color-text-mut);
+}
+
+.avis-privacitat svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--color-primari);
+}
+
+@media (min-width: 900px) {
+  .panell {
+    left: var(--espai-s);
+    right: auto;
+    top: calc(72px + env(safe-area-inset-top));
+    bottom: auto;
+    width: 390px;
+    max-height: calc(100vh - 96px);
+    border-radius: var(--radi-gran);
+    padding: var(--espai-m);
+  }
+
+  .panell--plegat {
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+  }
+
+  .panell__ansa {
+    display: none;
   }
 }
 

@@ -37,6 +37,7 @@
 // globalment via <script> abans d'importar aquest mòdul, igual que
 // Mapa necessita L (Leaflet).
 import { t } from '../i18n.js';
+import { margesPanell } from './disposicio.js';
 import { colorAltitud, colorPendent } from '../../nucli/js/serveis/escalaColor.js';
 
 const METRES_PER_GRAU_LATITUD = 111320;
@@ -119,6 +120,7 @@ export class Mapa3D {
 
     this._renderer = new THREE.WebGLRenderer({ antialias: true });
     this._renderer.setSize(amplaContenidor, altaContenidor);
+    this._aplicarMarges();
     this.contenidor.innerHTML = '';
     this.contenidor.appendChild(this._renderer.domElement);
 
@@ -140,6 +142,8 @@ export class Mapa3D {
 
     this._gestorRedimensio = () => this._redimensionar();
     window.addEventListener('resize', this._gestorRedimensio);
+    // El panell flotant pot canviar de mida (plegar el full inferior).
+    window.addEventListener('canvi-panell', this._gestorRedimensio);
 
     this._afegirBotoPantallaCompleta();
     this._afegirBrúixola();
@@ -451,7 +455,26 @@ export class Mapa3D {
     // malla.
     this._escalaEscena = radi;
 
-    this._camera.position.set(0, radi * 0.9, radi * 1.1);
+    // Mateixa direcció de sempre (des del sud, elevada), però la
+    // distància també ha de fer cabre el model a la part visible (sense
+    // el panell). Amb la vista virtual de _aplicarMarges, el camp de
+    // visió vertical cobreix l'alçada virtual (h + panell inferior):
+    // la part lliure en veu només una fracció, en vertical i en
+    // horitzontal. Al mòbil (vertical i amb el full a baix) és la
+    // restricció que mana.
+    const { esquerra, inferior } = margesPanell();
+    const w = this.contenidor.clientWidth;
+    const h = this.contenidor.clientHeight;
+    const tanMeitatFov = Math.tan((this._camera.fov * Math.PI) / 360);
+    const tanHoritzontalLliure = (tanMeitatFov * Math.max(w - esquerra, 1)) / (h + inferior);
+    const tanVerticalLliure = (tanMeitatFov * Math.max(h - inferior, 1)) / (h + inferior);
+    const direccio = new THREE.Vector3(0, 0.9, 1.1);
+    const distancia = Math.max(
+      direccio.length() * radi,
+      (radi * 0.6) / tanHoritzontalLliure,
+      (radi * 0.45) / tanVerticalLliure
+    );
+    this._camera.position.copy(direccio.normalize().multiplyScalar(distancia));
     this._camera.lookAt(0, 0, 0);
   }
 
@@ -512,9 +535,33 @@ export class Mapa3D {
     if (!this._renderer) return;
     const amplada = this.contenidor.clientWidth;
     const alcada = this.contenidor.clientHeight;
-    this._camera.aspect = amplada / alcada;
-    this._camera.updateProjectionMatrix();
     this._renderer.setSize(amplada, alcada);
+    this._aplicarMarges();
+  }
+
+  /**
+   * El panell flotant tapa una part del visor (a l'esquerra a
+   * l'escriptori, a baix al mòbil). Es fa una vista virtual més gran
+   * (setViewOffset) de la qual només es mostra la part que toca, perquè
+   * el centre de la càmera caigui al mig de l'espai lliure -- sense
+   * deformar el model, a diferència de canviar només l'aspecte.
+   * Amb el panell a l'esquerra (e) i a baix (i), el centre virtual
+   * (W/2, H/2) ha de caure a ((w+e)/2, (h-i)/2) de la part visible:
+   * desplaçament x = 0, y = i.
+   */
+  _aplicarMarges() {
+    const amplada = this.contenidor.clientWidth;
+    const alcada = this.contenidor.clientHeight;
+    if (!amplada || !alcada) return;
+    const enPantallaCompleta = document.fullscreenElement === this.contenidor;
+    const { esquerra, inferior } = enPantallaCompleta ? { esquerra: 0, inferior: 0 } : margesPanell();
+    this._camera.aspect = (amplada + esquerra) / (alcada + inferior);
+    if (esquerra === 0 && inferior === 0) {
+      this._camera.clearViewOffset();
+    } else {
+      this._camera.setViewOffset(amplada + esquerra, alcada + inferior, 0, inferior, amplada, alcada);
+    }
+    this._camera.updateProjectionMatrix();
   }
 
   _animar() {
@@ -532,6 +579,7 @@ export class Mapa3D {
     }
     if (this._gestorRedimensio) {
       window.removeEventListener('resize', this._gestorRedimensio);
+      window.removeEventListener('canvi-panell', this._gestorRedimensio);
       this._gestorRedimensio = null;
     }
     if (this._gestorPantallaCompleta) {

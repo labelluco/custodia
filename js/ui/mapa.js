@@ -1,12 +1,21 @@
 // Embolcall sobre Leaflet. Necessita que L estigui carregat globalment
 // via <script> abans d'importar aquest mòdul.
 import { t } from '../i18n.js';
+import { margesPanell } from './disposicio.js';
 import { colorAltitud, colorPendent, colorOmbres } from '../../nucli/js/serveis/escalaColor.js';
 
 const COLOR_NEUTRE = '#000000';
 
 const CENTRE_PER_DEFECTE = [40.15, -0.65]; // zona interior de Castelló/Terol
 const ZOOM_PER_DEFECTE = 11;
+// Elements flotants de dalt (barra superior, pestanyes 2D/3D) que també
+// tapen el mapa: el marge superior arriba fins al de més avall.
+const FLOTANTS_SUPERIORS = ['.barra-superior', '.selector-vista'];
+
+function margeSuperior() {
+  const vores = FLOTANTS_SUPERIORS.map((selector) => document.querySelector(selector)?.getBoundingClientRect().bottom ?? 0);
+  return Math.max(0, ...vores);
+}
 
 export class Mapa {
   constructor(idContenidor) {
@@ -136,7 +145,7 @@ export class Mapa {
     entrada.capa.openTooltip();
     this._capaRessaltada = [entrada.capa];
 
-    this.leafletMap.fitBounds(entrada.capa.getBounds(), { padding: [40, 40], maxZoom: 17 });
+    this.leafletMap.fitBounds(entrada.capa.getBounds(), { ...this._margesVista(40), maxZoom: 17 });
   }
 
   /**
@@ -160,7 +169,7 @@ export class Mapa {
     this._capaRessaltada = capes;
 
     const limits = L.featureGroup(capes).getBounds();
-    this.leafletMap.fitBounds(limits, { padding: [40, 40], maxZoom: 17 });
+    this.leafletMap.fitBounds(limits, { ...this._margesVista(40), maxZoom: 17 });
   }
 
   /** Treu només la capa de filtre (altitud/orientació), sense tocar el perímetre. */
@@ -438,6 +447,28 @@ export class Mapa {
   ajustarVistaATotes() {
     if (this.parceles.length === 0) return;
     const grup = L.featureGroup(this.parceles.map((p) => p.capa));
-    this.leafletMap.fitBounds(grup.getBounds(), { padding: [20, 20] });
+    this.leafletMap.fitBounds(grup.getBounds(), this._margesVista(20));
+  }
+
+  /**
+   * Marges per a fitBounds que descompten el que tapen el panell flotant
+   * i la barra superior: així el que s'ajusta queda centrat a la part del
+   * mapa que es veu, no darrere del panell (vegeu ui/disposicio.js).
+   */
+  _margesVista(marge) {
+    const { esquerra, inferior } = margesPanell();
+    return {
+      paddingTopLeft: [esquerra + marge, margeSuperior() + marge],
+      paddingBottomRight: [marge, inferior + marge],
+    };
+  }
+
+  /** Centre de la part visible del mapa (sense el panell), en lat/lng. */
+  centreVisible() {
+    const { esquerra, inferior } = margesPanell();
+    const mida = this.leafletMap.getSize();
+    const dalt = margeSuperior();
+    const punt = L.point(esquerra + (mida.x - esquerra) / 2, dalt + (mida.y - inferior - dalt) / 2);
+    return this.leafletMap.containerPointToLatLng(punt);
   }
 }

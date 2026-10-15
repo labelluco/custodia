@@ -25,7 +25,7 @@ inicialitzarMenu();
 const COLOR_NORMAL = '#396a49';
 const COLOR_TRIADA = '#a1552e';
 
-const titolPagina = document.querySelector('main h2');
+const titolPagina = document.getElementById('titol-pagina');
 const enllacTornar = document.getElementById('enllac-tornar');
 const seccioParcelaTriada = document.getElementById('parcela-triada');
 const contingutParcelaTriada = document.getElementById('contingut-parcela-triada');
@@ -65,8 +65,9 @@ async function iniciar() {
 
     document.title = `Custòdia — ${t('Editar agrupació')}`;
     titolPagina.textContent = t('Editar agrupació');
-    enllacTornar.innerHTML =
-      `<a href="detall-agrupacio.html?id=${encodeURIComponent(id)}" class="enllac-tornar">&larr; ${t('Tornar al detall')}</a>`;
+    enllacTornar.href = `detall-agrupacio.html?id=${encodeURIComponent(id)}`;
+    enllacTornar.title = t('Tornar al detall');
+    enllacTornar.setAttribute('aria-label', enllacTornar.title);
   }
 
   totesLesParceles = await bd.llegirTotesLesParceles();
@@ -112,7 +113,7 @@ function actualitzarBotoAfegirTreure() {
   botoAfegirTreure.textContent = jaTriada
     ? t('Treure de l\'agrupació')
     : t('Afegir a l\'agrupació');
-  botoAfegirTreure.className = jaTriada ? 'boto-estret boto-secundari' : 'boto-estret';
+  botoAfegirTreure.className = `boto boto--ample ${jaTriada ? 'boto--secundari' : 'boto--primari'}`;
 }
 
 botoAfegirTreure.addEventListener('click', () => {

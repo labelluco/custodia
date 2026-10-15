@@ -2,7 +2,7 @@
 <html lang="ca">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Custòdia — Altimetria</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icones/icona.svg">
@@ -12,108 +12,71 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="">
+  <link rel="stylesheet" href="nucli/css/nucli.css">
   <link rel="stylesheet" href="css/estils.css">
 </head>
-<body>
-  <header class="capcalera">
-    <h1>Custòdia</h1>
-    <nav class="menu" id="menu-principal">
-      <a href="index.html" class="menu__enllac" data-i18n="Inici">Inici</a>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Parcel·les">Parcel·les</button>
-        <div class="menu__submenu">
-          <a href="parceles.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Agrupacions">Agrupacions</button>
-        <div class="menu__submenu">
-          <a href="agrupacions.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir-agrupacio.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Geometries">Geometries</button>
-        <div class="menu__submenu">
-          <a href="geometries.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir-geometria.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-      <a href="copia-seguretat.html" class="menu__enllac" data-i18n="Còpia de seguretat">Còpia de seguretat</a>
-    </nav>
-    <div class="capcalera__dreta">
-      <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">
-        <span></span><span></span><span></span>
-      </button>
-      <span id="selector-idioma" class="selector-idioma"></span>
+<body class="pantalla-mapa" data-seccio="parceles">
+  <header class="barra-superior">
+    <a href="index.html" class="marca"><img src="icones/icona.svg" alt="" class="marca__icona" width="32" height="32"><span class="marca__nom">Custòdia</span></a>
+    <nav id="navegacio" class="pestanyes navegacio" aria-label="Seccions" data-i18n-aria-label="Seccions"></nav>
+    <div class="barra-superior__accions">
+      <div id="selector-idioma" class="selector-idioma"></div>
+      <button type="button" id="boto-menu" class="boto-icona boto-menu" title="Menú" aria-label="Menú" data-i18n-title="Menú" data-i18n-aria-label="Menú"><svg><use href="#i-menu"/></svg></button>
     </div>
   </header>
 
   <main>
-    <p id="enllac-tornar"><a href="parceles.html" class="enllac-tornar" data-i18n="← Tornar al llistat">&larr; Tornar al llistat</a></p>
+    <div id="mapa-altitud" class="mapa" role="region" aria-label="Perímetre amb vèrtexs" data-i18n-aria-label="Perímetre amb vèrtexs"></div>
 
-    <h2 data-i18n="Altimetria">Altimetria</h2>
+    <section class="panell" aria-labelledby="titol-pagina">
+      <button type="button" class="panell__ansa" aria-expanded="true" aria-label="Plegar o desplegar el panell" data-i18n-aria-label="Plegar o desplegar el panell"></button>
+      <div class="panell__capcalera">
+        <a id="enllac-tornar" href="parceles.html" class="boto-icona boto-icona--pla" title="Tornar al detall" aria-label="Tornar al detall" data-i18n-title="Tornar al detall" data-i18n-aria-label="Tornar al detall"><svg><use href="#i-enrere"/></svg></a>
+        <div class="panell__capcalera-text">
+          <h1 id="titol-pagina" class="panell__titol" data-i18n="Altimetria">Altimetria</h1>
+          <p id="subtitol-pagina" class="panell__subtitol"></p>
+        </div>
+      </div>
 
-    <section id="mapa-altitud" class="mapa" aria-label="Perímetre amb vèrtexs"></section>
-    <p id="instruccio-mapa" class="fitxa-parcela-contenidor" hidden></p>
+      <p id="instruccio-mapa" class="panell__pista panell__pista--destacada" hidden></p>
 
-    <div class="panell">
-      <section id="resum-altimetria" class="fitxa-parcela-contenidor" hidden>
-        <h2 data-i18n="Resultats">Resultats</h2>
+      <section id="resum-altimetria" class="bloc" hidden>
+        <h2 class="bloc__titol" data-i18n="Resultats">Resultats</h2>
         <div id="contingut-resum-altimetria"></div>
       </section>
 
-      <div id="seleccio-metode" class="fitxa-parcela-contenidor" role="group" aria-labelledby="titol-metode-calcul">
-        <h2 id="titol-metode-calcul" data-i18n="Mètode de càlcul">Mètode de càlcul</h2>
-
-        <div class="metode-contingut">
-          <div class="camp camp--radio">
-            <label>
-              <input type="radio" name="metode" value="vertexs">
-              <span data-i18n="Vèrtexs del perímetre">Vèrtexs del perímetre</span>
-            </label>
-          </div>
-
-          <div class="camp camp--radio">
-            <label>
-              <input type="radio" name="metode" value="malla" checked>
-              <span data-i18n="Malla de punts">Malla de punts</span>
-            </label>
-          </div>
-          <div class="metode-malla-detalls">
-            <div class="camp">
-              <label for="distancia-malla" data-i18n="Distància entre punts (m)">Distància entre punts (m)</label>
-              <input type="number" id="distancia-malla" name="distanciaMalla" min="1" value="10">
-            </div>
-            <p class="nota" data-i18n="Amb aquest mètode també es calcula l'orientació mitjana del terreny.">
-              Amb aquest mètode també es calcula l'orientació mitjana del terreny.
-            </p>
-          </div>
-
-          <button type="button" id="boto-calcular" class="boto-estret" data-i18n="Calcular">Calcular</button>
+      <div id="seleccio-metode" class="grup-camps" role="group" aria-labelledby="titol-metode-calcul">
+        <span id="titol-metode-calcul" class="camp__etiqueta" data-i18n="Mètode de càlcul">Mètode de càlcul</span>
+        <div class="pestanyes pestanyes--radio">
+          <label class="pestanyes__opcio"><input type="radio" name="metode" value="vertexs" class="nomes-lectors"><span data-i18n="Vèrtexs del perímetre">Vèrtexs del perímetre</span></label>
+          <label class="pestanyes__opcio"><input type="radio" name="metode" value="malla" class="nomes-lectors" checked><span data-i18n="Malla de punts">Malla de punts</span></label>
         </div>
+        <div class="metode-malla-detalls">
+          <label class="camp">
+            <span class="camp__etiqueta" data-i18n="Distància entre punts (m)">Distància entre punts (m)</span>
+            <input type="number" id="distancia-malla" name="distanciaMalla" class="camp__entrada" min="1" value="10" inputmode="numeric">
+          </label>
+          <p class="panell__pista" data-i18n="Amb aquest mètode també es calcula l'orientació mitjana del terreny.">Amb aquest mètode també es calcula l'orientació mitjana del terreny.</p>
+        </div>
+        <button type="button" id="boto-calcular" class="boto boto--primari boto--ample" data-i18n="Calcular">Calcular</button>
       </div>
-    </div>
 
-    <button type="button" id="boto-desar-altimetria" class="boto-estret" hidden data-i18n="Desar a la parcel·la">Desar a la parcel·la</button>
-    <p id="missatge-estat" class="missatge-estat" hidden></p>
+      <button type="button" id="boto-desar-altimetria" class="boto boto--primari boto--ample" hidden data-i18n="Desar a la parcel·la">Desar a la parcel·la</button>
+      <p id="missatge-estat" class="missatge-estat" role="status" hidden></p>
+
+      <footer class="peu-panell">
+        <p class="avis-privacitat"><svg><use href="#i-escut"/></svg><span data-i18n="Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l'IGN.">Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l'IGN.</span></p>
+        <p class="peu-panell__credits">Custòdia · <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) · <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> · <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a></p>
+      </footer>
+    </section>
   </main>
 
-  <footer class="peu">
-    <p>
-      Custòdia — <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) ·
-      <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> ·
-      <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a>
-    </p>
-  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossorigin=""></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.js"></script>
   <script type="module" src="js/altitud.js"></script>
   <script type="module" src="js/registrar-sw.js"></script>
 </body>

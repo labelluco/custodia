@@ -2,125 +2,90 @@
 <html lang="ca">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Custòdia — Inici</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icones/icona.svg">
   <link rel="icon" type="image/png" sizes="192x192" href="icones/icona-192.png">
   <link rel="apple-touch-icon" href="icones/icona-192.png">
   <meta name="theme-color" content="#396a49">
+  <link rel="stylesheet" href="nucli/css/nucli.css">
   <link rel="stylesheet" href="css/estils.css">
 </head>
-<body>
-  <header class="capcalera">
-    <h1>Custòdia</h1>
-    <nav class="menu" id="menu-principal">
-      <a href="index.html" class="menu__enllac menu__enllac--actiu" data-i18n="Inici">Inici</a>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Parcel·les">Parcel·les</button>
-        <div class="menu__submenu">
-          <a href="parceles.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Agrupacions">Agrupacions</button>
-        <div class="menu__submenu">
-          <a href="agrupacions.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir-agrupacio.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Geometries">Geometries</button>
-        <div class="menu__submenu">
-          <a href="geometries.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir-geometria.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-      <a href="copia-seguretat.html" class="menu__enllac" data-i18n="Còpia de seguretat">Còpia de seguretat</a>
-    </nav>
-    <div class="capcalera__dreta">
-      <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">
-        <span></span><span></span><span></span>
-      </button>
-      <span id="selector-idioma" class="selector-idioma"></span>
+<body class="pantalla-simple" data-seccio="inici">
+  <header class="barra-superior">
+    <a href="index.html" class="marca"><img src="icones/icona.svg" alt="" class="marca__icona" width="32" height="32"><span class="marca__nom">Custòdia</span></a>
+    <nav id="navegacio" class="pestanyes navegacio" aria-label="Seccions" data-i18n-aria-label="Seccions"></nav>
+    <div class="barra-superior__accions">
+      <div id="selector-idioma" class="selector-idioma"></div>
+      <button type="button" id="boto-menu" class="boto-icona boto-menu" title="Menú" aria-label="Menú" data-i18n-title="Menú" data-i18n-aria-label="Menú"><svg><use href="#i-menu"/></svg></button>
     </div>
   </header>
 
   <main>
-    <h2 data-i18n="Què vols fer?">Què vols fer?</h2>
-
-    <div class="menu-icones">
-      <a href="parceles.html" class="icona-menu">
-        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+    <section class="targeta-pagina" aria-labelledby="titol-pagina">
+      <h1 id="titol-pagina" class="panell__titol" data-i18n="Què vols fer?">Què vols fer?</h1>
+      <div class="menu-icones">
+        <a href="parceles.html" class="icona-menu">
+          <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
           <path d="M8 22 L18 10 L34 12 L40 24 L32 38 L14 36 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
-        </svg>
-        <span data-i18n="Parcel·les">Parcel·les</span>
-      </a>
-
-      <a href="agrupacions.html" class="icona-menu">
-        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+          </svg>
+          <span data-i18n="Parcel·les">Parcel·les</span>
+        </a>
+        <a href="agrupacions.html" class="icona-menu">
+          <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
           <path d="M4 20 L13 10 L26 12 L30 24 L23 34 L8 32 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
           <path d="M20 26 L29 16 L42 18 L46 30 L38 40 L23 38 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
-        </svg>
-        <span data-i18n="Agrupacions de parcel·les">Agrupacions de parcel·les</span>
-      </a>
-
-      <a href="afegir.html" class="icona-menu">
-        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+          </svg>
+          <span data-i18n="Agrupacions de parcel·les">Agrupacions de parcel·les</span>
+        </a>
+        <a href="geometries.html" class="icona-menu">
+          <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M8 22 L18 10 L34 12 L40 24 L32 38 L14 36 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-dasharray="4 3"/>
+          </svg>
+          <span data-i18n="Geometries">Geometries</span>
+        </a>
+        <a href="afegir.html" class="icona-menu">
+          <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
           <path d="M8 22 L18 10 L34 12 L40 24 L32 38 L14 36 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
           <circle cx="36" cy="12" r="9" fill="var(--color-accent)" stroke="none"/>
           <path d="M36 8 V16 M32 12 H40" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span data-i18n="Afegir parcel·la">Afegir parcel·la</span>
-      </a>
-
-      <a href="afegir-agrupacio.html" class="icona-menu">
-        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+          </svg>
+          <span data-i18n="Afegir parcel·la">Afegir parcel·la</span>
+        </a>
+        <a href="afegir-agrupacio.html" class="icona-menu">
+          <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
           <path d="M4 24 L13 14 L26 16 L28 28 L21 36 L8 34 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
           <path d="M18 30 L27 20 L40 22 L42 32 L35 40 L22 38 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
           <circle cx="38" cy="12" r="9" fill="var(--color-accent)" stroke="none"/>
           <path d="M38 8 V16 M34 12 H42" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span data-i18n="Afegir agrupació">Afegir agrupació</span>
-      </a>
-
-      <a href="geometries.html" class="icona-menu">
-        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
-          <path d="M8 22 L18 10 L34 12 L40 24 L32 38 L14 36 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-dasharray="4 3"/>
-        </svg>
-        <span data-i18n="Geometries">Geometries</span>
-      </a>
-
-      <a href="afegir-geometria.html" class="icona-menu">
-        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+          </svg>
+          <span data-i18n="Afegir agrupació">Afegir agrupació</span>
+        </a>
+        <a href="afegir-geometria.html" class="icona-menu">
+          <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
           <path d="M8 22 L18 10 L34 12 L40 24 L32 38 L14 36 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-dasharray="4 3"/>
           <circle cx="36" cy="12" r="9" fill="var(--color-accent)" stroke="none"/>
           <path d="M36 8 V16 M32 12 H40" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span data-i18n="Afegir geometria">Afegir geometria</span>
-      </a>
-
-      <a href="copia-seguretat.html" class="icona-menu">
-        <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
+          </svg>
+          <span data-i18n="Afegir geometria">Afegir geometria</span>
+        </a>
+        <a href="copia-seguretat.html" class="icona-menu">
+          <svg class="icona-menu__icona" viewBox="0 0 48 48" aria-hidden="true">
           <path d="M24 6 V28 M16 20 L24 28 L32 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M8 34 V40 H40 V34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span data-i18n="Còpia de seguretat">Còpia de seguretat</span>
-      </a>
-    </div>
+          </svg>
+          <span data-i18n="Còpia de seguretat">Còpia de seguretat</span>
+        </a>
+      </div>
+      <footer class="peu-panell">
+        <p class="avis-privacitat"><svg><use href="#i-escut"/></svg><span data-i18n="Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l'IGN.">Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l'IGN.</span></p>
+        <p class="peu-panell__credits">Custòdia · <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) · <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> · <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a></p>
+      </footer>
+    </section>
   </main>
 
-  <footer class="peu">
-    <p>
-      Custòdia — <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) ·
-      <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> ·
-      <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a>
-    </p>
-  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
 
   <script type="module" src="js/inici.js"></script>
   <script type="module" src="js/registrar-sw.js"></script>

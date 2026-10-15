@@ -15,10 +15,16 @@ import { Mapa } from './ui/mapa.js';
 import { Parcela } from './model/parcela.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
+import { inicialitzarPestanyes } from './ui/pestanyes.js';
+import { avisar } from './ui/dialegs.js';
 
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
 inicialitzarMenu();
+// Dues maneres de triar la parcel·la (com a Terra 3D): tocar-la al mapa,
+// o escriure'n la província, el municipi, el polígon i la parcel·la.
+// El resultat de la consulta es mostra a sota, sigui quina sigui.
+inicialitzarPestanyes(document.querySelector('.panell .pestanyes'));
 
 const formulari = document.getElementById('form-parcela');
 const fieldsetCadastre = document.getElementById('dades-cadastre');
@@ -61,7 +67,7 @@ async function carregarProvincies() {
   } catch (error) {
     console.warn('No s\'han pogut carregar les províncies, es deixa com a camp de text:', error);
     selectProvincia.outerHTML =
-      `<input type="text" id="provincia" name="provincia" required placeholder="${t('p. ex. Teruel')}">`;
+      `<input type="text" id="provincia" name="provincia" class="camp__entrada" required placeholder="${t('p. ex. Teruel')}">`;
   }
 }
 
@@ -83,7 +89,7 @@ selectProvincia.addEventListener('change', async () => {
     selectPoblacio.disabled = false;
   } catch (error) {
     console.warn('No s\'han pogut carregar els municipis, es deixa com a camp de text:', error);
-    selectPoblacio.outerHTML = '<input type="text" id="poblacio" name="poblacio" required>';
+    selectPoblacio.outerHTML = '<input type="text" id="poblacio" name="poblacio" class="camp__entrada" required>';
   }
 });
 
@@ -102,10 +108,10 @@ function codiSeleccionat(idElement) {
 
 botoConsultar.addEventListener('click', async () => {
   const dadesFormulari = new FormData(formulari);
-  const provincia = dadesFormulari.get('provincia').trim();
-  const poblacio = dadesFormulari.get('poblacio').trim();
-  const poligon = dadesFormulari.get('poligon').trim();
-  const parcelaCadastral = dadesFormulari.get('parcela').trim();
+  const provincia = (dadesFormulari.get('provincia') ?? '').trim();
+  const poblacio = (dadesFormulari.get('poblacio') ?? '').trim();
+  const poligon = (dadesFormulari.get('poligon') ?? '').trim();
+  const parcelaCadastral = (dadesFormulari.get('parcela') ?? '').trim();
 
   if (!provincia || !poblacio || !poligon || !parcelaCadastral) {
     mostrarEstat(t('Cal omplir provincia, polígon, parcel·la i població.'), 'error');
@@ -302,7 +308,9 @@ function inicialitzarMapaSeleccio() {
 async function actualitzarParcelesVisibles() {
   const generacioDAquestaConsulta = ++generacioActual;
 
-  const centre = mapaSeleccio.leafletMap.getCenter();
+  // El centre de la part visible del mapa, no el de tot el contenidor:
+  // el panell en tapa una part, i el requadre ha de quedar a la vista.
+  const centre = mapaSeleccio.centreVisible();
   const bounds = centre.toBounds(COSTAT_AREA_CONSULTA_METRES);
 
   if (capaIndicadorArea) {
@@ -315,7 +323,6 @@ async function actualitzarParcelesVisibles() {
     dashArray: '6 4',
   }).addTo(mapaSeleccio.leafletMap);
 
-  console.log('[mapa-cadastre] BBOX de consulta (lat/lng):', bounds.toBBoxString());
   missatgeCarregantMapa.hidden = false;
   const inicimostraCarrega = Date.now();
   // Sense això, el navegador pot no arribar mai a repintar el canvi
@@ -333,15 +340,12 @@ async function actualitzarParcelesVisibles() {
     );
 
     if (generacioDAquestaConsulta !== generacioActual) {
-      console.log('[mapa-cadastre] resposta descartada (ja no és la consulta més recent)');
       return;
     }
 
-    console.log('[mapa-cadastre] parcel·les rebudes:', parceles.length, parceles);
     mapaSeleccio.buidar();
     for (const p of parceles) {
       if (p.coordenades.length === 0) {
-        console.log('[mapa-cadastre] parcel·la sense geometria, ignorada:', p.referenciaCadastral);
         continue;
       }
       mapaSeleccio.afegirParcelaCandidata(p.coordenades, p.referenciaCadastral, () =>
@@ -374,13 +378,8 @@ async function actualitzarParcelesVisibles() {
  * s'omplen tots els camps del formulari, i es llança la consulta de seguida.
  */
 async function seleccionarParcelaCandidata(parcelaCandidata) {
-  console.log(
-    '[mapa-cadastre] parcel·la triada -- referència en brut:', parcelaCandidata.referenciaCadastral,
-    '| polígon/parcel·la desglossats:', parcelaCandidata.poligon, '/', parcelaCandidata.parcelaCadastral
-  );
-
   if (!parcelaCandidata.poligon || !parcelaCandidata.parcelaCadastral) {
-    alert(t('No s\'ha pogut identificar el polígon i la parcel·la d\'aquesta finca.'));
+    avisar(t('No s\'ha pogut identificar el polígon i la parcel·la d\'aquesta finca.'));
     return;
   }
 
@@ -411,9 +410,8 @@ async function seleccionarParcelaCandidata(parcelaCandidata) {
       codiMunicipiRef,
       parcelaCandidata.referenciaCadastral
     );
-    console.log('[mapa-cadastre] provincia/municipi resolts pel Cadastre:', provincia, '/', municipi);
 
-    establirValorUbicacio('provincia', provincia);
+    establirValorUbicacio('provincia', provincia, null, codiProvinciaRef);
     // Encara no tenim la llista sencera de municipis d'aquesta
     // província (no calia demanar-la) -- n'hi ha prou de crear-hi
     // només l'opció d'aquest municipi concret.
@@ -424,7 +422,7 @@ async function seleccionarParcelaCandidata(parcelaCandidata) {
     botoConsultar.click();
   } catch (error) {
     console.error(error);
-    alert(
+    avisar(
       t(
         'No s\'ha pogut identificar automàticament la província i el municipi d\'aquesta parcel·la. Selecciona\'ls manualment i escriu el polígon i la parcel·la a mà.'
       )
@@ -439,10 +437,11 @@ async function seleccionarParcelaCandidata(parcelaCandidata) {
  * opcions noves (per exemple, la població, que només es poblen quan
  * es tria una província a mà), es passen a "opcions".
  */
-function establirValorUbicacio(idElement, nom, opcions) {
+function establirValorUbicacio(idElement, nom, opcions, codi = null) {
   const element = document.getElementById(idElement);
   if (!element) return;
 
+  let valor = nom;
   if (element.tagName === 'SELECT') {
     if (opcions) {
       element.innerHTML = opcions
@@ -450,13 +449,20 @@ function establirValorUbicacio(idElement, nom, opcions) {
         .join('');
       element.disabled = false;
     }
+    // Primer pel codi (INE), si se'n sap: els serveis del Cadastre no
+    // anomenen igual totes les províncies (ConsultaProvincia diu
+    // "CASTELLO" i Consulta_DNPRC_Codigos "CASTELLÓN", comprovat el
+    // 2026-10-15), però el codi (12) sí que coincideix.
+    const perCodi =
+      codi != null && Array.from(element.options).find((o) => o.dataset.codi && Number(o.dataset.codi) === Number(codi));
+    if (perCodi) valor = perCodi.value;
   }
-  element.value = nom;
+  element.value = valor;
 
   // Si el navegador no ha trobat cap <option> amb aquest valor exacte,
   // el camp es queda buit (o amb el valor anterior) sense cap avís --
   // es detecta i es registra, en lloc de deixar-ho passar en silenci.
-  if (element.value !== nom) {
+  if (element.value !== valor) {
     console.error(
       `[mapa-cadastre] "${nom}" no coincideix amb cap opció de #${idElement}` +
         (opcions ? ` -- opcions disponibles: ${opcions.map((o) => o.nom).join(', ')}` : '')

@@ -6,7 +6,6 @@ export const ES = {
   // Capçalera / menú (compartit per totes les pàgines)
   'Inici': 'Inicio',
   'Afegir parcel·la': 'Añadir parcela',
-  'Llistar': 'Listar',
   'Afegir': 'Añadir',
   'Tornar al llistat': 'Volver al listado',
   'Tornar al detall': 'Volver al detalle',
@@ -51,7 +50,6 @@ export const ES = {
   'No s\'ha pogut desar la parcel·la:': 'No se ha podido guardar la parcela:',
 
   // Compartit (mapes, general)
-  '← Tornar al llistat': '← Volver al listado',
   'Tornar a l\'agrupació': 'Volver a la agrupación',
 
   // Pàgina de detall (detall.html / detall.js)
@@ -187,7 +185,6 @@ export const ES = {
   'Agrupacions de parcel·les': 'Agrupaciones de parcelas',
   'Agrupacions': 'Agrupaciones',
   'Afegir agrupació': 'Añadir agrupación',
-  '← Tornar a l\'inici': '← Volver al inicio',
   'Aquesta funcionalitat encara no està disponible -- estarà a punt en una propera versió.':
     'Esta funcionalidad todavía no está disponible -- estará lista en una próxima versión.',
 
@@ -256,7 +253,6 @@ export const ES = {
   'Veure punts d\'altitud': 'Ver puntos de altitud',
 
   // Punts d'altitud combinats (altitud-agrupacio.html / altitud-agrupacio.js)
-  '← Tornar al detall': '← Volver al detalle',
   'Punts d\'altitud de l\'agrupació': 'Puntos de altitud de la agrupación',
   'Es mostren els punts ja calculats i desats de cada parcel·la, combinats en un sol mapa -- no es torna a consultar res.':
     'Se muestran los puntos ya calculados y guardados de cada parcela, combinados en un solo mapa -- no se vuelve a consultar nada.',
@@ -265,7 +261,6 @@ export const ES = {
     'Hay que calcular la altitud con el método de malla para todas las parcelas de la agrupación. Falta para:',
 
   // Mapa de selecció al Cadastre (afegir.html / afegir.js)
-  'Tria la parcel·la al mapa': 'Elige la parcela en el mapa',
   'Amplia el mapa fins que hi vegis les parcel·les i toca la que vulguis afegir. També pots ometre aquest pas i escriure les dades a mà, més avall.':
     'Amplía el mapa hasta que veas las parcelas y toca la que quieras añadir. También puedes omitir este paso y escribir los datos a mano, más abajo.',
   'Es mostren les parcel·les que cauen dins del requadre marcat (línia discontínua) o que en toquen alguna part -- desplaça el mapa fins que hi càpiga la teva zona.':
@@ -305,4 +300,39 @@ export const ES = {
   'Encara no has afegit cap geometria.': 'Todavía no has añadido ninguna geometría.',
   'No s\'han pogut carregar les geometries. Revisa la consola per a més detalls.':
     'No se han podido cargar las geometrías. Revisa la consola para más detalles.',
+  // Nova interfície (barra, panell flotant, diàlegs)
+  'Seccions': 'Secciones',
+  'Menú': 'Menú',
+  'Tancar': 'Cerrar',
+  'Continuar': 'Continuar',
+  'Cancel·lar': 'Cancelar',
+  'D\'acord': 'De acuerdo',
+  'Esborrar': 'Borrar',
+  'Plegar o desplegar el panell': 'Plegar o desplegar el panel',
+  'Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l\'IGN.':
+    'Tus datos se guardan solo en este dispositivo. Las consultas van directamente al Catastro y al IGN.',
+  'Cerca': 'Buscar',
+  'Ordena per': 'Ordenar por',
+  'Ordre d\'alta': 'Orden de alta',
+  'Invertir l\'ordre': 'Invertir el orden',
+  'parcel·la': 'parcela',
+  'parcel·les': 'parcelas',
+  'Vista del mapa': 'Vista del mapa',
+  'Al mapa': 'En el mapa',
+  'Polígon i parcel·la': 'Polígono y parcela',
+  'Agrupació': 'Agrupación',
+  'Geometria': 'Geometría',
+  'Mapa de parcel·les': 'Mapa de parcelas',
+  'Mapa d\'agrupacions': 'Mapa de agrupaciones',
+  'Mapa de geometries': 'Mapa de geometrías',
+  'Dibuix de la geometria': 'Dibujo de la geometría',
+  'Selecció de parcel·la al mapa del Cadastre': 'Selección de parcela en el mapa del Catastro',
+  'Punts d\'altitud de totes les parcel·les': 'Puntos de altitud de todas las parcelas',
+  'Perímetre amb vèrtexs': 'Perímetro con vértices',
+  'Perímetre de la parcel·la': 'Perímetro de la parcela',
+  'Perímetre de la geometria': 'Perímetro de la geometría',
+  'Perímetres de les parcel·les de l\'agrupació': 'Perímetros de las parcelas de la agrupación',
+  'Relleu 3D de la parcel·la': 'Relieve 3D de la parcela',
+  'Relleu 3D de la geometria': 'Relieve 3D de la geometría',
+  'Relleu 3D de l\'agrupació': 'Relieve 3D de la agrupación',
 };

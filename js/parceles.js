@@ -1,8 +1,11 @@
-// Controlador de parceles.html: mapa + llistat, amb cerca i ordenació.
+// Controlador de parceles.html: mapa a pantalla completa + llistat al
+// panell, amb cerca i ordenació.
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
 import { ServeiRisc } from './serveis/risc.js';
-import { inicialitzarOrdenacio } from './ui/taula-ordenable.js';
+import { inicialitzarOrdenacio } from './ui/ordenacio.js';
+import { elementLlista, formatSuperficie } from './ui/llista.js';
+import { avisar } from './ui/dialegs.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
 
@@ -17,14 +20,15 @@ async function iniciar() {
   const mapa = new Mapa('mapa');
   const contenidorLlistat = document.getElementById('llistat-parceles');
   const missatgeBuit = document.getElementById('missatge-buit');
+  const eines = document.getElementById('eines-llistat');
   const missatgeSenseResultats = document.getElementById('missatge-sense-resultats');
   const campCerca = document.getElementById('cerca-parceles');
-  const capcalera = document.getElementById('capcalera-parceles');
 
   const parceles = await bd.llegirTotesLesParceles();
 
   if (parceles.length === 0) {
     missatgeBuit.hidden = false;
+    eines.hidden = true;
     return;
   }
   missatgeBuit.hidden = true;
@@ -51,7 +55,7 @@ async function iniciar() {
   }
 
   /**
-   * Pinta mapa i taula junts, a partir de l'ordre actual de "files" i
+   * Pinta mapa i llistat junts, a partir de l'ordre actual de "files" i
    * del terme de cerca vigent -- es crida de nou en reordenar o en
    * escriure a la cerca.
    */
@@ -67,11 +71,22 @@ async function iniciar() {
       mapa.ajustarVistaATotes();
     }
 
-    pintarFilesTaula(contenidorLlistat, filesVisibles, mapa);
+    contenidorLlistat.replaceChildren(
+      ...filesVisibles.map(({ parcela, color, index }) =>
+        elementLlista({
+          titol: `${parcela.poblacio} · ${parcela.poligon}/${parcela.parcelaCadastral}`,
+          detall: [parcela.us, formatSuperficie(parcela.superficie)].filter(Boolean).join(' · '),
+          risc: { color, index },
+          href: `detall.html?id=${encodeURIComponent(parcela.id)}`,
+          onSeleccionar: () => mapa.ressaltarParcela(parcela.id),
+        })
+      )
+    );
   }
 
   inicialitzarOrdenacio(
-    capcalera,
+    document.getElementById('ordre-parceles'),
+    document.getElementById('ordre-parceles-sentit'),
     files,
     {
       poblacio: (f) => f.parcela.poblacio,
@@ -92,54 +107,11 @@ async function iniciar() {
   pintar();
 }
 
-/** Pinta les files de la taula (no el mapa) en l'ordre i filtre actuals. */
-function pintarFilesTaula(contenidorLlistat, files, mapa) {
-  contenidorLlistat.innerHTML = '';
-
-  for (const { parcela, color, index } of files) {
-    const fila = document.createElement('tr');
-    fila.className = 'fila-parcela';
-    fila.dataset.id = parcela.id;
-    fila.innerHTML = `
-      <td>${parcela.poblacio}</td>
-      <td>${parcela.poligon}</td>
-      <td>${parcela.parcelaCadastral}</td>
-      <td class="us">${parcela.us ?? '—'}</td>
-      <td>${parcela.superficie ? `${parcela.superficie} m²` : '—'}</td>
-      <td>
-        ${
-          index != null
-            ? `
-              <span class="taula-parceles__risc">
-                <span class="taula-parceles__punt-risc" style="background-color: ${color};"></span>
-                ${index.toFixed(0)} / 100
-              </span>
-            `
-            : '—'
-        }
-      </td>
-      <td><a href="detall.html?id=${encodeURIComponent(parcela.id)}" class="boto-taula">${t('Detall')}</a></td>
-    `;
-    // Tocar la fila la ressalta al mapa (per relacionar visualment
-    // llistat i mapa); el botó "Detall" -- amb el seu propi clic, que
-    // no interfereix amb el de la fila -- porta a la fitxa completa.
-    fila.addEventListener('click', () => {
-      mapa.ressaltarParcela(parcela.id);
-
-      const anteriorSeleccionada = contenidorLlistat.querySelector('.fila-parcela--seleccionada');
-      anteriorSeleccionada?.classList.remove('fila-parcela--seleccionada');
-      fila.classList.add('fila-parcela--seleccionada');
-    });
-    fila.querySelector('.boto-taula').addEventListener('click', (event) => event.stopPropagation());
-    contenidorLlistat.appendChild(fila);
-  }
-}
-
 function obrirDetall(id) {
   window.location.href = `detall.html?id=${encodeURIComponent(id)}`;
 }
 
 iniciar().catch((error) => {
   console.error(error);
-  alert(t('No s\'han pogut carregar les parcel·les. Revisa la consola per a més detalls.'));
+  avisar(t('No s\'han pogut carregar les parcel·les. Revisa la consola per a més detalls.'));
 });

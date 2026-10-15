@@ -2,7 +2,7 @@
 <html lang="ca">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Custòdia — Afegir agrupació</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icones/icona.svg">
@@ -12,91 +12,61 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="">
+  <link rel="stylesheet" href="nucli/css/nucli.css">
   <link rel="stylesheet" href="css/estils.css">
 </head>
-<body>
-  <header class="capcalera">
-    <h1>Custòdia</h1>
-    <nav class="menu" id="menu-principal">
-      <a href="index.html" class="menu__enllac" data-i18n="Inici">Inici</a>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Parcel·les">Parcel·les</button>
-        <div class="menu__submenu">
-          <a href="parceles.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <div class="menu__grup menu__grup--te-actiu">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Agrupacions">Agrupacions</button>
-        <div class="menu__submenu">
-          <a href="agrupacions.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir-agrupacio.html" class="menu__enllac menu__enllac--actiu" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Geometries">Geometries</button>
-        <div class="menu__submenu">
-          <a href="geometries.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir-geometria.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-      <a href="copia-seguretat.html" class="menu__enllac" data-i18n="Còpia de seguretat">Còpia de seguretat</a>
-    </nav>
-    <div class="capcalera__dreta">
-      <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">
-        <span></span><span></span><span></span>
-      </button>
-      <span id="selector-idioma" class="selector-idioma"></span>
+<body class="pantalla-mapa" data-seccio="agrupacions">
+  <header class="barra-superior">
+    <a href="index.html" class="marca"><img src="icones/icona.svg" alt="" class="marca__icona" width="32" height="32"><span class="marca__nom">Custòdia</span></a>
+    <nav id="navegacio" class="pestanyes navegacio" aria-label="Seccions" data-i18n-aria-label="Seccions"></nav>
+    <div class="barra-superior__accions">
+      <div id="selector-idioma" class="selector-idioma"></div>
+      <button type="button" id="boto-menu" class="boto-icona boto-menu" title="Menú" aria-label="Menú" data-i18n-title="Menú" data-i18n-aria-label="Menú"><svg><use href="#i-menu"/></svg></button>
     </div>
   </header>
 
   <main>
-    <p id="enllac-tornar"><a href="index.html" class="enllac-tornar" data-i18n="← Tornar a l'inici">&larr; Tornar a l'inici</a></p>
+    <div id="mapa-agrupacio" class="mapa" role="region" aria-label="Mapa de parcel·les" data-i18n-aria-label="Mapa de parcel·les"></div>
 
-    <h2 data-i18n="Afegir agrupació">Afegir agrupació</h2>
-    <p class="nota nota--llistat" data-i18n="Toca una parcel·la al mapa per afegir-la (o treure-la) de l'agrupació.">
-      Toca una parcel·la al mapa per afegir-la (o treure-la) de l'agrupació.
-    </p>
+    <section class="panell" aria-labelledby="titol-pagina">
+      <button type="button" class="panell__ansa" aria-expanded="true" aria-label="Plegar o desplegar el panell" data-i18n-aria-label="Plegar o desplegar el panell"></button>
+      <div class="panell__capcalera">
+        <a id="enllac-tornar" href="agrupacions.html" class="boto-icona boto-icona--pla" title="Tornar al llistat" aria-label="Tornar al llistat" data-i18n-title="Tornar al llistat" data-i18n-aria-label="Tornar al llistat"><svg><use href="#i-enrere"/></svg></a>
+        <div class="panell__capcalera-text">
+          <h1 id="titol-pagina" class="panell__titol" data-i18n="Afegir agrupació">Afegir agrupació</h1>
+          
+        </div>
+      </div>
 
-    <section id="mapa-agrupacio" class="mapa" aria-label="Mapa de parcel·les"></section>
+      <p class="panell__pista panell__pista--destacada" data-i18n="Toca una parcel·la al mapa per afegir-la (o treure-la) de l'agrupació.">Toca una parcel·la al mapa per afegir-la (o treure-la) de l'agrupació.</p>
 
-    <div class="panell">
-      <section id="parcela-triada" class="fitxa-parcela-contenidor" hidden>
-        <h2 data-i18n="Parcel·la triada">Parcel·la triada</h2>
+      <section id="parcela-triada" class="bloc" hidden>
+        <h2 class="bloc__titol" data-i18n="Parcel·la triada">Parcel·la triada</h2>
         <div id="contingut-parcela-triada"></div>
-        <button type="button" id="boto-afegir-treure" class="boto-estret"></button>
+        <button type="button" id="boto-afegir-treure" class="boto boto--primari boto--ample"></button>
       </section>
 
-      <section class="fitxa-parcela-contenidor">
-        <h2 data-i18n="Parcel·les de l'agrupació">Parcel·les de l'agrupació</h2>
-        <p id="missatge-buides" class="nota" data-i18n="Encara no has afegit cap parcel·la a l'agrupació.">
-          Encara no has afegit cap parcel·la a l'agrupació.
-        </p>
+      <section class="bloc">
+        <h2 class="bloc__titol" data-i18n="Parcel·les de l'agrupació">Parcel·les de l'agrupació</h2>
+        <p id="missatge-buides" class="panell__pista" data-i18n="Encara no has afegit cap parcel·la a l'agrupació.">Encara no has afegit cap parcel·la a l'agrupació.</p>
         <ul id="llistat-triades" class="llistat-triades"></ul>
       </section>
 
-      <section class="fitxa-parcela-contenidor">
-        <h2 data-i18n="Nom de l'agrupació">Nom de l'agrupació</h2>
-        <div class="camp">
-          <label for="nom-agrupacio" data-i18n="Nom">Nom</label>
-          <input type="text" id="nom-agrupacio" required>
-        </div>
-        <button type="button" id="boto-guardar" class="boto-estret" style="margin-top: var(--espai-s);" data-i18n="Guardar agrupació">Guardar agrupació</button>
-        <p id="missatge-estat" class="missatge-estat" hidden></p>
-      </section>
-    </div>
+      <label class="camp">
+        <span class="camp__etiqueta" data-i18n="Nom de l'agrupació">Nom de l'agrupació</span>
+        <input type="text" id="nom-agrupacio" class="camp__entrada" required>
+      </label>
+      <button type="button" id="boto-guardar" class="boto boto--primari boto--ample" data-i18n="Guardar agrupació">Guardar agrupació</button>
+      <p id="missatge-estat" class="missatge-estat" role="status" hidden></p>
+
+      <footer class="peu-panell">
+        <p class="avis-privacitat"><svg><use href="#i-escut"/></svg><span data-i18n="Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l'IGN.">Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l'IGN.</span></p>
+        <p class="peu-panell__credits">Custòdia · <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) · <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> · <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a></p>
+      </footer>
+    </section>
   </main>
 
-  <footer class="peu">
-    <p>
-      Custòdia — <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) ·
-      <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> ·
-      <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a>
-    </p>
-  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="

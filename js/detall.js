@@ -9,6 +9,7 @@ import { inicialitzarAjudes, iconaAjuda } from './ui/ajuda.js';
 import { crearAnellSvg, filaComponent } from './ui/risc-visual.js';
 import { t, idiomaActual, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
+import { avisar, confirmar } from './ui/dialegs.js';
 
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
@@ -58,11 +59,16 @@ async function iniciar() {
   // "agrupacio" a la URL), l'enllaç de tornada hi porta de nou, en
   // lloc de portar al llistat general de parcel·les.
   if (idAgrupacio) {
-    document.getElementById('enllac-tornar').innerHTML =
-      `<a href="detall-agrupacio.html?id=${encodeURIComponent(idAgrupacio)}" class="enllac-tornar">&larr; ${t('Tornar a l\'agrupació')}</a>`;
+    const enllacTornar = document.getElementById('enllac-tornar');
+    enllacTornar.href = `detall-agrupacio.html?id=${encodeURIComponent(idAgrupacio)}`;
+    enllacTornar.title = t('Tornar a l\'agrupació');
+    enllacTornar.setAttribute('aria-label', enllacTornar.title);
   }
 
   document.title = `Custòdia — ${parcelaActual.poblacio}`;
+  document.getElementById('titol-detall').textContent = parcelaActual.poblacio;
+  document.getElementById('subtitol-detall').textContent =
+    `${t('Polígon')} ${parcelaActual.poligon} · ${t('Parcel·la')} ${parcelaActual.parcelaCadastral}`;
   pintarFitxa(parcelaActual);
 
   // Es llegeixen un sol cop i es reutilitzen tant per al llistat com
@@ -160,8 +166,8 @@ function inicialitzarFiltreMapa(mapa, parcela) {
 
   function activar2D() {
     tipusMapaActual = '2d';
-    botoMapa2d.classList.add('boto-secundari--actiu');
-    botoMapa3d.classList.remove('boto-secundari--actiu');
+    botoMapa2d.setAttribute('aria-selected', 'true');
+    botoMapa3d.setAttribute('aria-selected', 'false');
 
     mapa3d?.destruir();
     mapa3d = null;
@@ -189,8 +195,8 @@ function inicialitzarFiltreMapa(mapa, parcela) {
 
   function activar3D() {
     tipusMapaActual = '3d';
-    botoMapa3d.classList.add('boto-secundari--actiu');
-    botoMapa2d.classList.remove('boto-secundari--actiu');
+    botoMapa3d.setAttribute('aria-selected', 'true');
+    botoMapa2d.setAttribute('aria-selected', 'false');
 
     // De moment el 3D no sap mostrar l'orientació (calen fletxes 3D
     // pròpies, encara no fetes) -- es manté amagada mentre la resta
@@ -406,14 +412,15 @@ botoEsborrar.addEventListener('click', async () => {
   const agrupacions = await bd.llegirAgrupacionsAmbParcela(parcelaActual.id);
   if (agrupacions.length > 0) {
     const noms = agrupacions.map((a) => a.nom).join(', ');
-    alert(
+    await avisar(
       `${t('Aquesta parcel·la forma part de')} ${agrupacions.length === 1 ? t('l\'agrupació') : t('les agrupacions')} "${noms}". ${t('Cal treure-la de l\'agrupació abans de poder esborrar-la.')}`
     );
     return;
   }
 
-  const confirmat = confirm(
-    `${t('Segur que vols esborrar la parcel·la de')} ${parcelaActual.poblacio}? ${t('Aquesta acció no es pot desfer.')}`
+  const confirmat = await confirmar(
+    `${t('Segur que vols esborrar la parcel·la de')} ${parcelaActual.poblacio}? ${t('Aquesta acció no es pot desfer.')}`,
+    { accio: t('Esborrar'), perillos: true }
   );
   if (!confirmat) return;
 
@@ -424,5 +431,5 @@ botoEsborrar.addEventListener('click', async () => {
 
 iniciar().catch((error) => {
   console.error(error);
-  alert(t('No s\'ha pogut carregar el detall de la parcel·la.'));
+  avisar(t('No s\'ha pogut carregar el detall de la parcel·la.'));
 });

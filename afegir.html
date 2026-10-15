@@ -2,7 +2,7 @@
 <html lang="ca">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Custòdia — Afegir parcel·la</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icones/icona.svg">
@@ -12,104 +12,81 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="">
+  <link rel="stylesheet" href="nucli/css/nucli.css">
   <link rel="stylesheet" href="css/estils.css">
 </head>
-<body>
-  <header class="capcalera">
-    <h1>Custòdia</h1>
-    <nav class="menu" id="menu-principal">
-      <a href="index.html" class="menu__enllac" data-i18n="Inici">Inici</a>
-
-      <div class="menu__grup menu__grup--te-actiu">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Parcel·les">Parcel·les</button>
-        <div class="menu__submenu">
-          <a href="parceles.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir.html" class="menu__enllac menu__enllac--actiu" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Agrupacions">Agrupacions</button>
-        <div class="menu__submenu">
-          <a href="agrupacions.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir-agrupacio.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Geometries">Geometries</button>
-        <div class="menu__submenu">
-          <a href="geometries.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir-geometria.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-      <a href="copia-seguretat.html" class="menu__enllac" data-i18n="Còpia de seguretat">Còpia de seguretat</a>
-    </nav>
-    <div class="capcalera__dreta">
-      <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">
-        <span></span><span></span><span></span>
-      </button>
-      <span id="selector-idioma" class="selector-idioma"></span>
+<body class="pantalla-mapa" data-seccio="parceles">
+  <header class="barra-superior">
+    <a href="index.html" class="marca"><img src="icones/icona.svg" alt="" class="marca__icona" width="32" height="32"><span class="marca__nom">Custòdia</span></a>
+    <nav id="navegacio" class="pestanyes navegacio" aria-label="Seccions" data-i18n-aria-label="Seccions"></nav>
+    <div class="barra-superior__accions">
+      <div id="selector-idioma" class="selector-idioma"></div>
+      <button type="button" id="boto-menu" class="boto-icona boto-menu" title="Menú" aria-label="Menú" data-i18n-title="Menú" data-i18n-aria-label="Menú"><svg><use href="#i-menu"/></svg></button>
     </div>
   </header>
 
   <main>
-    <section class="fitxa-parcela-contenidor">
-      <h2 data-i18n="Tria la parcel·la al mapa">Tria la parcel·la al mapa</h2>
-      <p class="nota nota--llistat" data-i18n="Amplia el mapa fins que hi vegis les parcel·les i toca la que vulguis afegir. També pots ometre aquest pas i escriure les dades a mà, més avall.">
-        Amplia el mapa fins que hi vegis les parcel·les i toca la que vulguis afegir. També pots ometre aquest pas i escriure les dades a mà, més avall.
-      </p>
-      <section id="mapa-seleccio-cadastre" class="mapa" aria-label="Selecció de parcel·la al mapa del Cadastre"></section>
-      <p id="carregant-parceles-mapa" class="missatge-estat missatge-estat--info" style="margin-top: var(--espai-s);" hidden data-i18n="Carregant les parcel·les d'aquesta zona...">Carregant les parcel·les d'aquesta zona...</p>
-      <p id="avis-zoom-mapa" class="nota" data-i18n="Es mostren les parcel·les que cauen dins del requadre marcat (línia discontínua) o que en toquen alguna part -- desplaça el mapa fins que hi càpiga la teva zona.">
-        Es mostren les parcel·les que cauen dins del requadre marcat (línia discontínua) o que en toquen alguna part -- desplaça el mapa fins que hi càpiga la teva zona.
-      </p>
-    </section>
+    <div id="mapa-seleccio-cadastre" class="mapa" role="region" aria-label="Selecció de parcel·la al mapa del Cadastre" data-i18n-aria-label="Selecció de parcel·la al mapa del Cadastre"></div>
 
-    <section class="formulari-parcela fitxa-parcela-contenidor">
-      <h2 data-i18n="Afegir una nova parcel·la">Afegir una nova parcel·la</h2>
+    <section class="panell" aria-labelledby="titol-panell">
+      <button type="button" class="panell__ansa" aria-expanded="true" aria-label="Plegar o desplegar el panell" data-i18n-aria-label="Plegar o desplegar el panell"></button>
+      <div class="panell__capcalera">
+        <a id="enllac-tornar" href="parceles.html" class="boto-icona boto-icona--pla" title="Tornar al llistat" aria-label="Tornar al llistat" data-i18n-title="Tornar al llistat" data-i18n-aria-label="Tornar al llistat"><svg><use href="#i-enrere"/></svg></a>
+        <div class="panell__capcalera-text">
+          <h1 id="titol-panell" class="panell__titol" data-i18n="Afegir una nova parcel·la">Afegir una nova parcel·la</h1>
+          
+        </div>
+      </div>
 
-      <form id="form-parcela">
-        <fieldset id="dades-cadastre" class="formulari-graella">
-          <div class="camp">
-            <label for="provincia" data-i18n="Provincia">Provincia</label>
-            <select id="provincia" name="provincia" required>
+      <div class="pestanyes" role="tablist">
+        <button type="button" class="pestanyes__opcio" role="tab" data-pestanya="mapa" aria-selected="true" data-i18n="Al mapa">Al mapa</button>
+        <button type="button" class="pestanyes__opcio" role="tab" data-pestanya="dades" aria-selected="false" data-i18n="Polígon i parcel·la">Polígon i parcel·la</button>
+      </div>
+
+      <div class="panell__formulari" data-panell-pestanya="mapa">
+        <p class="panell__pista panell__pista--destacada" data-i18n="Amplia el mapa fins que hi vegis les parcel·les i toca la que vulguis afegir. També pots ometre aquest pas i escriure les dades a mà, més avall.">Amplia el mapa fins que hi vegis les parcel·les i toca la que vulguis afegir. També pots ometre aquest pas i escriure les dades a mà, més avall.</p>
+        <p id="avis-zoom-mapa" class="panell__pista" data-i18n="Es mostren les parcel·les que cauen dins del requadre marcat (línia discontínua) o que en toquen alguna part -- desplaça el mapa fins que hi càpiga la teva zona.">Es mostren les parcel·les que cauen dins del requadre marcat (línia discontínua) o que en toquen alguna part -- desplaça el mapa fins que hi càpiga la teva zona.</p>
+        <p id="carregant-parceles-mapa" class="avis avis--info" hidden><span class="spinner"></span><span data-i18n="Carregant les parcel·les d'aquesta zona...">Carregant les parcel·les d'aquesta zona...</span></p>
+      </div>
+
+      <form id="form-parcela" class="panell__formulari" novalidate>
+        <fieldset id="dades-cadastre" class="grup-camps" data-panell-pestanya="dades" hidden>
+          <label class="camp">
+            <span class="camp__etiqueta" data-i18n="Provincia">Provincia</span>
+            <select id="provincia" name="provincia" class="camp__entrada" required>
               <option value="" data-i18n="Carregant...">Carregant...</option>
             </select>
-          </div>
-
-          <div class="camp">
-            <label for="poblacio" data-i18n="Població">Població</label>
-            <select id="poblacio" name="poblacio" required disabled>
+          </label>
+          <label class="camp">
+            <span class="camp__etiqueta" data-i18n="Població">Població</span>
+            <select id="poblacio" name="poblacio" class="camp__entrada" required disabled>
               <option value="" data-i18n="Tria primer una província">Tria primer una província</option>
             </select>
+          </label>
+          <div class="fila-camps">
+            <label class="camp">
+              <span class="camp__etiqueta" data-i18n="Polígon">Polígon</span>
+              <input type="text" id="poligon" name="poligon" class="camp__entrada" inputmode="numeric" autocomplete="off" required>
+            </label>
+            <label class="camp">
+              <span class="camp__etiqueta" data-i18n="Parcel·la">Parcel·la</span>
+              <input type="text" id="parcela" name="parcela" class="camp__entrada" inputmode="numeric" autocomplete="off" required>
+            </label>
           </div>
-
-          <div class="camp">
-            <label for="poligon" data-i18n="Polígon">Polígon</label>
-            <input type="text" id="poligon" name="poligon" required>
-          </div>
-
-          <div class="camp">
-            <label for="parcela" data-i18n="Parcel·la">Parcel·la</label>
-            <input type="text" id="parcela" name="parcela" required>
-          </div>
-
-          <button type="button" id="boto-consultar" data-i18n="Consultar cadastre">Consultar cadastre</button>
+          <button type="button" id="boto-consultar" class="boto boto--primari boto--ample"><svg><use href="#i-cercar"/></svg><span data-i18n="Consultar cadastre">Consultar cadastre</span></button>
         </fieldset>
 
-        <p id="missatge-estat" class="missatge-estat" hidden></p>
+        <p id="missatge-estat" class="missatge-estat" role="status" hidden></p>
 
-        <fieldset id="dades-us-risc" hidden>
+        <fieldset id="dades-us-risc" class="grup-camps bloc" hidden>
           <div class="camp">
-            <span class="etiqueta-camp" data-i18n="Ús (segons el Cadastre)">Ús (segons el Cadastre)</span>
+            <span class="camp__etiqueta" data-i18n="Ús (segons el Cadastre)">Ús (segons el Cadastre)</span>
             <p id="valor-us-cadastre" class="valor-nomes-lectura"></p>
           </div>
-
           <div class="camp" id="camp-desglossament" hidden>
-            <span class="etiqueta-camp" data-i18n="Desglossament de subparceles">Desglossament de subparceles</span>
-            <div class="taula-parceles-contenidor">
-              <table class="taula-parceles">
+            <span class="camp__etiqueta" data-i18n="Desglossament de subparceles">Desglossament de subparceles</span>
+            <div class="taula-contenidor">
+              <table class="taula-compacta">
                 <thead>
                   <tr>
                     <th data-i18n="Descripció">Descripció</th>
@@ -122,29 +99,25 @@
               </table>
             </div>
           </div>
-
-          <button type="button" id="boto-desar" class="boto-estret" data-i18n="Afegir a la llista">Afegir a la llista</button>
+          <button type="button" id="boto-desar" class="boto boto--primari boto--ample"><svg><use href="#i-mes"/></svg><span data-i18n="Afegir a la llista">Afegir a la llista</span></button>
         </fieldset>
       </form>
-    </section>
 
-    <section id="parceles-pendents" class="fitxa-parcela-contenidor" hidden>
-      <h2 data-i18n="Parcel·les per guardar">Parcel·les per guardar</h2>
-      <p class="nota" data-i18n="Pots seguir afegint-ne més (d'altres municipis també) abans de desar-les totes.">
-        Pots seguir afegint-ne més (d'altres municipis també) abans de desar-les totes.
-      </p>
-      <ul id="llistat-pendents" class="llistat-triades"></ul>
-      <button type="button" id="boto-guardar-totes" class="boto-estret" style="margin-top: var(--espai-s);" data-i18n="Guardar totes les parcel·les">Guardar totes les parcel·les</button>
+      <section id="parceles-pendents" class="bloc" hidden>
+        <h2 class="bloc__titol" data-i18n="Parcel·les per guardar">Parcel·les per guardar</h2>
+        <p class="panell__pista" data-i18n="Pots seguir afegint-ne més (d'altres municipis també) abans de desar-les totes.">Pots seguir afegint-ne més (d'altres municipis també) abans de desar-les totes.</p>
+        <ul id="llistat-pendents" class="llistat-triades"></ul>
+        <button type="button" id="boto-guardar-totes" class="boto boto--primari boto--ample" data-i18n="Guardar totes les parcel·les">Guardar totes les parcel·les</button>
+      </section>
+
+      <footer class="peu-panell">
+        <p class="avis-privacitat"><svg><use href="#i-escut"/></svg><span data-i18n="Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l'IGN.">Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l'IGN.</span></p>
+        <p class="peu-panell__credits">Custòdia · <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) · <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> · <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a></p>
+      </footer>
     </section>
   </main>
 
-  <footer class="peu">
-    <p>
-      Custòdia — <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) ·
-      <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> ·
-      <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a>
-    </p>
-  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="

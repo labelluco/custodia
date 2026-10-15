@@ -2,88 +2,51 @@
 <html lang="ca">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Custòdia — Còpia de seguretat</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icones/icona.svg">
   <link rel="icon" type="image/png" sizes="192x192" href="icones/icona-192.png">
   <link rel="apple-touch-icon" href="icones/icona-192.png">
   <meta name="theme-color" content="#396a49">
+  <link rel="stylesheet" href="nucli/css/nucli.css">
   <link rel="stylesheet" href="css/estils.css">
 </head>
-<body>
-  <header class="capcalera">
-    <h1>Custòdia</h1>
-    <nav class="menu" id="menu-principal">
-      <a href="index.html" class="menu__enllac" data-i18n="Inici">Inici</a>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Parcel·les">Parcel·les</button>
-        <div class="menu__submenu">
-          <a href="parceles.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Agrupacions">Agrupacions</button>
-        <div class="menu__submenu">
-          <a href="agrupacions.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir-agrupacio.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <div class="menu__grup">
-        <button type="button" class="menu__grup-boto" aria-expanded="false" data-i18n="Geometries">Geometries</button>
-        <div class="menu__submenu">
-          <a href="geometries.html" class="menu__enllac" data-i18n="Llistar">Llistar</a>
-          <a href="afegir-geometria.html" class="menu__enllac" data-i18n="Afegir">Afegir</a>
-        </div>
-      </div>
-
-      <a href="copia-seguretat.html" class="menu__enllac menu__enllac--actiu" data-i18n="Còpia de seguretat">Còpia de seguretat</a>
-    </nav>
-    <div class="capcalera__dreta">
-      <button type="button" id="boto-menu" class="boto-menu" aria-expanded="false" aria-controls="menu-principal" aria-label="Menú">
-        <span></span><span></span><span></span>
-      </button>
-      <span id="selector-idioma" class="selector-idioma"></span>
+<body class="pantalla-simple" data-seccio="copia">
+  <header class="barra-superior">
+    <a href="index.html" class="marca"><img src="icones/icona.svg" alt="" class="marca__icona" width="32" height="32"><span class="marca__nom">Custòdia</span></a>
+    <nav id="navegacio" class="pestanyes navegacio" aria-label="Seccions" data-i18n-aria-label="Seccions"></nav>
+    <div class="barra-superior__accions">
+      <div id="selector-idioma" class="selector-idioma"></div>
+      <button type="button" id="boto-menu" class="boto-icona boto-menu" title="Menú" aria-label="Menú" data-i18n-title="Menú" data-i18n-aria-label="Menú"><svg><use href="#i-menu"/></svg></button>
     </div>
   </header>
 
   <main>
-    <p><a href="index.html" class="enllac-tornar" data-i18n="← Tornar a l'inici">&larr; Tornar a l'inici</a></p>
+    <section class="targeta-pagina" aria-labelledby="titol-pagina">
+      <h1 id="titol-pagina" class="panell__titol" data-i18n="Còpia de seguretat">Còpia de seguretat</h1>
 
-    <h2 data-i18n="Còpia de seguretat">Còpia de seguretat</h2>
-
-    <div class="panell">
-      <section class="fitxa-parcela-contenidor">
-        <h2 data-i18n="Exportar">Exportar</h2>
-        <p class="nota nota--llistat" data-i18n="Es descarreguen quatre fitxers CSV (parceles, subparceles, agrupacions i geometries), amb totes les teves dades tal com estan ara mateix -- obribles amb qualsevol full de càlcul.">
-          Es descarreguen quatre fitxers CSV (parceles, subparceles, agrupacions i geometries), amb totes les teves dades tal com estan ara mateix -- obribles amb qualsevol full de càlcul.
-        </p>
-        <button type="button" id="boto-exportar" class="boto-estret" data-i18n="Exportar totes les dades">Exportar totes les dades</button>
+      <section class="bloc">
+        <h2 class="bloc__titol" data-i18n="Exportar">Exportar</h2>
+        <p class="panell__pista" data-i18n="Es descarreguen quatre fitxers CSV (parceles, subparceles, agrupacions i geometries), amb totes les teves dades tal com estan ara mateix -- obribles amb qualsevol full de càlcul.">Es descarreguen quatre fitxers CSV (parceles, subparceles, agrupacions i geometries), amb totes les teves dades tal com estan ara mateix -- obribles amb qualsevol full de càlcul.</p>
+        <button type="button" id="boto-exportar" class="boto boto--primari"><svg><use href="#i-descarregar"/></svg><span data-i18n="Exportar totes les dades">Exportar totes les dades</span></button>
       </section>
 
-      <section class="fitxa-parcela-contenidor">
-        <h2 data-i18n="Importar">Importar</h2>
-        <p class="nota nota--llistat" data-i18n="Selecciona un o més dels quatre fitxers CSV (es reconeixen pel seu nom). Compte: cada fitxer que seleccionis substitueix del tot les dades corresponents que ja tinguis -- no s'hi afegeixen, se substitueixen.">
-          Selecciona un o més dels quatre fitxers CSV (es reconeixen pel seu nom). Compte: cada fitxer que seleccionis substitueix del tot les dades corresponents que ja tinguis -- no s'hi afegeixen, se substitueixen.
-        </p>
-        <input type="file" id="fitxers-importar" accept=".csv" multiple>
-        <button type="button" id="boto-importar" class="boto-perillos" style="margin-top: var(--espai-s);" data-i18n="Importar (substitueix les dades)">Importar (substitueix les dades)</button>
-        <p id="missatge-estat" class="missatge-estat" hidden></p>
+      <section class="bloc">
+        <h2 class="bloc__titol" data-i18n="Importar">Importar</h2>
+        <p class="avis avis--error" data-i18n="Selecciona un o més dels quatre fitxers CSV (es reconeixen pel seu nom). Compte: cada fitxer que seleccionis substitueix del tot les dades corresponents que ja tinguis -- no s'hi afegeixen, se substitueixen.">Selecciona un o més dels quatre fitxers CSV (es reconeixen pel seu nom). Compte: cada fitxer que seleccionis substitueix del tot les dades corresponents que ja tinguis -- no s'hi afegeixen, se substitueixen.</p>
+        <input type="file" id="fitxers-importar" class="camp__entrada" accept=".csv" multiple>
+        <button type="button" id="boto-importar" class="boto boto--perill"><svg><use href="#i-pujar"/></svg><span data-i18n="Importar (substitueix les dades)">Importar (substitueix les dades)</span></button>
       </section>
-    </div>
+
+      <footer class="peu-panell">
+        <p class="avis-privacitat"><svg><use href="#i-escut"/></svg><span data-i18n="Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l'IGN.">Les teves dades es guarden només en aquest dispositiu. Les consultes van directament al Cadastre i a l'IGN.</span></p>
+        <p class="peu-panell__credits">Custòdia · <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) · <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> · <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a></p>
+      </footer>
+    </section>
   </main>
 
-  <footer class="peu">
-    <p>
-      Custòdia — <span data-i18n="Programari lliure">Programari lliure</span> (AGPL-3.0) ·
-      <a href="https://codeberg.org/mario_escuder/custodia" target="_blank" rel="noopener" data-i18n="Codi font">Codi font</a> ·
-      <a href="mailto:mario.escuder1982@gmail.com" data-i18n="Contacte">Contacte</a>
-    </p>
-  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
 
   <script type="module" src="js/copia-seguretat.js"></script>
   <script type="module" src="js/registrar-sw.js"></script>

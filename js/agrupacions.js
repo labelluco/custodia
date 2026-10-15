@@ -1,5 +1,5 @@
 // Controlador d'agrupacions.html: llistat de les agrupacions ja
-// creades, amb el mateix estil de taula que el llistat de parcel·les
+// creades, amb el mateix estil de llistat que el de parcel·les
 // (nom, nombre de parcel·les, superfície total) -- no s'hi repeteix la
 // població de cada parcel·la (si una agrupació en té deu del mateix
 // municipi, sortiria deu vegades i no aportaria res).
@@ -9,7 +9,8 @@
 // mapa totes les parcel·les d'aquella agrupació. Amb cerca i ordenació.
 import { BaseDades } from './serveis/basedades.js';
 import { Mapa } from './ui/mapa.js';
-import { inicialitzarOrdenacio } from './ui/taula-ordenable.js';
+import { inicialitzarOrdenacio } from './ui/ordenacio.js';
+import { elementLlista, formatSuperficie, nombreParceles } from './ui/llista.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
 
@@ -22,12 +23,11 @@ inicialitzarMenu();
 // de risc perquè no es puguin confondre.
 const COLOR_AGRUPACIO = '#a1552e';
 
-const seccioMapa = document.getElementById('mapa-agrupacions');
 const missatgeBuit = document.getElementById('missatge-buit');
 const missatgeSenseResultats = document.getElementById('missatge-sense-resultats');
 const llistatAgrupacions = document.getElementById('llistat-agrupacions');
 const campCerca = document.getElementById('cerca-agrupacions');
-const capcalera = document.getElementById('capcalera-agrupacions');
+const eines = document.getElementById('eines-llistat');
 
 let mapa;
 let termeCerca = '';
@@ -35,9 +35,13 @@ let termeCerca = '';
 async function iniciar() {
   const bd = await BaseDades.obrir();
   const agrupacions = await bd.llegirTotesLesAgrupacions();
+  // El mapa es mostra sempre (és el fons de la pantalla), encara que no
+  // hi hagi cap agrupació.
+  mapa = new Mapa('mapa-agrupacions');
 
   if (agrupacions.length === 0) {
     missatgeBuit.hidden = false;
+    eines.hidden = true;
     return;
   }
 
@@ -46,9 +50,6 @@ async function iniciar() {
   // consultar-les una a una per cada agrupació.
   const totesLesParceles = await bd.llegirTotesLesParceles();
   const parcelaPerId = new Map(totesLesParceles.map((p) => [p.id, p]));
-
-  seccioMapa.hidden = false;
-  mapa = new Mapa('mapa-agrupacions');
 
   const files = agrupacions.map((agrupacio) => {
     const parceles = agrupacio.parcelaIds.map((id) => parcelaPerId.get(id)).filter(Boolean);
@@ -75,11 +76,12 @@ async function iniciar() {
       mapa.ajustarVistaATotes();
     }
 
-    pintarFilesTaula(filesVisibles);
+    pintarLlistat(filesVisibles);
   }
 
   inicialitzarOrdenacio(
-    capcalera,
+    document.getElementById('ordre-agrupacions'),
+    document.getElementById('ordre-agrupacions-sentit'),
     files,
     {
       nom: (f) => f.agrupacio.nom,
@@ -97,35 +99,20 @@ async function iniciar() {
   pintar();
 }
 
-/** Pinta les files de la taula (no el mapa) en l'ordre i filtre actuals. */
-function pintarFilesTaula(files) {
-  llistatAgrupacions.innerHTML = files
-    .map(
-      ({ agrupacio, superficieTotal }) => `
-        <tr class="fila-parcela" data-id="${agrupacio.id}" data-parceles="${agrupacio.parcelaIds.join(',')}">
-          <td>${agrupacio.nom}</td>
-          <td>${agrupacio.parcelaIds.length}</td>
-          <td>${superficieTotal ? `${superficieTotal} m²` : '—'}</td>
-          <td><a href="detall-agrupacio.html?id=${encodeURIComponent(agrupacio.id)}" class="boto-taula">${t('Detall')}</a></td>
-        </tr>
-      `
+/** Pinta el llistat del panell (no el mapa) en l'ordre i filtre actuals. */
+function pintarLlistat(files) {
+  // Tocar una agrupació ressalta al mapa totes les seves parcel·les; el
+  // botó "Detall" porta directament a la fitxa de l'agrupació.
+  llistatAgrupacions.replaceChildren(
+    ...files.map(({ agrupacio, superficieTotal }) =>
+      elementLlista({
+        titol: agrupacio.nom,
+        detall: `${nombreParceles(agrupacio.parcelaIds.length)} · ${formatSuperficie(superficieTotal)}`,
+        href: `detall-agrupacio.html?id=${encodeURIComponent(agrupacio.id)}`,
+        onSeleccionar: () => mapa.ressaltarParceles(agrupacio.parcelaIds),
+      })
     )
-    .join('');
-
-  // Tocar la fila ressalta al mapa totes les parcel·les de l'agrupació
-  // (com al llistat de parceles.html); el botó "Detall" porta
-  // directament a la fitxa de l'agrupació.
-  llistatAgrupacions.querySelectorAll('.fila-parcela').forEach((fila) => {
-    fila.addEventListener('click', () => {
-      const ids = fila.dataset.parceles.split(',').filter(Boolean).map(Number);
-      mapa.ressaltarParceles(ids);
-
-      const anteriorSeleccionada = llistatAgrupacions.querySelector('.fila-parcela--seleccionada');
-      anteriorSeleccionada?.classList.remove('fila-parcela--seleccionada');
-      fila.classList.add('fila-parcela--seleccionada');
-    });
-    fila.querySelector('.boto-taula').addEventListener('click', (event) => event.stopPropagation());
-  });
+  );
 }
 
 function obrirDetall(idAgrupacio) {

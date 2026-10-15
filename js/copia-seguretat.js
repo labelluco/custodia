@@ -3,6 +3,7 @@
 import { ExportadorDades } from './serveis/exportadorDades.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';
 import { inicialitzarMenu } from './ui/menu.js';
+import { confirmar, mostrarAvis } from './ui/dialegs.js';
 
 aplicarTraduccions();
 inicialitzarSelectorIdioma('selector-idioma');
@@ -11,7 +12,6 @@ inicialitzarMenu();
 const botoExportar = document.getElementById('boto-exportar');
 const campFitxers = document.getElementById('fitxers-importar');
 const botoImportar = document.getElementById('boto-importar');
-const missatgeEstat = document.getElementById('missatge-estat');
 
 botoExportar.addEventListener('click', async () => {
   botoExportar.disabled = true;
@@ -34,8 +34,9 @@ botoImportar.addEventListener('click', async () => {
     return;
   }
 
-  const confirmat = confirm(
-    t('Segur que vols importar aquests fitxers? Les dades corresponents que ja tinguis es perdran i se substituiran per les del fitxer. Aquesta acció no es pot desfer.')
+  const confirmat = await confirmar(
+    t('Segur que vols importar aquests fitxers? Les dades corresponents que ja tinguis es perdran i se substituiran per les del fitxer. Aquesta acció no es pot desfer.'),
+    { accio: t('Importar'), perillos: true }
   );
   if (!confirmat) return;
 
@@ -59,8 +60,8 @@ botoImportar.addEventListener('click', async () => {
   }
 });
 
+// Els resultats es mostren com a avisos breus (toast); els errors
+// duren més, perquè doni temps a llegir-los.
 function mostrarEstat(text, tipus) {
-  missatgeEstat.textContent = text;
-  missatgeEstat.className = `missatge-estat missatge-estat--${tipus}`;
-  missatgeEstat.hidden = false;
+  mostrarAvis(text, tipus === 'error' ? { tipus: 'error', durada: 8000 } : {});
 }

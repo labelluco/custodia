@@ -22,9 +22,14 @@ l'orientació. Disponible en català i castellà.
   propi i experimental, no un estàndard oficial ni una probabilitat real
   d'incendi — pensat per comparar parcel·les entre elles, no com a valor
   absolut.
-- **Mapa i llistat**: totes les parcel·les es veuen sobre un mapa (amb un
-  color segons l'índex de risc) i en una taula, amb accés directe al detall
-  de cadascuna.
+- **Mapa i llistat**: totes les parcel·les es veuen sobre un mapa a pantalla
+  completa (amb un color segons l'índex de risc) i en un llistat al panell
+  flotant, amb cerca, ordenació i accés directe al detall de cadascuna.
+- **Agrupacions i geometries**: parcel·les agrupades (amb els valors
+  agregats) i perímetres dibuixats a mà, sense referència cadastral.
+- **Vista 3D del relleu** (Three.js) amb capes d'altitud, pendent, cotes i
+  perímetre, a partir dels punts d'altimetria ja calculats.
+- **Còpia de seguretat** en CSV (exportar i importar).
 - **Exportació GPX**: el perímetre de qualsevol parcel·la es pot exportar
   per fer-lo servir amb un GPS o una app de navegació al camp.
 - **Multilingüe** (català/castellà), amb detecció automàtica de l'idioma
@@ -40,8 +45,10 @@ Totes les dades procedeixen de fonts públiques i obertes:
 - **Cadastre** (Sede Electrónica del Catastro): geometria de la parcel·la,
   referència cadastral, superfície, ús, i el desglossament de subparceles
   (descripció, superfície, índex de productivitat).
-- **IDEE** (Infraestructura de Dades Espacials d'Espanya): Model Digital del
-  Terreny, per al càlcul d'altitud/pendent/orientació.
+- **IDEE / IGN**: Model Digital del Terreny, per al càlcul
+  d'altitud/pendent/orientació. Els vèrtexs del perímetre es consulten amb
+  `getElevation`; la malla, amb una sola graella del WCS del MDT (5 m),
+  interpolada localment (vegeu `ServeiAltimetria.consultarAltitudsMDT`).
 
 Es va explorar també el **Mapa Forestal d'Espanya (MFE)** per obtenir el
 tipus de vegetació de cada parcel·la, però el servei s'ha trobat
@@ -53,62 +60,53 @@ funcionar o es troba una font alternativa.
 
 - JavaScript (mòduls ES natius, sense framework ni bundler)
 - [Leaflet](https://leafletjs.com/) per als mapes, [proj4js](http://proj4js.org/)
-  per a la conversió de coordenades (totes dues via CDN)
+  per a la conversió de coordenades i [Three.js](https://threejs.org/) r128
+  per al 3D (totes via CDN, amb versió fixa)
 - IndexedDB per a l'emmagatzematge local
 - PWA: `manifest.json` + `service-worker.js` per a instal·lació i ús offline
-- Sistema de traduccions propi (`js/i18n.js`), sense dependències externes
+- **Nucli compartit** amb les altres apps de la família
+  ([nucli](https://codeberg.org/mario_escuder/nucli)): Cadastre, províncies i
+  municipis, MDT, escales de color, traduccions i estils base
+  (`nucli/css/nucli.css`). És una **còpia** a `nucli/`, no un submòdul
+  (Codeberg Pages no en serveix); s'actualitza amb `./actualitzar-nucli.sh`
+  i `nucli/VERSIO` diu de quin commit ve. No s'edita mai la còpia.
 
 ## Estructura del repositori
 
 ```
 custodia/
-├── index.html            Pantalla d'inici: mapa + llistat de parcel·les
-├── afegir.html            Formulari per afegir una nova parcel·la
-├── detall.html            Detall d'una parcel·la (dades, risc, subparceles)
-├── altitud.html            Càlcul d'altitud, pendent i orientació
-├── manifest.json           Manifest de la PWA
-├── service-worker.js       Cache per a ús offline
-├── css/
-│   └── estils.css
-├── js/
-│   ├── model/
-│   │   └── parcela.js           Classe Parcela (dades pures)
-│   ├── serveis/                  Consultes a serveis externs i lògica de negoci
-│   │   ├── cadastre.js               Consulta al Cadastre (geometria, subparceles)
-│   │   ├── ubicacions.js             Llistat de províncies/municipis
-│   │   ├── altimetria.js             Altitud i pendent (IDEE)
-│   │   ├── orientacio.js             Orientació mitjana
-│   │   ├── risc.js                   Índex de risc d'incendi
-│   │   ├── basedades.js              Accés a IndexedDB
-│   │   ├── exportadorGpx.js          Exportació GPX
-│   │   └── vegetacio.js              MFE (desconnectat, vegeu més amunt)
-│   ├── geometria/                 Càlcul geomètric pur (sense IO)
-│   │   ├── malla.js                  Generació de la malla de punts
-│   │   └── gradient.js               Gradients (mètode de Horn)
-│   ├── ui/                        Components d'interfície reutilitzables
-│   │   ├── mapa.js                   Embolcall sobre Leaflet
-│   │   ├── menu.js                   Menú de la capçalera (mòbil)
-│   │   └── ajuda.js                  Icones d'ajuda amb explicació
-│   ├── i18n.js / i18n/es.js       Sistema de traduccions
-│   ├── inici.js                   Controlador de index.html
-│   ├── afegir.js                  Controlador d'afegir.html
-│   ├── detall.js                  Controlador de detall.html
-│   ├── altitud.js                 Controlador d'altitud.html
-│   └── registrar-sw.js            Registre del service worker
-└── icones/                    Icones de la PWA
+├── index.html                 Inici (accions principals)
+├── parceles.html · agrupacions.html · geometries.html     Llistats (mapa + panell)
+├── detall*.html               Detall (2D/3D, risc, dades)
+├── afegir*.html               Afegir parcel·les, agrupacions i geometries
+├── altitud*.html              Altimetria (càlcul i resum)
+├── copia-seguretat.html       Exportar / importar CSV
+├── manifest.json · service-worker.js
+├── actualitzar-nucli.sh       Torna a copiar ../nucli a nucli/
+├── nucli/                     Còpia del nucli compartit (no editar)
+├── css/estils.css             Disposició pròpia (sobre nucli/css/nucli.css)
+└── js/
+    ├── model/                 Parcela, Agrupacio, Geometria (dades pures)
+    ├── serveis/               Altimetria, orientació, risc, IndexedDB, GPX, CSV
+    ├── geometria/             Malla de punts i gradients (càlcul pur)
+    ├── ui/                    Mapa (Leaflet), Mapa3D (Three.js), menú,
+    │                          disposició del panell, diàlegs, llistats...
+    ├── i18n.js · i18n/es.js   Traduccions (sobre el sistema del nucli)
+    └── <pàgina>.js            Un controlador per pàgina
 ```
 
 ## Executar en local
 
 Com que és una PWA sense backend, n'hi ha prou amb servir els fitxers
 estàtics (obrir-los directament com a `file://` no permet registrar el
-service worker). Per exemple, amb Python:
+service worker). Des de la carpeta de l'app:
 
 ```bash
-python3 -m http.server 8000
+node nucli/eines/servidor.mjs 8000
 ```
 
-I obrir `http://localhost:8000` al navegador.
+I obrir `http://localhost:8000` al navegador. Abans de publicar, cal passar
+les verificacions: `node nucli/eines/verificar.mjs`.
 
 ## Llicència
 
