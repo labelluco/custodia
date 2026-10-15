@@ -1,0 +1,513 @@
+/* =====================================================================
+   Nucli: fonaments visuals compartits per les apps de la família
+   Custòdia. Paleta heretada de Custòdia (verd de pi/alzina, pedra
+   calcària, ocre de terra cremada), amb components pensats per a apps
+   més dinàmiques: panells flotants sobre el mapa, pestanyes, diàlegs i
+   avisos. Cada app hi afegeix el seu propi full d'estils per a la
+   disposició.
+   ===================================================================== */
+
+:root {
+  --color-primari: #396a49;
+  --color-primari-fosc: #24402f;
+  --color-primari-suau: #e3ece5;
+  --color-text: #23261f;
+  --color-text-mut: #6b6b63;
+  --color-fons: #f3f1ea;
+  --color-superficie: #ffffff;
+  --color-superficie-translucida: rgba(255, 255, 255, 0.92);
+  --color-vora: #e2ddd2;
+  --color-hover: #efece2;
+  --color-accent: #a1552e;
+  --color-accent-suau: #f6e7dc;
+  --color-perill: #c0392b;
+  --color-premium: #b07a1f;
+
+  --espai-xxs: 0.25rem;
+  --espai-xs: 0.5rem;
+  --espai-s: 1rem;
+  --espai-m: 1.5rem;
+  --espai-l: 2rem;
+
+  --radi: 10px;
+  --radi-gran: 18px;
+  --radi-rodo: 999px;
+
+  --ombra: 0 1px 3px rgba(35, 38, 31, 0.1), 0 1px 2px rgba(35, 38, 31, 0.06);
+  --ombra-flotant: 0 10px 30px rgba(35, 38, 31, 0.18), 0 2px 6px rgba(35, 38, 31, 0.08);
+
+  --transicio: 180ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--color-text);
+  background-color: var(--color-fons);
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: var(--color-accent);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.nomes-lectors {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* --- Botons ----------------------------------------------------------
+   Reset explícit propietat per propietat: la cascada no "hereta" el
+   reset d'una altra regla (lliçó de Custòdia). */
+.boto {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radi-rodo);
+  padding: 0.7rem 1.2rem;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--transicio), transform var(--transicio), box-shadow var(--transicio);
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}
+
+.boto:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.boto:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primari) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.boto:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.boto--primari {
+  background-color: var(--color-primari);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(57, 106, 73, 0.3);
+}
+
+.boto--primari:hover:not(:disabled) {
+  background-color: var(--color-primari-fosc);
+}
+
+.boto--premium {
+  background: linear-gradient(135deg, #c9952f, var(--color-premium));
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(176, 122, 31, 0.35);
+}
+
+.boto--secundari {
+  background-color: var(--color-superficie);
+  border-color: var(--color-vora);
+}
+
+.boto--secundari:hover:not(:disabled) {
+  background-color: var(--color-hover);
+}
+
+.boto--fantasma {
+  background-color: transparent;
+}
+
+.boto--fantasma:hover:not(:disabled) {
+  background-color: var(--color-hover);
+}
+
+.boto--ample {
+  width: 100%;
+}
+
+.boto--petit {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.9rem;
+}
+
+.boto-icona {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radi-rodo);
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: 1.15rem;
+  color: var(--color-text);
+  background-color: var(--color-superficie-translucida);
+  box-shadow: var(--ombra);
+  cursor: pointer;
+  transition: background-color var(--transicio), transform var(--transicio);
+}
+
+.boto-icona:hover {
+  background-color: var(--color-superficie);
+}
+
+.boto-icona:active {
+  transform: scale(0.94);
+}
+
+.boto-icona svg,
+.boto svg {
+  width: 1.2em;
+  height: 1.2em;
+  flex-shrink: 0;
+}
+
+/* --- Camps de formulari --- */
+.camp {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--espai-xxs);
+  min-width: 0;
+}
+
+.camp__etiqueta {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-mut);
+}
+
+.camp__entrada {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  color: var(--color-text);
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--color-vora);
+  border-radius: var(--radi);
+  background-color: var(--color-superficie);
+  transition: border-color var(--transicio), box-shadow var(--transicio);
+}
+
+select.camp__entrada {
+  padding-right: 2rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--color-text-mut) 50%),
+    linear-gradient(135deg, var(--color-text-mut) 50%, transparent 50%);
+  background-position: calc(100% - 1.1rem) 55%, calc(100% - 0.8rem) 55%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.camp__entrada:focus {
+  outline: none;
+  border-color: var(--color-primari);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primari) 20%, transparent);
+}
+
+.camp__ajuda {
+  font-size: 0.8rem;
+  color: var(--color-text-mut);
+}
+
+.fila-camps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espai-xs);
+}
+
+/* --- Pestanyes (control segmentat) --- */
+.pestanyes {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radi-rodo);
+  background-color: var(--color-hover);
+}
+
+.pestanyes__opcio {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  border: none;
+  border-radius: var(--radi-rodo);
+  padding: 0.5rem 0.6rem;
+  flex: 1 1 0;
+  min-width: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-mut);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color var(--transicio), color var(--transicio), box-shadow var(--transicio);
+}
+
+.pestanyes__opcio[aria-selected="true"],
+.pestanyes__opcio--activa {
+  background-color: var(--color-superficie);
+  color: var(--color-primari-fosc);
+  box-shadow: var(--ombra);
+}
+
+/* --- Selector d'idioma (mateixes classes que Custòdia) --- */
+.selector-idioma {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radi-rodo);
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.selector-idioma__opcio {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  border: none;
+  border-radius: var(--radi-rodo);
+  padding: 0.3rem 0.55rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-mut);
+  background: transparent;
+  cursor: pointer;
+}
+
+.selector-idioma__opcio--actiu {
+  background-color: var(--color-superficie);
+  color: var(--color-primari-fosc);
+}
+
+/* --- Xips (etiquetes petites) --- */
+.xip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radi-rodo);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background-color: var(--color-primari-suau);
+  color: var(--color-primari-fosc);
+}
+
+.xip--premium {
+  background-color: #f7ecd6;
+  color: #7c5512;
+}
+
+.xip--demo {
+  background-color: var(--color-accent-suau);
+  color: var(--color-accent);
+}
+
+/* --- Avisos en línia --- */
+.avis {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espai-xs);
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radi);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  background-color: var(--color-hover);
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.avis--error {
+  background-color: #fbe6e3;
+  color: #8c2a1f;
+}
+
+.avis--info {
+  background-color: var(--color-primari-suau);
+  color: var(--color-primari-fosc);
+}
+
+/* --- Notificacions emergents (toast) --- */
+.toasts {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--espai-m) + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espai-xs);
+  z-index: 2000;
+  pointer-events: none;
+  width: min(92vw, 420px);
+}
+
+.toast {
+  padding: 0.7rem 1rem;
+  border-radius: var(--radi);
+  background-color: #2b2e27;
+  color: #fff;
+  font-size: 0.9rem;
+  box-shadow: var(--ombra-flotant);
+  animation: toast-entra 220ms var(--transicio) both;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.toast--error {
+  background-color: #8c2a1f;
+}
+
+@keyframes toast-entra {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* --- Diàlegs (element <dialog>) --- */
+.dialeg {
+  border: none;
+  border-radius: var(--radi-gran);
+  padding: 0;
+  width: min(92vw, 440px);
+  max-height: 90vh;
+  box-shadow: var(--ombra-flotant);
+  color: var(--color-text);
+  background-color: var(--color-superficie);
+}
+
+.dialeg::backdrop {
+  background-color: rgba(25, 28, 22, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.dialeg[open] {
+  animation: dialeg-entra 220ms var(--transicio) both;
+}
+
+@keyframes dialeg-entra {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+.dialeg__cos {
+  padding: var(--espai-m);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--espai-s);
+}
+
+.dialeg__titol {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.dialeg__accions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--espai-xs);
+}
+
+/* --- Indicador de càrrega --- */
+.spinner {
+  width: 1.1em;
+  height: 1.1em;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: gira 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Visor 3D --- */
+.bruixola-3d {
+  position: absolute;
+  top: var(--espai-s);
+  right: var(--espai-s);
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background-color: var(--color-superficie-translucida);
+  box-shadow: var(--ombra);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.bruixola-3d__fletxa {
+  color: var(--color-perill);
+  font-size: 0.8rem;
+}
+
+.bruixola-3d__lletra {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* --- Dibuix sobre el mapa --- */
+.vertex-dibuix {
+  background-color: #fff;
+  border: 3px solid var(--color-primari);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  cursor: grab;
+}
+
+.mapa--dibuixant {
+  cursor: crosshair;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}

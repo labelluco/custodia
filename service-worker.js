@@ -1,7 +1,7 @@
 // Service worker bàsic: cache dels fitxers estàtics per a ús offline.
 // Actualitzar la llista si s'afegeixen pantalles noves.
 
-const NOM_CACHE = 'custodia-v78';
+const NOM_CACHE = 'custodia-v79';
 
 const FITXERS_PER_CACHE = [
   './',
@@ -19,6 +19,28 @@ const FITXERS_PER_CACHE = [
   './afegir-geometria.html',
   './detall-geometria.html',
   './css/estils.css',
+  './nucli/css/nucli.css',
+  './nucli/js/exportadors/obj.js',
+  './nucli/js/exportadors/stl.js',
+  './nucli/js/geometria/poligon.js',
+  './nucli/js/geometria/projeccio.js',
+  './nucli/js/geometria/solid.js',
+  './nucli/js/geometria/terreny.js',
+  './nucli/js/i18n/es.js',
+  './nucli/js/i18n/i18n.js',
+  './nucli/js/model/zona.js',
+  './nucli/js/pagaments/compres.js',
+  './nucli/js/serveis/cadastre.js',
+  './nucli/js/serveis/escalaColor.js',
+  './nucli/js/serveis/magatzem.js',
+  './nucli/js/serveis/mdt.js',
+  './nucli/js/serveis/ortofoto.js',
+  './nucli/js/serveis/ubicacions.js',
+  './nucli/js/ui/avisos.js',
+  './nucli/js/ui/descarrega.js',
+  './nucli/js/ui/dibuixPoligon.js',
+  './nucli/js/ui/mapaBase.js',
+  './nucli/js/ui/visor3d.js',
   './js/registrar-sw.js',
   './js/inici.js',
   './js/parceles.js',
@@ -36,9 +58,7 @@ const FITXERS_PER_CACHE = [
   './js/model/parcela.js',
   './js/model/agrupacio.js',
   './js/model/geometria.js',
-  './js/serveis/cadastre.js',
   './js/serveis/basedades.js',
-  './js/serveis/escalaColor.js',
   './js/serveis/exportadorDades.js',
   './js/serveis/exportadorGpx.js',
   './js/serveis/altimetria.js',
@@ -46,7 +66,6 @@ const FITXERS_PER_CACHE = [
   './js/serveis/risc.js',
   './js/serveis/agregacioAgrupacio.js',
   './js/serveis/vegetacio.js',
-  './js/serveis/ubicacions.js',
   './js/i18n.js',
   './js/i18n/es.js',
   './js/geometria/malla.js',

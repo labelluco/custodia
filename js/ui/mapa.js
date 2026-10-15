@@ -1,7 +1,7 @@
 // Embolcall sobre Leaflet. Necessita que L estigui carregat globalment
 // via <script> abans d'importar aquest mòdul.
 import { t } from '../i18n.js';
-import { colorAltitud, colorPendent, colorOmbres } from '../serveis/escalaColor.js';
+import { colorAltitud, colorPendent, colorOmbres } from '../../nucli/js/serveis/escalaColor.js';
 
 const COLOR_NEUTRE = '#000000';
 

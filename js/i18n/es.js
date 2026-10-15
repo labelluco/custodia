@@ -126,7 +126,6 @@ export const ES = {
   'orientació:': 'orientación:',
 
   // Etiquetes de bruixola (ServeiOrientacio.etiquetaBruixola)
-  'Nord': 'Norte',
   'Nord-est': 'Noreste',
   'Est': 'Este',
   'Sud-est': 'Sureste',

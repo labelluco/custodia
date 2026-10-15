@@ -9,8 +9,8 @@
 // repositori per si algun dia hi ha una alternativa, però no es crida
 // des d'enlloc.
 import { BaseDades } from './serveis/basedades.js';
-import { ServeiCadastre } from './serveis/cadastre.js';
-import { ServeiUbicacions } from './serveis/ubicacions.js';
+import { ServeiCadastre } from '../nucli/js/serveis/cadastre.js';
+import { ServeiUbicacions } from '../nucli/js/serveis/ubicacions.js';
 import { Mapa } from './ui/mapa.js';
 import { Parcela } from './model/parcela.js';
 import { t, aplicarTraduccions, inicialitzarSelectorIdioma } from './i18n.js';

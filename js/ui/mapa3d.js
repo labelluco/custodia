@@ -37,7 +37,7 @@
 // globalment via <script> abans d'importar aquest mòdul, igual que
 // Mapa necessita L (Leaflet).
 import { t } from '../i18n.js';
-import { colorAltitud, colorPendent } from '../serveis/escalaColor.js';
+import { colorAltitud, colorPendent } from '../../nucli/js/serveis/escalaColor.js';
 
 const METRES_PER_GRAU_LATITUD = 111320;
 
