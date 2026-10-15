@@ -1,7 +1,7 @@
 // Service worker bàsic: cache dels fitxers estàtics per a ús offline.
 // Actualitzar la llista si s'afegeixen pantalles noves.
 
-const NOM_CACHE = 'custodia-v85';
+const NOM_CACHE = 'custodia-v86';
 
 const FITXERS_PER_CACHE = [
   './',
@@ -116,9 +116,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // Només els fitxers de la pròpia app (mateix origen, GET), que són els
   // que hi ha a la cache. La resta -- tessel·les del mapa, CDN, Cadastre,
-  // MDT, ortofoto -- va directament a la xarxa, sense passar per aquí:
-  // abans s'interceptava tot, i les tessel·les que fallaven (per exemple,
-  // mentre s'actualitzava el service worker) es quedaven en gris.
+  // MDT, ortofoto -- va directament a la xarxa, sense passar per aquí
+  // (no són a la cache: fer-les passar pel service worker només hi
+  // afegia un pas).
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) {
     return;

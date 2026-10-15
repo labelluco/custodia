@@ -17,26 +17,18 @@ function margeSuperior() {
   return Math.max(0, ...vores);
 }
 
-/**
- * Leaflet no torna a demanar una tessel·la que ha fallat fins que canvia
- * la vista: queda un forat gris al mapa. Es reintenta una sola vegada,
- * al cap d'un segon (amb un paràmetre perquè el navegador no reutilitzi
- * l'error de la memòria cau).
- */
-function reintentarTesseles(capa) {
-  capa.on('tileerror', ({ tile }) => {
-    if (tile.dataset.reintentada) return;
-    tile.dataset.reintentada = '1';
-    const url = tile.src;
-    setTimeout(() => {
-      tile.src = `${url}${url.includes('?') ? '&' : '?'}reintent=1`;
-    }, 1000);
-  });
-}
-
 export class Mapa {
   constructor(idContenidor) {
-    this.leafletMap = L.map(idContenidor).setView(CENTRE_PER_DEFECTE, ZOOM_PER_DEFECTE);
+    // Sense l'animació d'aparició de les tessel·les (fadeAnimation): a
+    // Chrome de Windows (Intel UHD 630, comprovat al Chrome de Mario el
+    // 2026-10-15), algunes tessel·les ja carregades es quedaven a mig
+    // esvair-se -- blocs grisos o pàl·lids fins que es feia zoom -- i el
+    // panell parpellejava. L'animació marca cada tessel·la amb
+    // will-change: opacity (una capa de GPU per tessel·la) i depèn que
+    // requestAnimationFrame vagi completant l'esvaïment; amb el mapa a
+    // pantalla completa i panells a sobre, no sempre arribava al final.
+    // Ara cada tessel·la es mostra sencera tan bon punt arriba.
+    this.leafletMap = L.map(idContenidor, { fadeAnimation: false }).setView(CENTRE_PER_DEFECTE, ZOOM_PER_DEFECTE);
 
     const capaOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -56,8 +48,6 @@ export class Mapa {
 
     capaOsm.addTo(this.leafletMap);
     this._afegirBotoFons(capaOsm, capaOrtofoto);
-    reintentarTesseles(capaOsm);
-    reintentarTesseles(capaOrtofoto);
 
     this.capaParceles = L.layerGroup().addTo(this.leafletMap);
     // Capa a part per als filtres opcionals (altitud/orientació) de les
