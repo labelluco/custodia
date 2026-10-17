@@ -19,15 +19,9 @@ function margeSuperior() {
 
 export class Mapa {
   constructor(idContenidor) {
-    // Sense l'animació d'aparició de les tessel·les (fadeAnimation): a
-    // Chrome de Windows (Intel UHD 630, comprovat al Chrome de Mario el
-    // 2026-10-15), algunes tessel·les ja carregades es quedaven a mig
-    // esvair-se -- blocs grisos o pàl·lids fins que es feia zoom -- i el
-    // panell parpellejava. L'animació marca cada tessel·la amb
-    // will-change: opacity (una capa de GPU per tessel·la) i depèn que
-    // requestAnimationFrame vagi completant l'esvaïment; amb el mapa a
-    // pantalla completa i panells a sobre, no sempre arribava al final.
-    // Ara cada tessel·la es mostra sencera tan bon punt arriba.
+    // Sense l'animació d'aparició de les tessel·les (fadeAnimation): cada
+    // tessel·la es mostra sencera tan bon punt arriba, sense dependre de
+    // cap animació per acabar de veure's (vegeu també _margesVista).
     this.leafletMap = L.map(idContenidor, { fadeAnimation: false }).setView(CENTRE_PER_DEFECTE, ZOOM_PER_DEFECTE);
 
     const capaOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -491,13 +485,24 @@ export class Mapa {
   }
 
   /**
-   * Marges per a fitBounds que descompten el que tapen el panell flotant
-   * i la barra superior: així el que s'ajusta queda centrat a la part del
-   * mapa que es veu, no darrere del panell (vegeu ui/disposicio.js).
+   * Opcions per a fitBounds: marges que descompten el que tapen el panell
+   * flotant i la barra superior (el que s'ajusta queda centrat a la part
+   * del mapa que es veu, no darrere del panell; vegeu ui/disposicio.js), i
+   * sense animació.
+   *
+   * Per què sense animació: el mapa neix al zoom 11 i, quan arriben les
+   * dades, salta al zoom de les parcel·les. Si el salt és de 4 nivells o
+   * menys, Leaflet l'anima amb una transició CSS i espera el seu
+   * transitionend per acabar-lo. Al Chrome de Mario (Windows, GPU Intel)
+   * aquest esdeveniment no sempre arribava: el mapa es quedava a mig zoom
+   * -- tessel·les velles ampliades i blocs grisos -- fins que l'usuari
+   * feia zoom ell mateix (comprovat el 2026-10-17). Els ajustos que fa
+   * l'app sola no necessiten animació; els zooms de l'usuari la mantenen.
    */
   _margesVista(marge) {
     const { esquerra, inferior } = margesPanell();
     return {
+      animate: false,
       paddingTopLeft: [esquerra + marge, margeSuperior() + marge],
       paddingBottomRight: [marge, inferior + marge],
     };
