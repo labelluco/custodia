@@ -1,7 +1,7 @@
 // Service worker bàsic: cache dels fitxers estàtics per a ús offline.
 // Actualitzar la llista si s'afegeixen pantalles noves.
 
-const NOM_CACHE = 'custodia-v87';
+const NOM_CACHE = 'custodia-v88';
 
 const FITXERS_PER_CACHE = [
   './',
@@ -106,8 +106,13 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
+    // Només les versions antigues de Custòdia: totes les apps de
+    // mario_escuder.codeberg.page comparteixen origen i, per tant, la
+    // llista de caches (p. ex. "terrabloc-v2"), i no s'han de tocar.
     caches.keys().then((noms) =>
-      Promise.all(noms.filter((nom) => nom !== NOM_CACHE).map((nom) => caches.delete(nom)))
+      Promise.all(
+        noms.filter((nom) => nom.startsWith('custodia-') && nom !== NOM_CACHE).map((nom) => caches.delete(nom))
+      )
     )
   );
   self.clients.claim();
