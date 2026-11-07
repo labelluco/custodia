@@ -15,3 +15,6 @@ dist/
 .env
 
 publicar.sh
+
+# Compilació per a Cloudflare Pages / Capacitor
+www/
