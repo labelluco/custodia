@@ -114,7 +114,7 @@ les verificacions: `node nucli/eines/verificar.mjs`.
 ## Publicar
 
 El codi és a https://github.com/labelluco/custodia (públic, AGPL-3.0). Cada
-push a `main` el publica Cloudflare Pages a **https://custodia.pages.dev/**:
+push a `main` el publica Cloudflare Pages a **https://custodia-territori.pages.dev/**:
 compila `www/` amb `node eines/preparar-www.mjs && cp service-worker.js www/`
 (la llista de fitxers és la del service worker) i publica només aquesta
 carpeta. Cal pujar `NOM_CACHE` a `service-worker.js` quan canvien els fitxers.
