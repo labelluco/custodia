@@ -1,7 +1,7 @@
 // Service worker bàsic: cache dels fitxers estàtics per a ús offline.
 // Actualitzar la llista si s'afegeixen pantalles noves.
 
-const NOM_CACHE = 'custodia-v90';
+const NOM_CACHE = 'custodia-v91';
 
 const FITXERS_PER_CACHE = [
   './',
@@ -42,6 +42,17 @@ const FITXERS_PER_CACHE = [
   './nucli/js/ui/dibuixPoligon.js',
   './nucli/js/ui/mapaBase.js',
   './nucli/js/ui/visor3d.js',
+  './nucli/js/dades/zonesHoraries.js',
+  './nucli/js/exportadors/zip.js',
+  './nucli/js/geometria/gradients.js',
+  './nucli/js/i18n/en.js',
+  './nucli/js/paisos/paisos.js',
+  './nucli/js/serveis/fontsDades.js',
+  './nucli/js/serveis/llocs.js',
+  './nucli/js/serveis/mdtMundial.js',
+  './nucli/js/serveis/mosaic.js',
+  './nucli/js/ui/dibuixRectangle.js',
+  './nucli/js/ui/vistaMapa.js',
   './js/registrar-sw.js',
   './js/inici.js',
   './js/parceles.js',

@@ -9,22 +9,35 @@
 //    (pot fallar en mode privat o dins d'un iframe);
 //  - establirIdioma pot canviar l'idioma sense recarregar la pàgina:
 //    útil a les apps d'una sola pantalla, que no volen perdre l'estat.
-//    En aquest cas s'emet l'esdeveniment "canvi-idioma" a document.
+//    En aquest cas s'emet l'esdeveniment "canvi-idioma" a document;
+//  - cada app diu quins idiomes té i quin fa servir si el del dispositiu
+//    no hi és (Custòdia: català i castellà; Terra Bloc: també anglès).
 import { ES as ES_NUCLI } from './es.js';
+import { EN as EN_NUCLI } from './en.js';
 
-const IDIOMES_DISPONIBLES = ['ca', 'es'];
-const DICCIONARIS = { es: { ...ES_NUCLI } };
+let idiomesDisponibles = ['ca', 'es'];
+let idiomaPerDefecte = 'es';
+const DICCIONARIS = { es: { ...ES_NUCLI }, en: { ...EN_NUCLI } };
 let clauEmmagatzematge = 'nucli-idioma';
 let idiomaEnMemoria = null;
 
 /**
- * @param {{clau?: string, diccionaris?: Record<string, Record<string, string>>}} opcions
+ * @param {{clau?: string, idiomes?: string[], perDefecte?: string, diccionaris?: Record<string, Record<string, string>>}} opcions
+ *   idiomes: els que ofereix l'app (el català sempre, és l'idioma de les claus);
+ *   perDefecte: el que es fa servir si el del dispositiu no és entre aquests.
  */
-export function configurarI18n({ clau, diccionaris = {} } = {}) {
+export function configurarI18n({ clau, idiomes, perDefecte, diccionaris = {} } = {}) {
   if (clau) clauEmmagatzematge = clau;
+  if (idiomes) idiomesDisponibles = idiomes;
+  if (perDefecte) idiomaPerDefecte = perDefecte;
   for (const [idioma, diccionari] of Object.entries(diccionaris)) {
     DICCIONARIS[idioma] = { ...(DICCIONARIS[idioma] ?? {}), ...diccionari };
   }
+}
+
+/** Idiomes que ofereix l'app, per ordre. */
+export function idiomes() {
+  return [...idiomesDisponibles];
 }
 
 function llegirPreferencia() {
@@ -35,16 +48,24 @@ function llegirPreferencia() {
   }
 }
 
-/** Preferència desada > idioma del navegador > castellà si no és català. */
+/**
+ * Preferència desada > primer idioma del dispositiu que l'app tingui
+ * (navigator.languages, en l'ordre de preferència de la persona) >
+ * l'idioma per defecte de l'app.
+ */
 export function idiomaActual() {
   const desat = idiomaEnMemoria ?? llegirPreferencia();
-  if (desat && IDIOMES_DISPONIBLES.includes(desat)) return desat;
-  const navegador = (navigator.language || '').toLowerCase();
-  return navegador.startsWith('ca') ? 'ca' : 'es';
+  if (desat && idiomesDisponibles.includes(desat)) return desat;
+  const preferits = navigator.languages?.length ? navigator.languages : [navigator.language || ''];
+  for (const preferit of preferits) {
+    const codi = preferit.toLowerCase().split('-')[0];
+    if (idiomesDisponibles.includes(codi)) return codi;
+  }
+  return idiomaPerDefecte;
 }
 
 export function establirIdioma(idioma, { recarregar = true } = {}) {
-  if (!IDIOMES_DISPONIBLES.includes(idioma)) return;
+  if (!idiomesDisponibles.includes(idioma)) return;
   idiomaEnMemoria = idioma;
   try {
     localStorage.setItem(clauEmmagatzematge, idioma);
@@ -87,14 +108,14 @@ export function aplicarTraduccions(arrel = document) {
   document.documentElement.lang = idiomaActual();
 }
 
-/** Selector CA/ES dins del contenidor indicat. */
+/** Selector d'idioma (CA/ES/EN...) dins del contenidor indicat. */
 export function inicialitzarSelectorIdioma(idContenidor, { recarregar = true } = {}) {
   const contenidor = document.getElementById(idContenidor);
   if (!contenidor) return;
 
   const pintar = () => {
     const actual = idiomaActual();
-    contenidor.innerHTML = IDIOMES_DISPONIBLES.map(
+    contenidor.innerHTML = idiomesDisponibles.map(
       (idioma) =>
         `<button type="button" class="selector-idioma__opcio${idioma === actual ? ' selector-idioma__opcio--actiu' : ''}" data-idioma="${idioma}" aria-pressed="${idioma === actual}">${idioma.toUpperCase()}</button>`
     ).join('');

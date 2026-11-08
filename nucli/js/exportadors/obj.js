@@ -10,18 +10,20 @@
 
 /**
  * @param {ReturnType<import('../geometria/solid.js').construirModel>} model
- * @param {{origen: [number, number, number], zBase: number, ambLaterals?: boolean, requadreTextura?: {minX: number, minY: number, maxX: number, maxY: number}, descripcio?: string}} opcions
+ * @param {{origen: [number, number, number], zBase: number, ambLaterals?: boolean, requadreTextura?: {minX: number, minY: number, maxX: number, maxY: number}, aUV?: (x: number, y: number) => [number, number], crs?: string, descripcio?: string}} opcions
  *   origen: [x, y, z] que es resta a cada vèrtex (UTM i altitud);
- *   zBase: alçada de la base en coordenades ja relatives a l'origen.
+ *   zBase: alçada de la base en coordenades ja relatives a l'origen;
+ *   aUV: coordenada de textura de cada vèrtex, quan la imatge no és en el
+ *   sistema del model (té prioritat sobre requadreTextura).
  * @returns {string}
  */
-export function exportarObj(model, { origen, zBase, ambLaterals = true, requadreTextura = null, descripcio = '' }) {
+export function exportarObj(model, { origen, zBase, ambLaterals = true, requadreTextura = null, aUV = null, crs = 'EPSG:25830', descripcio = '' }) {
   const [ox, oy, oz] = origen;
   const n = model.vertexs.length / 3;
   const linies = [
     `# ${descripcio}`.trim(),
     '# Coordenades en metres: x = est, y = nord, z = altitud',
-    `# Origen local (EPSG:25830 + altitud): ${ox.toFixed(2)} ${oy.toFixed(2)} ${oz.toFixed(2)}`,
+    `# Origen local (${crs} + altitud): ${ox.toFixed(2)} ${oy.toFixed(2)} ${oz.toFixed(2)}`,
     'o model',
   ];
 
@@ -34,7 +36,13 @@ export function exportarObj(model, { origen, zBase, ambLaterals = true, requadre
       linies.push(`v ${(v[i * 3] - ox).toFixed(3)} ${(v[i * 3 + 1] - oy).toFixed(3)} ${zBase.toFixed(3)}`);
     }
   }
-  if (requadreTextura) {
+  const ambTextura = Boolean(aUV || requadreTextura);
+  if (aUV) {
+    for (let i = 0; i < n; i++) {
+      const [u, w] = aUV(v[i * 3], v[i * 3 + 1]);
+      linies.push(`vt ${u.toFixed(6)} ${w.toFixed(6)}`);
+    }
+  } else if (requadreTextura) {
     const { minX, minY, maxX, maxY } = requadreTextura;
     for (let i = 0; i < n; i++) {
       linies.push(`vt ${((v[i * 3] - minX) / (maxX - minX)).toFixed(6)} ${((v[i * 3 + 1] - minY) / (maxY - minY)).toFixed(6)}`);
@@ -43,7 +51,7 @@ export function exportarObj(model, { origen, zBase, ambLaterals = true, requadre
 
   // Els índexs de l'OBJ comencen per 1.
   const cara = (a, b, c) =>
-    requadreTextura
+    ambTextura
       ? `f ${a + 1}/${a + 1} ${b + 1}/${b + 1} ${c + 1}/${c + 1}`
       : `f ${a + 1} ${b + 1} ${c + 1}`;
 

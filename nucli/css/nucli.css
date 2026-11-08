@@ -543,7 +543,9 @@ select.camp__entrada {
   bottom: 0;
   max-height: 72vh;
   overflow-y: auto;
-  padding: var(--espai-xs) var(--espai-s) calc(var(--espai-s) + env(safe-area-inset-bottom));
+  /* Al mòbil, l'atribució del mapa (per damunt del panell) ocupa el peu:
+     el marge de baix deixa l'última línia del panell fora de sota. */
+  padding: var(--espai-xs) var(--espai-s) calc(var(--espai-s) + 2.25rem + env(safe-area-inset-bottom));
   border-radius: var(--radi-gran) var(--radi-gran) 0 0;
   background-color: var(--color-superficie-translucida);
   box-shadow: var(--ombra-flotant);
@@ -659,8 +661,39 @@ select.camp__entrada {
   color: var(--color-primari);
 }
 
+/* Signatura de la marca L'Abelluco (img/abelluco/) al peu dels panells. */
+.signatura-marca {
+  margin: var(--espai-xs) 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espai-xs);
+  font-size: 0.75rem;
+  color: var(--color-text-mut);
+}
+
+.signatura-marca a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.signatura-marca img {
+  height: 1.15rem;
+  width: auto;
+}
+
+.signatura-marca a:hover,
+.signatura-marca a:focus-visible {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
 @media (min-width: 900px) {
   .panell {
+    padding-bottom: var(--espai-s);
     left: var(--espai-s);
     right: auto;
     top: calc(72px + env(safe-area-inset-top));
@@ -710,6 +743,53 @@ select.camp__entrada {
   font-weight: 700;
 }
 
+/* Cotes màxima i mínima del visor 3D (ui/visor3d.js): una etiqueta per
+   punt, que el visor situa a cada fotograma amb transform (per això
+   left/top a 0). Mateix aspecte que la resta de controls flotants. */
+.cota-3d {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  margin-top: -4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radi-rodo);
+  background-color: var(--color-superficie-translucida);
+  box-shadow: var(--ombra);
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.cota-3d[hidden] {
+  display: none;
+}
+
+.cota-3d__icona {
+  font-size: 0.62rem;
+}
+
+.cota-3d--maxima .cota-3d__icona {
+  color: var(--color-accent);
+}
+
+.cota-3d--minima .cota-3d__icona {
+  color: var(--color-primari);
+}
+
+/* Punt marcat per l'app (Visor3D.mostrarPunts): el mateix groc que el
+   marcador del punt d'observació al mapa de Terra Visibilitat. */
+.cota-3d--punt .cota-3d__icona {
+  color: #d9a21b;
+}
+
 /* --- Dibuix sobre el mapa --- */
 .vertex-dibuix {
   background-color: #fff;
@@ -721,6 +801,20 @@ select.camp__entrada {
 
 .mapa--dibuixant {
   cursor: crosshair;
+}
+
+/* Controlador per moure un rectangle dibuixat (DibuixRectangle). */
+.centre-dibuix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--color-primari);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  cursor: move;
 }
 
 @media (prefers-reduced-motion: reduce) {

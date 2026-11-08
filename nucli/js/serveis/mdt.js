@@ -8,9 +8,11 @@
 //  - SCALESIZE permet triar la mida de la graella (i, per tant, el pas)
 //    sense descarregar tota la resolució original.
 //
-// Tot en EPSG:25830 (UTM 30N), el mateix sistema en què el Cadastre ja
-// ens dona les geometries. Les Canàries tenen el seu propi sistema i
-// queden fora d'aquesta primera versió.
+// En EPSG:25830 (UTM 30N) a la Península i les Balears, el mateix sistema
+// en què el Cadastre ja ens dona les geometries. A les Canàries, el
+// servei té les cobertures en EPSG:4083 (REGCAN95 / UTM 28N), que a
+// efectes pràctics coincideix amb l'EPSG:32628 que fem servir allà
+// (vegeu geometria/projeccio.js).
 
 const URL_WCS = 'https://servicios.idee.es/wcs-inspire/mdt';
 
@@ -18,11 +20,8 @@ const URL_WCS = 'https://servicios.idee.es/wcs-inspire/mdt';
 // Es tria la més grossa que encara és més fina que el pas demanat:
 // demanar la de 5 m per a un requadre de 30 km obligaria el servidor a
 // llegir moltíssimes dades per acabar-les reduint igualment.
-const COBERTURES = [
-  { pas: 5, id: 'Elevacion25830_5' },
-  { pas: 25, id: 'Elevacion25830_25' },
-  { pas: 200, id: 'Elevacion25830_200' },
-];
+const PASSOS_COBERTURA = [5, 25, 200];
+const FAMILIA_COBERTURA = { 'EPSG:25830': 'Elevacion25830', 'EPSG:32628': 'Elevacion4083' };
 
 export class ServeiMDT {
   /**
@@ -32,22 +31,24 @@ export class ServeiMDT {
    *
    * @param {{minX: number, minY: number, maxX: number, maxY: number}} requadre
    * @param {number} pasMetres
-   * @returns {Promise<{ncols: number, nrows: number, xll: number, yll: number, cellsize: number, valors: Float32Array}>}
+   * @param {string} [crs] EPSG:25830 (per defecte) o EPSG:32628 (Canàries)
+   * @returns {Promise<{ncols: number, nrows: number, xll: number, yll: number, cellsize: number, valors: Float32Array, fraccioBuida: number}>}
    */
-  static async consultarGraella(requadre, pasMetres) {
+  static async consultarGraella(requadre, pasMetres, crs = 'EPSG:25830') {
+    const familia = FAMILIA_COBERTURA[crs];
+    if (!familia) throw new Error(`ServeiMDT: l'IGN no té el MDT en ${crs}`);
     const ncols = Math.max(2, Math.ceil((requadre.maxX - requadre.minX) / pasMetres));
     const nrows = Math.max(2, Math.ceil((requadre.maxY - requadre.minY) / pasMetres));
     const maxX = requadre.minX + ncols * pasMetres;
     const maxY = requadre.minY + nrows * pasMetres;
 
-    const cobertura =
-      [...COBERTURES].reverse().find((c) => c.pas <= pasMetres) ?? COBERTURES[0];
+    const pasCobertura = [...PASSOS_COBERTURA].reverse().find((p) => p <= pasMetres) ?? PASSOS_COBERTURA[0];
 
     const params = new URLSearchParams({
       SERVICE: 'WCS',
       VERSION: '2.0.1',
       REQUEST: 'GetCoverage',
-      COVERAGEID: cobertura.id,
+      COVERAGEID: `${familia}_${pasCobertura}`,
       FORMAT: 'application/asc',
     });
     // SUBSET i SCALESIZE es repeteixen/porten parèntesis: més clar
@@ -124,11 +125,18 @@ export function parsejarAsc(text) {
 
   const esBuit = (v) => Number.isNaN(v) || (nodata !== undefined && v === nodata) || v < -1000;
   let minimValid = Infinity;
-  for (const v of valors) if (!esBuit(v) && v < minimValid) minimValid = v;
+  let buits = 0;
+  for (const v of valors) {
+    if (esBuit(v)) buits++;
+    else if (v < minimValid) minimValid = v;
+  }
   if (minimValid === Infinity) {
     throw new Error('ServeiMDT: no hi ha dades d\'altitud en aquesta zona');
   }
   for (let i = 0; i < valors.length; i++) if (esBuit(valors[i])) valors[i] = minimValid;
 
-  return { ncols, nrows, xll, yll, cellsize, valors };
+  // fraccioBuida: quina part de la graella no tenia dades. Ho fa servir
+  // el generador de models per saber si la zona surt de la cobertura de
+  // l'IGN (per exemple, a la frontera amb Portugal o França).
+  return { ncols, nrows, xll, yll, cellsize, valors, fraccioBuida: buits / valors.length };
 }
