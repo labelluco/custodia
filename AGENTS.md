@@ -15,7 +15,7 @@ orientació i un índex de risc d'incendi comparatiu. PWA lliure (AGPL-3.0), rep
 - `js/model/` (Geometria → Parcela, Agrupacio), `js/serveis/` (basedades, altimetria, orientació, risc...), `js/geometria/`, `js/ui/`
 - `manifest.json`, `service-worker.js` (llista de fitxers i `NOM_CACHE`)
 - `nucli/` és una CÒPIA del repositori nucli (Terra nucli): no s'edita mai aquí. Els canvis es fan a ../nucli
-  (on la IA només treballa en mode lectura) i es copien amb `./actualitzar-nucli.sh`.
+  i es copien amb `./actualitzar-nucli.sh` (vegeu «Canvis que afecten el nucli» a ../notes-abelluco/normes-comunes.md).
 
 ## Normes
 - Codi simple, llegible i fàcil de mantenir. Sense dependències noves sense preguntar.
